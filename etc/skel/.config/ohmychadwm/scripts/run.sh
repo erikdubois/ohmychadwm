@@ -41,58 +41,49 @@ run "xfce4-clipman"
 run "blueberry-tray"
 run "/usr/lib/xfce4/notifyd/xfce4-notifyd"
 run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-#fastcompmgr -c &
-picom -b  --config ~/.config/arco-chadwm/picom/picom.conf &
-# picom -b  --config ~/.config/arco-chadwm/picom/picom-cachyos.conf &
-# picom -b  --config ~/.config/arco-chadwm/picom/picom-edu-dwm.conf &
-# picom -b  --config ~/.config/arco-chadwm/picom/picom-edu-nodwm.conf &
-# picom -b  --config ~/.config/arco-chadwm/picom/picom-original.conf &
-# picom --backend glx --vsync &
 run "numlockx on"
 run "volctl"
 #run "pa-applet"
-sxhkd -c ~/.config/arco-chadwm/sxhkd/sxhkdrc &
-#run "nitrogen --restore"
-#run "conky -c $HOME/.config/arco-chadwm/conky/system-overview"
 #you can set wallpapers in themes as well
 #feh --bg-fill /usr/share/backgrounds/archlinux/arch-wallpaper.jpg &
 #feh --bg-fill /usr/share/backgrounds/arcolinux/arco-wallpaper.jpg &
-#feh --bg-fill ~/.config/arco-chadwm/wallpaper/chadwm.jpg &
-feh --bg-fill ~/.config/arco-chadwm/wallpaper/chadwm4.jpg &
+#feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm.jpg &
+feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
 #feh --randomize --bg-fill /home/erik/Insync/Apps/Wallhaven/*
 
-
-#nitrogen --set-zoom-fill --random /home/erik/Insync/Apps/Desktoppr/ --head=0
-#nitrogen --set-zoom-fill --random /home/erik/Insync/Apps/Desktoppr/ --head=1
-
-#wallpaper for other Arch based systems
-#feh --bg-fill /usr/share/archlinux-tweak-tool/data/wallpaper/wallpaper.png &
 #run applications from startup
-
 run "insync start"
-#run "spotify"
-#run "ckb-next -b"
-#run "discord"
-#run "telegram-desktop"
-#run "dropbox"
-#run "/usr/bin/octopi-notifier"
 
-
-# Kill running instances
+# Kill processes
 pkill -x chadwm
 pkill -f bar.sh
-
-# Optional: kill other related processes
 pkill picom
 pkill sxhkd
 
-# Small delay to ensure cleanup
-sleep 0.2
+# Function to wait until a process is gone
+wait_until_gone() {
+    local name="$1"
+    while pgrep -f "$name" > /dev/null; do
+        sleep 0.1
+    done
+}
+
+# Wait for full cleanup
+wait_until_gone chadwm
+wait_until_gone bar.sh
+wait_until_gone picom
+wait_until_gone sxhkd
 
 # Restart components
-~/.config/arco-chadwm/scripts/bar.sh &
-picom &
-sxhkd &
+~/.config/ohmychadwm/scripts/bar.sh &
+picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &
+# picom -b  --config ~/.config/ohmychadwm/picom/picom-cachyos.conf &
+# picom -b  --config ~/.config/ohmychadwm/picom/picom-edu-dwm.conf &
+# picom -b  --config ~/.config/ohmychadwm/picom/picom-edu-nodwm.conf &
+# picom -b  --config ~/.config/ohmychadwm/picom/picom-original.conf &
+# picom --backend glx --vsync &
+#fastcompmgr -c &
+sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
 
 LOCAL_CHADWM="$HOME/.local/bin/chadwm"
 SYSTEM_CHADWM="/usr/bin/chadwm"
