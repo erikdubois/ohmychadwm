@@ -78,6 +78,30 @@ run "insync start"
 #run "/usr/bin/octopi-notifier"
 
 
-pkill bar.sh
+# Kill running instances
+pkill -x chadwm
+pkill -f bar.sh
+
+# Optional: kill other related processes
+pkill picom
+pkill sxhkd
+
+# Small delay to ensure cleanup
+sleep 0.2
+
+# Restart components
 ~/.config/arco-chadwm/scripts/bar.sh &
-while type chadwm >/dev/null; do chadwm && continue || break; done
+picom &
+sxhkd &
+
+LOCAL_CHADWM="$HOME/.local/bin/chadwm"
+SYSTEM_CHADWM="/usr/bin/chadwm"
+
+if [ -x "$LOCAL_CHADWM" ]; then
+    exec "$LOCAL_CHADWM"
+elif [ -x "$SYSTEM_CHADWM" ]; then
+    exec "$SYSTEM_CHADWM"
+else
+    echo "Error: chadwm not found in ~/.local/bin or /usr/bin"
+    exit 1
+fi
