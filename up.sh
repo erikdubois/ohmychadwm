@@ -33,16 +33,6 @@
 # stash or commit
 # git reset --hard
 
-CONFIG_DIR="/home/erik/DATA/EDU/ohmychadwm/etc/skel/.config"
-SOURCE_DIR="/home/erik/.config/ohmychadwm"
-
-# clean target
-rm -rf "$CONFIG_DIR"
-mkdir -p "$CONFIG_DIR"
-
-# copy config
-cp -rv "$SOURCE_DIR" "$CONFIG_DIR/"
-# Below command will backup everything inside the project folder
 git add --all .
 
 # Give a comment to the commit if you want
