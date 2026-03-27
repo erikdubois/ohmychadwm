@@ -1,0 +1,20 @@
+#!/bin/sh
+
+cd ~
+
+# Check if ~/.config/ohmychadwm exists
+if [ ! -d "$HOME/.config/ohmychadwm" ]; then
+    echo "Directory ~/.config/ohmychadwm does not exist. Copying from /etc/skel/.config/ohmychadwm..."
+
+    # Ensure the target directory exists
+    mkdir -p "$HOME/.config"
+
+    # Copy the contents from /etc/skel/.config/ohmychadwm to ~/.config/ohmychadwm
+    cp -r /etc/skel/.config/ohmychadwm "$HOME/.config/ohmychadwm"
+
+else
+    echo "Directory ~/.config/ohmychadwm already exists. Skipping copy."
+fi
+
+# Run the script
+~/.config/ohmychadwm/scripts/run.sh

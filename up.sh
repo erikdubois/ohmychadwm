@@ -36,7 +36,6 @@
 # checking if I have the latest files from github
 cp -rv /home/erik/.config/ohmychadwm /home/erik/DATA/ohmychadwm/etc/skel/.config/
 
-
 # Below command will backup everything inside the project folder
 git add --all .
 
