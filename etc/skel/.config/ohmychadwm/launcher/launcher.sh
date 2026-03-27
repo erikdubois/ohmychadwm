@@ -5,4 +5,4 @@
 ## Github  : @adi1090x
 ## Twitter : @adi1090x
 
-rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/arco-chadwm/launcher/rofi/launcher.rasi
+rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/launcher/rofi/launcher.rasi

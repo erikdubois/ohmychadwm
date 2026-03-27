@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_DIR="$HOME/.config/arco-chadwm/picom"
+CONFIG_DIR="$HOME/.config/ohmychadwm/picom"
 
 if pgrep -x "picom" > /dev/null; then
     notify-send "Picom" "Stopping picom..."

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-CONFIG="$HOME/.config/arco-chadwm/chadwm/config.def.h"
+CONFIG="$HOME/.config/ohmychadwm/chadwm/config.def.h"
 
 themes=(
   "catppuccin"
@@ -38,7 +38,7 @@ awk -v selected="$chosen" '
 
 mv "$tmp" "$CONFIG"
 
-cd ~/.config/arco-chadwm/chadwm/
+cd ~/.config/ohmychadwm/chadwm/
 ./rebuild.sh
 
 # reload chadwm

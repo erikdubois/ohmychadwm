@@ -249,8 +249,8 @@ static const Key keys[] = {
     { MODKEY|ControlMask|ShiftMask,     XK_ccedilla,          incrovgaps,     {.i = -1 } },
 
     { MODKEY|ControlMask|ShiftMask,     XK_d,                 defaultgaps,    {0} },
-    { MODKEY|ControlMask|ShiftMask,     XK_space,             spawn, SHCMD("$HOME/.config/arco-chadwm/scripts/theme-switch.sh") },
-    { MODKEY|ControlMask|ShiftMask,     XK_r,                 spawn, SHCMD("$HOME/.config/arco-chadwm/chadwm/rebuild.sh") },
+    { MODKEY|ControlMask|ShiftMask,     XK_space,             spawn, SHCMD("$HOME/.config/ohmychadwm/scripts/theme-switch.sh") },
+    { MODKEY|ControlMask|ShiftMask,     XK_r,                 spawn, SHCMD("$HOME/.config/ohmychadwm/chadwm/rebuild.sh") },
 
     // layout (preferences = no 1,3,4,8,9)
     { MODKEY|ControlMask,               XK_F1,       setlayout,      {.v = &layouts[0]} },

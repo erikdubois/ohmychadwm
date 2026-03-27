@@ -2,8 +2,8 @@
 
 set -eu
 
-DWM_FILE="$HOME/.config/arco-chadwm/chadwm/config.def.h"
-SXHKD_FILE="$HOME/.config/arco-chadwm/sxhkd/sxhkdrc"
+DWM_FILE="$HOME/.config/ohmychadwm/chadwm/config.def.h"
+SXHKD_FILE="$HOME/.config/ohmychadwm/sxhkd/sxhkdrc"
 
 if [ ! -f "$DWM_FILE" ]; then
     printf 'Missing dwm file: %s\n' "$DWM_FILE" >&2

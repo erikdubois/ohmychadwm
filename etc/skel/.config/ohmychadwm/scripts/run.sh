@@ -55,7 +55,7 @@ feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
 run "insync start"
 
 # Kill processes
-pkill -x ohmychadwm
+pkill -x chadwm
 pkill -f bar.sh
 pkill picom
 pkill sxhkd
@@ -69,7 +69,7 @@ wait_until_gone() {
 }
 
 # Wait for full cleanup
-wait_until_gone ohmychadwm
+wait_until_gone chadwm
 wait_until_gone bar.sh
 wait_until_gone picom
 wait_until_gone sxhkd

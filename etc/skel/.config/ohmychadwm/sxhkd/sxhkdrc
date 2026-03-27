@@ -48,23 +48,23 @@ super + F10
 
 #Rofi Fullscreen
 super + F11
-    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/arco-chadwm/rofi/launcher2.rasi
+    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi
 
 #Rofi
 super + F12
-    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/arco-chadwm/rofi/launcher2.rasi
+    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi
 
 
 #Rofi Fullscreen
 super + space
-    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/arco-chadwm/rofi/launcher2.rasi
+    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi
 #################################################################
 # SUPER + ... KEYS
 #################################################################
 
 #show keybindings
 super + k
-    ~/.config/arco-chadwm/scripts/show-keybindings.sh
+    ~/.config/ohmychadwm/scripts/show-keybindings.sh
 
 #Atom
 super + e
@@ -142,7 +142,7 @@ super + shift + d
 
 #rofi large
 super + d
-    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/arco-chadwm/rofi/launcher2.rasi
+    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi
 
 #reload sxhkd:
 super + shift + s
@@ -429,7 +429,7 @@ ctrl + alt + o
 
 #Picom Toggle
 super + p
-    ~/.config/arco-chadwm/scripts/picom-toggle.sh
+    ~/.config/ohmychadwm/scripts/picom-toggle.sh
 
 #update
 ctrl + alt + shift + F1
