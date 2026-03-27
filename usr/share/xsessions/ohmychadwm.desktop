@@ -1,7 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Chadwm
+Name=Ohmychadwm
 Comment=Dynamic window manager
-Exec=/usr/bin/exec-chadwm
+Exec=/usr/bin/exec-ohmychadwm
 Icon=chadwm
 Type=Application
