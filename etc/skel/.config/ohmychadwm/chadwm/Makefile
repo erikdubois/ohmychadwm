@@ -45,14 +45,13 @@ install: all
 	# Create the target directory for the manual pages if it doesn't exist
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	# Replace the placeholder VERSION with the actual version in the manual page and copy it to the target directory
-	sed "s/VERSION/${VERSION}/g" < ohmychadwm.1 > ${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
+	# sed "s/VERSION/${VERSION}/g" < ohmychadwm.1 > ${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
 	# Set the permissions of the copied manual page to be readable by everyone, writable by the owner
-	chmod 644 ${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
+	# chmod 644 ${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
 
 uninstall:
 	# Remove the installed ohmychadwm binary and its manual page
-	rm -f ${DESTDIR}${PREFIX}/bin/ohmychadwm\
-		${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
+	rm -f ${DESTDIR}${PREFIX}/bin/ohmychadwm
 
 .PHONY: all options clean install uninstall
 # Declare these targets as phony to indicate that they are not files
