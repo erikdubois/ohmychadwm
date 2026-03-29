@@ -41,9 +41,9 @@ install: all
 	# Copy the compiled binary to the target directory, force overwriting if it exist
 	cp -f ohmychadwm ${DESTDIR}${PREFIX}/bin
 	# Set the permissions of the copied binary to be readable and executable by everyone, writable by the owner
-	chmod 755 ${DESTDIR}${PREFIX}/bin/chadwm
+	chmod 755 ${DESTDIR}${PREFIX}/bin/ohmychadwm
 	# Create the target directory for the manual pages if it doesn't exist
-	mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	# mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	# Replace the placeholder VERSION with the actual version in the manual page and copy it to the target directory
 	# sed "s/VERSION/${VERSION}/g" < ohmychadwm.1 > ${DESTDIR}${MANPREFIX}/man1/ohmychadwm.1
 	# Set the permissions of the copied manual page to be readable by everyone, writable by the owner
