@@ -21,10 +21,10 @@ run "blueberry-tray"
 run "/usr/lib/xfce4/notifyd/xfce4-notifyd"
 run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 run "fastcompmgr -c"
-#picom -b  --config ~/.config/arco-chadwm/picom/picom.conf &
+#picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &
 run "numlockx on"
 run "volctl"
-sxhkd -c ~/.config/arco-chadwm/sxhkd/sxhkdrc &
+sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
 feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
 run "insync start"
 run "slstatus"
