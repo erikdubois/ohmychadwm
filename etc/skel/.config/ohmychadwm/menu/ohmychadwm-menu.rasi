@@ -1,0 +1,119 @@
+/*
+ * ohmychadwm-menu.rasi
+ * Rofi theme for ohmychadwm-menu — dmenu mode
+ *
+ * Design adapted from launcher2.rasi by Aditya Shakya / DN-debug.
+ * Keeps the same visual DNA:
+ *   - Semi-transparent near-black background  (#101010A9)
+ *   - No border, 5px / 12px radius
+ *   - White primary text, accent highlight on selected
+ *   - Compact prompt bar at top, clean vertical list below
+ *
+ * Place at: ~/.config/rofi/ohmychadwm-menu.rasi
+ *
+ * Usage in ohmychadwm-menu script (replace the rofi call):
+ *   rofi -dmenu -theme ~/.config/rofi/ohmychadwm-menu.rasi -p "${prompt}"
+ */
+
+/* ── Colour tokens ─────────────────────────────────────────────────────── */
+* {
+    /* Backgrounds */
+    bg:     #101010A9;   /* main window — semi-transparent near-black        */
+    bg-alt: #000000CC;   /* entry bar — slightly more opaque                 */
+    al:     #00000000;   /* fully transparent (alpha)                        */
+
+    /* Text */
+    fg:     #eeeeee;     /* primary text                                      */
+    fg-dim: #888888;     /* placeholder / dim text                            */
+
+    /* Accent  — tweak this one colour to match your theme */
+    ac:     #7E9CD8;     /* selected item text   (Kanagawa blue by default)  */
+    sa:     #1a1a2eCC;   /* selected item bg     (dark navy, semi-opaque)    */
+
+    /* Rofi resets */
+    background-color: @al;
+    text-color:       @fg;
+    border-color:     @al;
+}
+
+/* ── Window ─────────────────────────────────────────────────────────────── */
+window {
+    transparency:     "real";
+    background-color: @bg;
+    border:           0px;
+    border-radius:    5px;
+
+    width:            320px;
+    location:         center;
+    x-offset:         0px;
+    y-offset:         0px;
+
+    padding:          6px 0px;
+}
+
+mainbox {
+    background-color: @al;
+    border:           0px;
+    border-radius:    0px;
+    children:         [ listview ];
+    spacing:          0px;
+    padding:          0px;
+}
+
+
+/* ── List ───────────────────────────────────────────────────────────────── */
+listview {
+    background-color: @al;
+    padding:          4px 0px;
+    columns:          1;
+    lines:            12;
+    spacing:          0px;
+    cycle:            false;
+    dynamic:          true;
+    layout:           vertical;
+    scrollbar:        false;
+}
+
+/* ── Items ──────────────────────────────────────────────────────────────── */
+element {
+    background-color: @al;
+    text-color:       @fg;
+    orientation:      horizontal;
+    border-radius:    0px;
+    padding:          7px 14px;
+    spacing:          0px;
+}
+
+element-text {
+    background-color: @al;
+    text-color:       inherit;
+    vertical-align:   0.5;
+    horizontal-align: 0.0;
+    font:             "Noto Sans 11";
+}
+
+/* No icons in dmenu mode — element-icon kept minimal */
+element-icon {
+    size:   0px;
+    border: 0px;
+}
+
+/* Selected row */
+element selected {
+    background-color: @sa;
+    text-color:       @fg;
+    border:           0px;
+    border-radius:    4px;
+}
+
+element-text selected {
+    text-color: @ac;
+}
+
+/* ── Scrollbar (hidden) ─────────────────────────────────────────────────── */
+scrollbar {
+    background-color: @al;
+    handle-color:     @al;
+    border:           0px;
+    padding:          0px;
+}

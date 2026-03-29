@@ -124,12 +124,24 @@ super + KP_Enter
 	alacritty
 
 #################################################################
+# SUPER + ALT KEYS
+#################################################################
+
+#arcolinux-application-glade
+super + alt + space
+    ~/.config/ohmychadwm/menu/ohmychadwm-menu.sh
+
+#################################################################
 # SUPER + SHIFT KEYS
 #################################################################
 
 #File-Manager
 super + shift + Return
 	thunar
+
+#File-Manager
+super + shift + f
+    thunar
 
 #Keyboard dependent
 #File-Manager
