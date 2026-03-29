@@ -4,8 +4,7 @@ VERSION = 6.5
 # Customize below to fit your system
 
 # paths
-#PREFIX = /usr/local
-PREFIX = ~/.local
+PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 # X11 include directory

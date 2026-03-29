@@ -214,8 +214,13 @@ BEGIN{current=""}
 }
 ' "$tmpdir/grouped.tsv" > "$tmpdir/display.txt"
 
+if [ ! -s "$tmpdir/display.txt" ]; then
+    printf 'No keybindings were parsed\n' >&2
+    exit 1
+fi
+
 if command -v rofi >/dev/null 2>&1; then
-    /usr/bin/rofi -dmenu -i -p "Keybindings" < "$tmpdir/display.txt" >/dev/null
+    rofi -theme ~/.config/arco-chadwm/launcher/rofi/keybindings.rasi -dmenu -i -p "Keybindings" < "$tmpdir/display.txt"
 elif command -v dmenu >/dev/null 2>&1; then
     dmenu -i -l 30 -p "Keybindings" < "$tmpdir/display.txt" >/dev/null
 else

@@ -1,0 +1,103 @@
+/*
+ * Rofi dmenu theme for keybindings
+ * Matches the same transparent black look and font
+ */
+
+configuration {
+    font: "Noto Sans Mono 11";
+    show-icons: false;
+    disable-history: true;
+    fullscreen: false;
+    hide-scrollbar: true;
+    sidebar-mode: false;
+}
+
+* {
+    background-color: transparent;
+    text-color: #eeeeee;
+}
+
+window {
+    transparency: "real";
+    background-color: #101010A9;
+
+    width: 60%;
+    height: 60%;
+
+    location: center;
+    anchor: center;
+
+    border: 0px;
+    border-radius: 8px;
+}
+
+mainbox {
+    background-color: transparent;
+    children: [ inputbar, listview ];
+    spacing: 0px;
+    padding: 0px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    background-color: #00000000;
+    text-color: #eeeeee;
+    border: 0px;
+    margin: 0px;
+    padding: 12px;
+    spacing: 12px;
+}
+
+prompt {
+    background-color: #000000;
+    text-color: #eeeeee;
+    padding: 10px 14px;
+    border-radius: 8px;
+}
+
+entry {
+    background-color: #000000;
+    text-color: #ffffff;
+    placeholder: "Type to search";
+    expand: true;
+    horizontal-align: 0.0;
+    padding: 10px 14px;
+    border-radius: 8px;
+}
+
+listview {
+    background-color: transparent;
+    columns: 1;
+    lines: 25;
+    spacing: 6px;
+    cycle: false;
+    dynamic: true;
+    layout: vertical;
+    padding: 8px 12px 12px 12px;
+}
+
+element {
+    background-color: transparent;
+    text-color: #eeeeee;
+    orientation: horizontal;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    expand: true;
+    horizontal-align: 0.0;
+    vertical-align: 0.5;
+}
+
+element selected {
+    background-color: #1b1b1be6;
+    text-color: #ffffff;
+    border-radius: 8px;
+}
+
+element-text selected {
+    text-color: #ffffff;
+}

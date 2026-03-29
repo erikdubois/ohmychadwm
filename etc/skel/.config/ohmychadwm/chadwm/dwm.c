@@ -3570,7 +3570,7 @@ void updatesizehints(Client *c) {
 
 void updatestatus(void) {
   if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-    strcpy(stext, "chadwm-" VERSION);
+    strcpy(stext, "");
   drawbar(selmon);
   updatesystray();
 }

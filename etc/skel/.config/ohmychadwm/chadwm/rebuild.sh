@@ -2,10 +2,8 @@
 
 make clean
 make
-make install
+sudo make install
 make clean
-
-## xdotool key super+shift+r
 
 echo
 tput setaf 2

@@ -1,7 +1,6 @@
 #!/bin/sh
-
 #xrandr --output DVI-D-0 --off --output HDMI-0 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-0 --mode 1920x1080 --pos 1920x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output None-1-1 --off
-bash /home/erik/.screenlayout/erik.sh
+sh /home/erik/.screenlayout/erik.sh
 #xrdb merge ~/.Xresources 
 #xbacklight -set 10 &
 #xset r rate 200 50 &
@@ -41,9 +40,17 @@ run "xfce4-clipman"
 run "blueberry-tray"
 run "/usr/lib/xfce4/notifyd/xfce4-notifyd"
 run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+#fastcompmgr -c &
+picom -b  --config ~/.config/arco-chadwm/picom/picom.conf &
+# picom -b  --config ~/.config/arco-chadwm/picom/picom-cachyos.conf &
+# picom -b  --config ~/.config/arco-chadwm/picom/picom-edu-dwm.conf &
+# picom -b  --config ~/.config/arco-chadwm/picom/picom-edu-nodwm.conf &
+# picom -b  --config ~/.config/arco-chadwm/picom/picom-original.conf &
+# picom --backend glx --vsync &
 run "numlockx on"
 run "volctl"
 #run "pa-applet"
+sxhkd -c ~/.config/arco-chadwm/sxhkd/sxhkdrc &
 #you can set wallpapers in themes as well
 #feh --bg-fill /usr/share/backgrounds/archlinux/arch-wallpaper.jpg &
 #feh --bg-fill /usr/share/backgrounds/arcolinux/arco-wallpaper.jpg &
@@ -54,45 +61,4 @@ feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
 #run applications from startup
 run "insync start"
 
-# Kill processes
-pkill -x chadwm
-pkill -f bar.sh
-pkill picom
-pkill sxhkd
-
-# Function to wait until a process is gone
-wait_until_gone() {
-    local name="$1"
-    while pgrep -f "$name" > /dev/null; do
-        sleep 0.1
-    done
-}
-
-# Wait for full cleanup
-wait_until_gone chadwm
-wait_until_gone bar.sh
-wait_until_gone picom
-wait_until_gone sxhkd
-
-# Restart components
-~/.config/ohmychadwm/scripts/bar.sh &
-picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &
-# picom -b  --config ~/.config/ohmychadwm/picom/picom-cachyos.conf &
-# picom -b  --config ~/.config/ohmychadwm/picom/picom-edu-dwm.conf &
-# picom -b  --config ~/.config/ohmychadwm/picom/picom-edu-nodwm.conf &
-# picom -b  --config ~/.config/ohmychadwm/picom/picom-original.conf &
-# picom --backend glx --vsync &
-#fastcompmgr -c &
-sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
-
-LOCAL_CHADWM="$HOME/.local/bin/chadwm"
-SYSTEM_CHADWM="/usr/bin/chadwm"
-
-if [ -x "$LOCAL_CHADWM" ]; then
-    exec "$LOCAL_CHADWM"
-elif [ -x "$SYSTEM_CHADWM" ]; then
-    exec "$SYSTEM_CHADWM"
-else
-    echo "Error: chadwm not found in ~/.local/bin or /usr/bin"
-    exit 1
-fi
+while type ohmychadwm >/dev/null; do ohmychadwm && continue || break; done
