@@ -60,5 +60,5 @@ feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
 
 #run applications from startup
 run "insync start"
-
+run "slstatus"
 while type ohmychadwm >/dev/null; do ohmychadwm && continue || break; done
