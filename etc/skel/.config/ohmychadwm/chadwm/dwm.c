@@ -291,6 +291,7 @@ static void hide(Client *c);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
+static void killall(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
@@ -2047,6 +2048,21 @@ void killclient(const Arg *arg) {
     XSetErrorHandler(xerror);
     XUngrabServer(dpy);
   }
+}
+
+void killall(const Arg *arg) {
+  Client *c;
+  for (c = selmon->clients; c; c = c->next)
+    if (!sendevent(c->win, wmatom[WMDelete], NoEventMask,
+                   wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
+      XGrabServer(dpy);
+      XSetErrorHandler(xerrordummy);
+      XSetCloseDownMode(dpy, DestroyAll);
+      XKillClient(dpy, c->win);
+      XSync(dpy, False);
+      XSetErrorHandler(xerror);
+      XUngrabServer(dpy);
+    }
 }
 
 void manage(Window w, XWindowAttributes *wa) {

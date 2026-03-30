@@ -25,7 +25,7 @@ run "fastcompmgr -c"
 run "numlockx on"
 run "volctl"
 sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
-feh --bg-fill ~/.config/ohmychadwm/wallpaper/chadwm4.jpg &
+feh --bg-fill ~/.config/ohmychadwm/wallpapers/chadwm4.jpg &
 run "insync start"
 run "slstatus"
 

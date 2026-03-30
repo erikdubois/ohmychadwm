@@ -200,7 +200,7 @@ static const Key keys[] = {
     { MODKEY,                           XK_b,       togglebar,      {0} },
     { MODKEY|ShiftMask,                 XK_space,   togglebar,      {0} },
     { MODKEY|ControlMask,               XK_t,       togglegaps,     {0} },
-    { MODKEY|ShiftMask,                 XK_space,   togglefloating, {0} },
+    //{ MODKEY|ShiftMask,                 XK_space,   togglefloating, {0} },
     { MODKEY,                           XK_f,       togglefullscr,  {0} },
 
     { MODKEY|ControlMask,               XK_w,       tabmode,        { -1 } },
@@ -282,19 +282,21 @@ static const Key keys[] = {
     { MODKEY|ShiftMask,                 XK_w,       setborderpx,    {.i = default_border } },
 
     // kill dwm
-    { ControlMask|Mod1Mask,             XK_Delete, quit,            {0} },
+    { ControlMask|Mod1Mask,            XK_Delete,   killall,        {0} },
+    { ControlMask|Mod1Mask|ShiftMask,  XK_Delete,   quit,           {0} },
 
     // kill window
     { MODKEY,                           XK_q,       killclient,     {0} },
     { MODKEY|ShiftMask,                 XK_q,       killclient,     {0} },
     { MODKEY|ShiftMask,                 XK_c,       killclient,     {0} },
+    { MODKEY|ControlMask,               XK_q,       killall,        {0} },
 
     // restart
     { MODKEY|ShiftMask,                 XK_r,       restart,           {0} },
 
     // hide & restore windows
-    { MODKEY,                           XK_i,       hidewin,        {0} },
-    { MODKEY|ShiftMask,                 XK_i,       restorewin,     {0} },
+    //{ MODKEY,                           XK_i,       hidewin,        {0} },
+    //{ MODKEY|ShiftMask,                 XK_i,       restorewin,     {0} },
 
     // qwerty keyboard
 

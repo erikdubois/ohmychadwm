@@ -45,6 +45,7 @@ if [[ -z "${BROWSER:-}" ]]; then
     BROWSER="${BROWSER:-xdg-open}"  # xdg-open as last resort
 fi
 PRESENT_FONT_SIZE="${PRESENT_FONT_SIZE:-14}"
+MENU_WIDTH="${MENU_WIDTH:-40}"
 
 # ohmychadwm config root
 OHMYCHADWM_CONFIG="${HOME}/.config/ohmychadwm"
@@ -65,7 +66,7 @@ fi
 [[ -f "${OHMYCHADWM_CONFIG}/menu.conf" ]] && source "${OHMYCHADWM_CONFIG}/menu.conf"
 
 # Load user extension (can override any function defined before the source line)
-USER_EXTENSION="${OHMYCHADWM_CONFIG}/menu-extension.sh"
+USER_EXTENSION="${OHMYCHADWM_CONFIG}/menu/menu-extension.sh"
 
 # ---------------------------------------------------------------------------
 # Back-navigation flag
@@ -75,7 +76,7 @@ USER_EXTENSION="${OHMYCHADWM_CONFIG}/menu-extension.sh"
 BACK_TO_EXIT=false
 
 go_back() {
-    exit 0
+    :
 }
 
 # ---------------------------------------------------------------------------
@@ -97,6 +98,7 @@ menu() {
         -p "" \
         -no-show-match \
         -no-fixed-num-lines \
+        -cycle \
         "${theme_arg[@]}" \
         ${extra} \
         2>/dev/null) || true
@@ -183,7 +185,7 @@ show_learn_menu() {
         *Neovim*)       setsid "$BROWSER" "https://www.lazyvim.org/keymaps" >/dev/null 2>&1 & disown ;;
         *Bash*)         setsid "$BROWSER" "https://devhints.io/bash" >/dev/null 2>&1 & disown ;;
         *"Man pages"*)  present_terminal "man -k . | fzf --preview 'man {1}' | awk '{print \$1}' | xargs -r man" ;;
-        *)              go_back ;;
+        *)              return 1 ;;
     esac
 }
 
@@ -191,23 +193,27 @@ show_learn_menu() {
 # Trigger — Capture / Share / Toggle
 # ---------------------------------------------------------------------------
 show_trigger_menu() {
-    case $(menu "Trigger" " Capture\n Share\n Toggle") in
-        *Capture*) show_capture_menu ;;
-        *Share*)   show_share_menu ;;
-        *Toggle*)  show_toggle_menu ;;
-        *)         go_back ;;
-    esac
+    while true; do
+        case $(menu "Trigger" " Capture\n Share\n Toggle") in
+            *Capture*) show_capture_menu || continue; return 0 ;;
+            *Share*)   show_share_menu   || continue; return 0 ;;
+            *Toggle*)  show_toggle_menu  || continue; return 0 ;;
+            *)         return 1 ;;
+        esac
+    done
 }
 
 show_capture_menu() {
-    case $(menu "Capture" " Screenshot\n Screenshot → clipboard\n Screenshot region\n Screen record\n Colour picker") in
-        *"Screenshot →"*)    _screenshot_clipboard ;;
-        *"Screenshot region"*) _screenshot_region ;;
-        *"Screenshot"*)      _screenshot_smart ;;
-        *"Screen record"*)   show_screenrecord_menu ;;
-        *"Colour picker"*)   _colour_picker ;;
-        *)                   go_back ;;
-    esac
+    while true; do
+        case $(menu "Capture" " Screenshot\n Screenshot → clipboard\n Screenshot region\n Screen record\n Colour picker") in
+            *"Screenshot →"*)      _screenshot_clipboard; return 0 ;;
+            *"Screenshot region"*) _screenshot_region;    return 0 ;;
+            *"Screenshot"*)        _screenshot_smart;     return 0 ;;
+            *"Screen record"*)     show_screenrecord_menu || continue; return 0 ;;
+            *"Colour picker"*)     _colour_picker;        return 0 ;;
+            *)                     return 1 ;;
+        esac
+    done
 }
 
 _screenshot_smart() {
@@ -250,7 +256,7 @@ show_screenrecord_menu() {
         *"Record screen + mic"*) _screenrecord start mic ;;
         *"Record screen"*)       _screenrecord start ;;
         *"Stop"*)                _screenrecord stop ;;
-        *)                       go_back ;;
+        *)                       return 1 ;;
     esac
 }
 
@@ -289,14 +295,13 @@ _screenrecord() {
 show_share_menu() {
     if ! command -v localsend &>/dev/null; then
         notify-send -u critical "ohmychadwm" "LocalSend not installed. Install via Install > Apps > LocalSend"
-        go_back
-        return
+        return 1
     fi
     case $(menu "Share" " Clipboard\n File\n Folder") in
         *Clipboard*) _share_clipboard ;;
         *File*)      _share_file ;;
         *Folder*)    _share_folder ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 
@@ -330,7 +335,7 @@ show_toggle_menu() {
     case $(menu "Toggle" "${_nightlight_state} night light\n ${_autolock_state} auto-lock") in
         *"night light"*) _toggle_nightlight ;;
         *"auto-lock"*)   _toggle_autolock ;;
-        *)               go_back ;;
+        *)               return 1 ;;
     esac
 }
 
@@ -366,32 +371,32 @@ _toggle_autolock() {
 # Style
 # ---------------------------------------------------------------------------
 show_style_menu() {
-    case $(menu "Style" " Theme\n Font\n Wallpaper\n Colours (Xresources)\n Picom / compositor") in
-        *Theme*)       show_theme_menu ;;
-        *Font*)        show_font_menu ;;
-        *Wallpaper*)   show_wallpaper_menu ;;
-        *"Colours"*)   edit_in_editor "${HOME}/.Xresources" ;;
-        *"Picom"*)     edit_in_editor "${HOME}/.config/picom/picom.conf" ;;
-        *)             go_back ;;
-    esac
+    while true; do
+        case $(menu "Style" " Theme\n Font\n Wallpaper\n Colours (Xresources)\n Picom / compositor") in
+            *Theme*)       show_theme_menu    || continue; return 0 ;;
+            *Font*)        show_font_menu     || continue; return 0 ;;
+            *Wallpaper*)   show_wallpaper_menu || continue; return 0 ;;
+            *"Colours"*)   edit_in_editor "${HOME}/.Xresources"; return 0 ;;
+            *"Picom"*)     edit_in_editor "${HOME}/.config/picom/picom.conf"; return 0 ;;
+            *)             return 1 ;;
+        esac
+    done
 }
 
 show_theme_menu() {
     local themes_dir="${OHMYCHADWM_CONFIG}/themes"
     if [[ ! -d "$themes_dir" ]]; then
         notify-send "ohmychadwm" "No themes directory found at ${themes_dir}"
-        go_back
-        return
+        return 1
     fi
     local theme_list
     theme_list=$(ls -1 "$themes_dir" 2>/dev/null)
     if [[ -z "$theme_list" ]]; then
         notify-send "ohmychadwm" "No themes found in ${themes_dir}"
-        go_back
-        return
+        return 1
     fi
     local chosen
-    chosen=$(echo "$theme_list" | menu "Theme" "$(echo "$theme_list")") || go_back
+    chosen=$(menu "Theme" "$theme_list") || return 1
     _apply_theme "$chosen"
 }
 
@@ -417,7 +422,7 @@ show_font_menu() {
     local font_list
     font_list=$(fc-list : family | sort -u)
     local chosen
-    chosen=$(echo "$font_list" | rofi -dmenu -p "Font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || go_back
+    chosen=$(echo "$font_list" | rofi -dmenu -p "Font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1 1
     _apply_font "$chosen"
 }
 
@@ -441,18 +446,16 @@ show_wallpaper_menu() {
     local walls_dir="${OHMYCHADWM_CONFIG}/wallpapers"
     if [[ ! -d "$walls_dir" ]]; then
         notify-send "ohmychadwm" "No wallpapers directory at ${walls_dir}"
-        go_back
-        return
+        return 1
     fi
     local wall_list
     wall_list=$(ls -1 "$walls_dir" 2>/dev/null | grep -E '\.(jpg|jpeg|png|webp)$')
     if [[ -z "$wall_list" ]]; then
         notify-send "ohmychadwm" "No wallpaper images found"
-        go_back
-        return
+        return 1
     fi
     local chosen
-    chosen=$(echo "$wall_list" | rofi -dmenu -p "Wallpaper…" -width "$MENU_WIDTH" 2>/dev/null) || go_back
+    chosen=$(echo "$wall_list" | rofi -dmenu -p "Wallpaper…" -width "$MENU_WIDTH" 2>/dev/null) || return 1 1
     feh --bg-fill "${walls_dir}/${chosen}" && \
         notify-send "ohmychadwm" "Wallpaper set to '${chosen}'"
 }
@@ -461,20 +464,22 @@ show_wallpaper_menu() {
 # Setup
 # ---------------------------------------------------------------------------
 show_setup_menu() {
-    local options=" Autostart\n Picom\n Dunst\n Rofi\n Alacritty\n Defaults"
+    while true; do
+        local options=" Autostart\n Picom\n Dunst\n Rofi\n Alacritty\n Defaults"
 
-    # Show Xresources option only if the file exists
-    [[ -f "${HOME}/.Xresources" ]] && options+=" \n Xresources"
+        # Show Xresources option only if the file exists
+        [[ -f "${HOME}/.Xresources" ]] && options+=" \n Xresources"
 
-    case $(menu "Setup" "$options") in
-        *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh" ;;
-        *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf" && _restart_picom ;;
-        *Dunst*)        edit_in_editor "${HOME}/.config/ohmychadwm/dunst/dunstrc"    && _restart_dunst ;;
-        *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi" ;;
-        *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml" ;;
-        *Defaults*)     show_defaults_menu ;;
-        *)              go_back ;;
-    esac
+        case $(menu "Setup" "$options") in
+            *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
+            *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf" && _restart_picom; return 0 ;;
+            *Dunst*)        edit_in_editor "${HOME}/.config/ohmychadwm/dunst/dunstrc"    && _restart_dunst; return 0 ;;
+            *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
+            *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
+            *Defaults*)     show_defaults_menu || continue; return 0 ;;
+            *)              return 1 ;;
+        esac
+    done
 }
 
 show_defaults_menu() {
@@ -482,14 +487,14 @@ show_defaults_menu() {
         *Terminal*) _set_default_terminal ;;
         *Editor*)   _set_default_editor ;;
         *Browser*)  _set_default_browser ;;
-        *)          go_back ;;
+        *)          return 1 ;;
     esac
 }
 
 _set_default_terminal() {
     local terminals="alacritty\nghostty\nkitty\nxterm\nurxvt"
     local chosen
-    chosen=$(echo -e "$terminals" | rofi -dmenu -p "Terminal…" -width "$MENU_WIDTH" 2>/dev/null) || go_back
+    chosen=$(echo -e "$terminals" | rofi -dmenu -p "Terminal…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^TERMINAL=.*|TERMINAL=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "TERMINAL=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
@@ -499,7 +504,7 @@ _set_default_terminal() {
 _set_default_editor() {
     local editors="nvim\nvim\nemacs\nnano\ngedit\ncode"
     local chosen
-    chosen=$(echo -e "$editors" | rofi -dmenu -p "Editor…" -width "$MENU_WIDTH" 2>/dev/null) || go_back
+    chosen=$(echo -e "$editors" | rofi -dmenu -p "Editor…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^EDITOR=.*|EDITOR=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "EDITOR=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
@@ -509,7 +514,7 @@ _set_default_editor() {
 _set_default_browser() {
     local browsers="firefox\nchromium\nbrave\nqutebrowser\nmidori"
     local chosen
-    chosen=$(echo -e "$browsers" | rofi -dmenu -p "Browser…" -width "$MENU_WIDTH" 2>/dev/null) || go_back
+    chosen=$(echo -e "$browsers" | rofi -dmenu -p "Browser…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^BROWSER=.*|BROWSER=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "BROWSER=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
@@ -520,19 +525,21 @@ _set_default_browser() {
 # Install
 # ---------------------------------------------------------------------------
 show_install_menu() {
-    case $(menu "Install" "Package\nAUR package\n Terminal\n Editor\n Browser\n Dev environment\n AI tools\n Gaming\n Fonts\n Extras") in
-        *"Package"*)       present_terminal 'pacman -Slq | fzf --multi --preview "pacman -Si {}" | xargs -ro sudo pacman -S --needed' ;;
-        *"AUR"*)           present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S' ;;
-        *Terminal*)        show_install_terminal_menu ;;
-        *Editor*)          show_install_editor_menu ;;
-        *Browser*)         show_install_browser_menu ;;
-        *"Dev"*)           show_install_dev_menu ;;
-        *AI*)              show_install_ai_menu ;;
-        *Gaming*)          show_install_gaming_menu ;;
-        *Fonts*)           show_install_fonts_menu ;;
-        *Extras*)          show_install_extras_menu ;;
-        *)                 go_back ;;
-    esac
+    while true; do
+        case $(menu "Install" "Package\n Aur package\n Terminal\n Editor\n Browser\n Dev environment\n Ai tools\n Gaming\n Fonts\n Extras") in
+            *"Package"*)  present_terminal 'pacman -Slq | fzf --multi --preview "pacman -Si {}" | xargs -ro sudo pacman -S --needed'; return 0 ;;
+            *"AUR"*)      present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S'; return 0 ;;
+            *Terminal*)   show_install_terminal_menu || continue; return 0 ;;
+            *Editor*)     show_install_editor_menu   || continue; return 0 ;;
+            *Browser*)    show_install_browser_menu  || continue; return 0 ;;
+            *"Dev"*)      show_install_dev_menu      || continue; return 0 ;;
+            *AI*)         show_install_ai_menu       || continue; return 0 ;;
+            *Gaming*)     show_install_gaming_menu   || continue; return 0 ;;
+            *Fonts*)      show_install_fonts_menu    || continue; return 0 ;;
+            *Extras*)     show_install_extras_menu   || continue; return 0 ;;
+            *)            return 1 ;;
+        esac
+    done
 }
 
 show_install_terminal_menu() {
@@ -542,7 +549,7 @@ show_install_terminal_menu() {
         *Kitty*)     install "Kitty" "kitty" ;;
         *Urxvt*)     install "Urxvt" "rxvt-unicode" ;;
         *Xterm*)     install "Xterm" "xterm" ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 
@@ -554,7 +561,7 @@ show_install_editor_menu() {
         *Zed*)    install    "Zed"    "zed" ;;
         *Helix*)  install    "Helix"  "helix" ;;
         *Emacs*)  install    "Emacs"  "emacs" ;;
-        *)        go_back ;;
+        *)        return 1 ;;
     esac
 }
 
@@ -564,7 +571,7 @@ show_install_browser_menu() {
         *Chromium*)    install    "Chromium"    "chromium" ;;
         *Brave*)       aur_install "Brave"      "brave-bin" ;;
         *Qutebrowser*) install    "Qutebrowser" "qutebrowser" ;;
-        *)             go_back ;;
+        *)             return 1 ;;
     esac
 }
 
@@ -578,7 +585,7 @@ show_install_dev_menu() {
         *Docker*) install "Docker" "docker docker-compose" && \
                   present_terminal "sudo systemctl enable --now docker && sudo usermod -aG docker \$USER && echo 'Log out and back in for group change'" ;;
         *Podman*) install "Podman" "podman" ;;
-        *)        go_back ;;
+        *)        return 1 ;;
     esac
 }
 
@@ -594,7 +601,7 @@ show_install_ai_menu() {
                            present_terminal "sudo systemctl enable --now ollama && echo 'Ollama running. Try: ollama run llama3'" ;;
         *OpenCode*)        present_terminal "npm install -g opencode-ai && echo 'Done. Run: opencode'" ;;
         *Copilot*)         present_terminal "nvim --headless '+Lazy install copilot.vim' +q && echo 'Copilot plugin installed'" ;;
-        *)                 go_back ;;
+        *)                 return 1 ;;
     esac
 }
 
@@ -605,7 +612,7 @@ show_install_gaming_menu() {
         *Retro*)   install "RetroArch" "retroarch" ;;
         *Heroic*)  aur_install "Heroic" "heroic-games-launcher-bin" ;;
         *Bottles*) install "Bottles" "bottles" ;;
-        *)         go_back ;;
+        *)         return 1 ;;
     esac
 }
 
@@ -616,7 +623,7 @@ show_install_fonts_menu() {
         *Noto*)       install "Noto Fonts" "noto-fonts noto-fonts-emoji noto-fonts-cjk" ;;
         *Inter*)      install "Inter" "ttf-inter" ;;
         *Custom*)     present_terminal 'yay -Slq | grep -i font | fzf --multi | xargs -ro yay -S' ;;
-        *)            go_back ;;
+        *)            return 1 ;;
     esac
 }
 
@@ -628,7 +635,7 @@ show_install_extras_menu() {
         *Spotify*)    aur_install "Spotify"   "spotify" ;;
         *OBS*)        install    "OBS Studio" "obs-studio" ;;
         *Bitwarden*)  install    "Bitwarden"  "bitwarden" ;;
-        *)            go_back ;;
+        *)            return 1 ;;
     esac
 }
 
@@ -636,13 +643,15 @@ show_install_extras_menu() {
 # Remove
 # ---------------------------------------------------------------------------
 show_remove_menu() {
-    case $(menu "Remove" "Package\n Dev environment\n Theme\n Autostart entry") in
-        *Package*)   present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns' ;;
-        *"Dev"*)     show_remove_dev_menu ;;
-        *Theme*)     show_remove_theme_menu ;;
-        *Autostart*) edit_in_editor "${OHMYCHADWM_CONFIG}/autostart.sh" ;;
-        *)           go_back ;;
-    esac
+    while true; do
+        case $(menu "Remove" " Package\n Dev environment\n Theme\n Autostart entry") in
+            *Package*)   present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns'; return 0 ;;
+            *"Dev"*)     show_remove_dev_menu   || continue; return 0 ;;
+            *Theme*)     show_remove_theme_menu || continue; return 0 ;;
+            *Autostart*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
+            *)           return 1 ;;
+        esac
+    done
 }
 
 show_remove_dev_menu() {
@@ -653,7 +662,7 @@ show_remove_dev_menu() {
         *Go*)     remove_pkg "Go" "go" ;;
         *Rust*)   present_terminal "rustup self uninstall" ;;
         *Docker*) remove_pkg "Docker" "docker docker-compose" ;;
-        *)        go_back ;;
+        *)        return 1 ;;
     esac
 }
 
@@ -661,9 +670,9 @@ show_remove_theme_menu() {
     local themes_dir="${OHMYCHADWM_CONFIG}/themes"
     local theme_list
     theme_list=$(ls -1 "$themes_dir" 2>/dev/null)
-    [[ -z "$theme_list" ]] && { notify-send "ohmychadwm" "No themes to remove"; go_back; return; }
+    [[ -z "$theme_list" ]] && { notify-send "ohmychadwm" "No themes to remove"; return 1; }
     local chosen
-    chosen=$(echo "$theme_list" | rofi -dmenu -p "Remove theme…" -width "$MENU_WIDTH" 2>/dev/null) || go_back
+    chosen=$(echo "$theme_list" | rofi -dmenu -p "Remove theme…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
     rm -rf "${themes_dir}/${chosen}" && notify-send "ohmychadwm" "Theme '${chosen}' removed"
 }
 
@@ -671,16 +680,18 @@ show_remove_theme_menu() {
 # Update
 # ---------------------------------------------------------------------------
 show_update_menu() {
-    case $(menu "Update" "System packages\n AUR packages\n Full update\n Restart process\n Hardware\n Timezone\n Time sync") in
-        *"System"*)   present_terminal "sudo pacman -Syu" ;;
-        *"AUR"*)      present_terminal "yay -Sua" ;;
-        *"Full"*)     present_terminal "yay -Syu" ;;
-        *"Restart"*)  show_restart_process_menu ;;
-        *Hardware*)   show_restart_hardware_menu ;;
-        *Timezone*)   present_terminal "tzselect && echo 'Run: sudo timedatectl set-timezone <zone>'" ;;
-        *"Time sync"*) present_terminal "sudo timedatectl set-ntp true && timedatectl status" ;;
-        *)            go_back ;;
-    esac
+    while true; do
+        case $(menu "Update" "System packages\n AUR packages\n Full update\n Restart process\n Hardware\n Timezone\n Time sync") in
+            *"System"*)    present_terminal "sudo pacman -Syu"; return 0 ;;
+            *"AUR"*)       present_terminal "yay -Sua"; return 0 ;;
+            *"Full"*)      present_terminal "yay -Syu"; return 0 ;;
+            *"Restart"*)   show_restart_process_menu  || continue; return 0 ;;
+            *Hardware*)    show_restart_hardware_menu || continue; return 0 ;;
+            *Timezone*)    present_terminal "tzselect && echo 'Run: sudo timedatectl set-timezone <zone>'"; return 0 ;;
+            *"Time sync"*) present_terminal "sudo timedatectl set-ntp true && timedatectl status"; return 0 ;;
+            *)             return 1 ;;
+        esac
+    done
 }
 
 show_restart_process_menu() {
@@ -688,7 +699,7 @@ show_restart_process_menu() {
         *Picom*)      _restart_picom ;;
         *Dunst*)      _restart_dunst ;;
         *Sxhkd*)      pkill sxhkd; setsid sxhkd &>/dev/null & disown; notify-send "ohmychadwm" "Sxhkd restarted" ;;
-        *)            go_back ;;
+        *)            return 1 ;;
     esac
 }
 
@@ -697,13 +708,13 @@ show_restart_hardware_menu() {
         *Audio*)     _restart_pipewire ;;
         *WiFi*)      present_terminal "sudo systemctl restart NetworkManager && echo Done" ;;
         *Bluetooth*) present_terminal "sudo systemctl restart bluetooth && echo Done" ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 
 _restart_picom() {
     pkill picom 2>/dev/null
-    setsid picom --config "${HOME}/.config/picom/picom.conf" -b &>/dev/null &
+    setsid picom --config "${HOME}/.config/ohmychadwm/picom/picom.conf" -b &>/dev/null &
     disown
     notify-send "ohmychadwm" "Picom restarted"
 }
@@ -738,15 +749,15 @@ show_system_menu() {
         *Hibernate*) systemctl hibernate ;;
         *Restart*)   systemctl reboot ;;
         *Shutdown*)  systemctl poweroff ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 
 _lock_screen() {
-    if command -v slock &>/dev/null; then
+    if command -v betterlockscreen &>/dev/null; then
+        betterlockscreen -l dim -- --time-str="%H:%M"
+    elif command -v slock &>/dev/null; then
         slock
-    elif command -v i3lock &>/dev/null; then
-        i3lock -c 000000
     else
         notify-send -u critical "ohmychadwm" "No screen locker found. Install slock or i3lock."
     fi
@@ -756,18 +767,20 @@ _lock_screen() {
 # MAIN MENU
 # ---------------------------------------------------------------------------
 show_main_menu() {
-    case $(menu "ohmychadwm" " Apps\n Learn\n Trigger\n Style\n Setup\n Install\n Remove\n Update\n System") in
-        *Apps*)    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi ;;
-        *Learn*)   show_learn_menu ;;
-        *Trigger*) show_trigger_menu ;;
-        *Style*)   show_style_menu ;;
-        *Setup*)   show_setup_menu ;;
-        *Install*) show_install_menu ;;
-        *Remove*)  show_remove_menu ;;
-        *Update*)  show_update_menu ;;
-        *System*)  show_system_menu ;;
-        *)         exit 0 ;;
-    esac
+    while true; do
+        case $(menu "ohmychadwm" " Apps\n Learn\n Trigger\n Style\n Setup\n Install\n Remove\n Update\n System") in
+            *Apps*)    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi; break ;;
+            *Learn*)   show_learn_menu   || continue; break ;;
+            *Trigger*) show_trigger_menu || continue; break ;;
+            *Style*)   show_style_menu   || continue; break ;;
+            *Setup*)   show_setup_menu   || continue; break ;;
+            *Install*) show_install_menu || continue; break ;;
+            *Remove*)  show_remove_menu  || continue; break ;;
+            *Update*)  show_update_menu  || continue; break ;;
+            *System*)  show_system_menu  || continue; break ;;
+            *)         break ;;
+        esac
+    done
 }
 
 # ===========================================================================

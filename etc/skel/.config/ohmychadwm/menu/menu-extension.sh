@@ -22,7 +22,7 @@ show_vpn_menu() {
         *"disconnect"*) setsid mullvad disconnect &>/dev/null & disown ;;
         *OpenVPN*)      present_terminal "ls /etc/openvpn/*.conf | fzf | xargs -ro sudo openvpn --config" ;;
         *WireGuard*)    present_terminal "sudo wg show; read -n1" ;;
-        *)              go_back ;;
+        *)              return 1 ;;
     esac
 }
 
@@ -30,14 +30,16 @@ show_vpn_menu() {
 # Example 2: override the Trigger menu to bolt on NAS and VPN entries
 # ---------------------------------------------------------------------------
 show_trigger_menu() {
-    case $(menu "Trigger" " Capture\n Share\n Toggle\n VPN\n NAS") in
-        *Capture*) show_capture_menu ;;
-        *Share*)   show_share_menu ;;
-        *Toggle*)  show_toggle_menu ;;
-        *VPN*)     show_vpn_menu ;;
-        *NAS*)     show_nas_menu ;;
-        *)         go_back ;;
-    esac
+    while true; do
+        case $(menu "Trigger" " Capture\n Share\n Toggle\n VPN\n NAS") in
+            *Capture*) show_capture_menu || continue; return 0 ;;
+            *Share*)   show_share_menu   || continue; return 0 ;;
+            *Toggle*)  show_toggle_menu  || continue; return 0 ;;
+            *VPN*)     show_vpn_menu     || continue; return 0 ;;
+            *NAS*)     show_nas_menu     || continue; return 0 ;;
+            *)         return 1 ;;
+        esac
+    done
 }
 
 show_nas_menu() {
@@ -45,7 +47,7 @@ show_nas_menu() {
         *"Mount"*)   present_terminal "sudo mount /mnt/nas && echo 'Mounted'" ;;
         *"Unmount"*) present_terminal "sudo umount /mnt/nas && echo 'Unmounted'" ;;
         *"/mnt"*)    setsid thunar /mnt &>/dev/null & disown ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 
@@ -67,7 +69,7 @@ show_system_menu() {
         *"Relaunch"*) _relaunch_chadwm ;;
         *Restart*)   systemctl reboot ;;
         *Shutdown*)  systemctl poweroff ;;
-        *)           go_back ;;
+        *)           return 1 ;;
     esac
 }
 

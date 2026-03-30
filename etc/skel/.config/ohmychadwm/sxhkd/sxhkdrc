@@ -115,8 +115,12 @@ super + Return
     alacritty
 
 #Xkill
-super + Escape
+super + shift + Escape
     xkill
+
+#logout - lock - restart
+super + Escape
+    ~/.config/ohmychadwm/menu/ohmychadwm-menu.sh system
 
 #Keyboard dependent
 #alacritty
@@ -165,25 +169,9 @@ super + shift + s
 # CONTROL + ALT KEYS
 #################################################################
 
-#arcolinux-application-glade
-ctrl + alt + h
-     arcolinux-app-glade
-
-#arcolinux-welcome-app
-ctrl + alt + w
-     arcolinux-welcome-app
-
 #archlinux-tweak-tool
 ctrl + alt + e
     archlinux-tweak-tool
-
-#conky-rotate
-ctrl + alt + Next
-     conky-rotate -n
-
-#conky-rotate
-ctrl + alt + Prior
-    conky-rotate -p
 
 #File-Manager
 ctrl + alt + b
@@ -200,10 +188,6 @@ ctrl + alt + g
 #Firefox
 ctrl + alt + f
      firefox
-
-#Nitrogen
-ctrl + alt + i
-     nitrogen
 
 #archlinux-logout
 ctrl + alt + k
@@ -252,13 +236,6 @@ ctrl + alt + v
 ctrl + alt + a
     xfce4-appfinder
 
-
-#Keyboard dependent
-#alacritty
-#ctrl + alt + KP_Enter
-#     alacritty
-
-
 #################################################################
 # ALT + ... KEYS
 #################################################################
@@ -306,7 +283,6 @@ alt + F2
 #Xfce4-appfinder
 alt + F3
     xfce4-appfinder
-
 
 #################################################################
 #VARIETY KEYS WITH PYWAL
