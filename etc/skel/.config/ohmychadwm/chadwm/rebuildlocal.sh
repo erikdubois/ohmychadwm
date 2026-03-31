@@ -2,7 +2,7 @@
 
 make clean
 make
-sudo make install
+make install PREFIX="$HOME/.local"
 make clean
 
 echo

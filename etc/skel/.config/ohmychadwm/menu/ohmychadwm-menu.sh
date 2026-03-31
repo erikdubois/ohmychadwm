@@ -377,20 +377,20 @@ show_style_menu() {
             *Font*)        show_font_menu     || continue; return 0 ;;
             *Wallpaper*)   show_wallpaper_menu || continue; return 0 ;;
             *"Colours"*)   edit_in_editor "${HOME}/.Xresources"; return 0 ;;
-            *"Picom"*)     edit_in_editor "${HOME}/.config/picom/picom.conf"; return 0 ;;
+            *"Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *)             return 1 ;;
         esac
     done
 }
 
 show_theme_menu() {
-    local themes_dir="${OHMYCHADWM_CONFIG}/themes"
+    local themes_dir="${OHMYCHADWM_CONFIG}/chadwm/themes"
     if [[ ! -d "$themes_dir" ]]; then
         notify-send "ohmychadwm" "No themes directory found at ${themes_dir}"
         return 1
     fi
     local theme_list
-    theme_list=$(ls -1 "$themes_dir" 2>/dev/null)
+    theme_list=$(ls -1 "$themes_dir"/*.h 2>/dev/null | xargs -n1 basename | sed 's/\.h$//')
     if [[ -z "$theme_list" ]]; then
         notify-send "ohmychadwm" "No themes found in ${themes_dir}"
         return 1
@@ -402,44 +402,49 @@ show_theme_menu() {
 
 _apply_theme() {
     local theme="$1"
-    local theme_dir="${OHMYCHADWM_CONFIG}/themes/${theme}"
-    if [[ ! -d "$theme_dir" ]]; then
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    if [[ ! -f "${OHMYCHADWM_CONFIG}/chadwm/themes/${theme}.h" ]]; then
         notify-send -u critical "ohmychadwm" "Theme '${theme}' not found"
-        return
+        return 1
     fi
+    # Comment out any active theme include
+    sed -i "s|^#include \"themes/\(.*\)\.h\"|//#include \"themes/\1.h\"|" "$config"
+    # Uncomment the chosen theme
+    sed -i "s|^//#include \"themes/${theme}\.h\"|#include \"themes/${theme}.h\"|" "$config"
     # Apply Xresources if present
-    [[ -f "${theme_dir}/colors.Xresources" ]] && xrdb -merge "${theme_dir}/colors.Xresources"
+    local xres="${OHMYCHADWM_CONFIG}/chadwm/themes/${theme}.Xresources"
+    [[ -f "$xres" ]] && xrdb -merge "$xres"
     # Apply alacritty colours if present
-    [[ -f "${theme_dir}/alacritty-colors.toml" ]] && \
-        cp "${theme_dir}/alacritty-colors.toml" "${HOME}/.config/alacritty/colors.toml"
-    # Run hook if defined
-    [[ -f "${OHMYCHADWM_CONFIG}/hooks/theme-set" ]] && \
-        bash "${OHMYCHADWM_CONFIG}/hooks/theme-set" "$theme"
-    notify-send "ohmychadwm" "Theme '${theme}' applied"
+    local alacritty_theme="${OHMYCHADWM_CONFIG}/chadwm/themes/alacritty/${theme}.toml"
+    [[ -f "$alacritty_theme" ]] && cp "$alacritty_theme" "${HOME}/.config/alacritty/colors.toml"
+    # Rebuild chadwm
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && bash rebuildlocal.sh)
+    notify-send "ohmychadwm" "Theme '${theme}' applied — reboot your system"
 }
 
 show_font_menu() {
     local font_list
     font_list=$(fc-list : family | sort -u)
     local chosen
-    chosen=$(echo "$font_list" | rofi -dmenu -p "Font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1 1
+    chosen=$(echo "$font_list" | rofi -dmenu -p "Font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1
     _apply_font "$chosen"
 }
 
 _apply_font() {
     local font="$1"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
     # Save selection
-    mkdir -p "${HOME}/.local/state/ohmychadwm"
-    echo "$font" > "${HOME}/.local/state/ohmychadwm/current-font"
+    echo "$font" > "${OHMYCHADWM_CONFIG}/chadwm/current-font"
+    # Update fonts[] in config.def.h
+    sed -i "s|static const char \*fonts\[\].*|static const char *fonts[] = {\"${font}:style:bold:size=13\"};|" "$config"
     # Apply to alacritty if used
     local alacritty_conf="${HOME}/.config/alacritty/alacritty.toml"
     if [[ -f "$alacritty_conf" ]]; then
-        # Replace the family line in the [font.normal] section
         sed -i "s/family = .*/family = \"${font}\"/" "$alacritty_conf"
     fi
-    [[ -f "${OHMYCHADWM_CONFIG}/hooks/font-set" ]] && \
-        bash "${OHMYCHADWM_CONFIG}/hooks/font-set" "$font"
-    notify-send "ohmychadwm" "Font set to '${font}'"
+    # Rebuild chadwm
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && bash rebuildlocal.sh)
+    notify-send "ohmychadwm" "Font set to '${font}' — reboot your system"
 }
 
 show_wallpaper_menu() {
