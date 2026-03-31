@@ -220,7 +220,7 @@ if [ ! -s "$tmpdir/display.txt" ]; then
 fi
 
 if command -v rofi >/dev/null 2>&1; then
-    rofi -theme ~/.config/arco-chadwm/launcher/rofi/keybindings.rasi -dmenu -i -p "Keybindings" < "$tmpdir/display.txt"
+    rofi -theme ~/.config/ohmychadwm/launcher/rofi/keybindings.rasi -dmenu -i -p "Keybindings" < "$tmpdir/display.txt"
 elif command -v dmenu >/dev/null 2>&1; then
     dmenu -i -l 30 -p "Keybindings" < "$tmpdir/display.txt" >/dev/null
 else

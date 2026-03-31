@@ -86,13 +86,13 @@ super + x
 super + shift + x
     edu-powermenu
 
-#nlogout
+#menu system
 alt + shift + x
-    nlogout
+    ~/.config/ohmychadwm/menu/ohmychadwm-menu.sh system
 
-#nlogout
+#menu system
 alt + x
-    nlogout
+    ~/.config/ohmychadwm/menu/ohmychadwm-menu.sh system
 
 #Rofi theme selector
 super + r
