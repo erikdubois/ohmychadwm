@@ -40,7 +40,7 @@ static const int new_window_attach_on_end = 0; /*  1 means the new window will a
 
 static const char *fonts[] = {"JetBrainsMono Nerd Font Mono:style:bold:size=13"};
 
-// theme
+// default themes
 //#include "themes/catppuccin.h"
 #include "themes/dracula.h"
 //#include "themes/everforest.h"
@@ -52,36 +52,46 @@ static const char *fonts[] = {"JetBrainsMono Nerd Font Mono:style:bold:size=13"}
 //#include "themes/tundra.h"
 
 
-static const char *colors[][3]      = {
-    /*                     fg       bg      border */
-    [SchemeNorm]       = { gray3,   black,  gray2 },
-    [SchemeSel]        = { gray4,   blue,   blue  },
-    [SchemeTitle]      = { white,   black,  black }, // active window title
-    [TabSel]           = { blue,    gray2,  black },
-    [TabNorm]          = { gray3,   black,  black },
-    [SchemeTag]        = { gray3,   black,  black },
-    [SchemeTag1]       = { blue,    black,  black },
-    [SchemeTag2]       = { red,     black,  black },
-    [SchemeTag3]       = { orange,  black,  black },
-    [SchemeTag4]       = { green,   black,  black },
-    [SchemeTag5]       = { blue,    black,  black },
-    [SchemeTag6]       = { pinky,   black,  black },
-    [SchemeTag7]       = { pink,    black,  black },
-    [SchemeTag8]       = { orange,  black,  black },
-    [SchemeTag9]       = { red,     black,  black },
-    [SchemeTag10]      = { blue,    black,  black },
-    [SchemeLayout]     = { green,   black,  black },
-    [SchemeBtnPrev]    = { green,   black,  black },
-    [SchemeBtnNext]    = { yellow,  black,  black },
-    [SchemeBtnClose]   = { red,     black,  black },
-    [SchemeLayoutFF]   = { orange,  black,  black },
-    [SchemeLayoutEW]   = { blue,    black,  black },
-    [SchemeLayoutDS]   = { red,     black,  black },
-    [SchemeLayoutTG]   = { green,   black,  black },
-    [SchemeLayoutMS]   = { pinky,   black,  black },
-    [SchemeLayoutPC]   = { orange,  black,  black },
-    [SchemeLayoutVV]   = { blue,    black,  black },
-    [SchemeLayoutOP]   = { red,    black,  black },
+// stellar themes
+//#include "themes/jupiter.h"
+//#include "themes/saturn.h"
+//#include "themes/mars.h"
+//#include "themes/venus.h"
+//#include "themes/mercury.h"
+//#include "themes/neptune.h"
+//#include "themes/uranus.h"
+//#include "themes/pluto.h"
+
+static const char *colors[][3] = {
+    /*                     fg                bg                border */
+    [SchemeNorm]       = { SchemeNormfg,     SchemeNormbg,     SchemeNormbr },
+    [SchemeSel]        = { SchemeSelfg,      SchemeSelbg,      SchemeSelbr },
+    [SchemeTitle]      = { SchemeTitlefg,    SchemeTitlebg,    SchemeTitlebr },
+    [TabSel]           = { TabSelfg,         TabSelbg,         TabSelbr },
+    [TabNorm]          = { TabNormfg,        TabNormbg,        TabNormbr },
+    [SchemeTag]        = { SchemeTagfg,      SchemeTagbg,      SchemeTagbr },
+    [SchemeTag1]       = { SchemeTag1fg,     SchemeTag1bg,     SchemeTag1br },
+    [SchemeTag2]       = { SchemeTag2fg,     SchemeTag2bg,     SchemeTag2br },
+    [SchemeTag3]       = { SchemeTag3fg,     SchemeTag3bg,     SchemeTag3br },
+    [SchemeTag4]       = { SchemeTag4fg,     SchemeTag4bg,     SchemeTag4br },
+    [SchemeTag5]       = { SchemeTag5fg,     SchemeTag5bg,     SchemeTag5br },
+    [SchemeTag6]       = { SchemeTag6fg,     SchemeTag6bg,     SchemeTag6br },
+    [SchemeTag7]       = { SchemeTag7fg,     SchemeTag7bg,     SchemeTag7br },
+    [SchemeTag8]       = { SchemeTag8fg,     SchemeTag8bg,     SchemeTag8br },
+    [SchemeTag9]       = { SchemeTag9fg,     SchemeTag9bg,     SchemeTag9br },
+    [SchemeTag10]      = { SchemeTag10fg,    SchemeTag10bg,    SchemeTag10br },
+    [SchemeLayout]     = { SchemeLayoutfg,   SchemeLayoutbg,   SchemeLayoutbr },
+    [SchemeBtnPrev]    = { SchemeBtnPrevfg,  SchemeBtnPrevbg,  SchemeBtnPrevbr },
+    [SchemeBtnNext]    = { SchemeBtnNextfg,  SchemeBtnNextbg,  SchemeBtnNextbr },
+    [SchemeBtnClose]   = { SchemeBtnClosefg, SchemeBtnClosebg, SchemeBtnClosebr },
+    [SchemeLayoutFF]   = { SchemeLayoutFFfg, SchemeLayoutFFbg, SchemeLayoutFFbr },
+    [SchemeLayoutEW]   = { SchemeLayoutEWfg, SchemeLayoutEWbg, SchemeLayoutEWbr },
+    [SchemeLayoutDS]   = { SchemeLayoutDSfg, SchemeLayoutDSbg, SchemeLayoutDSbr },
+    [SchemeLayoutTG]   = { SchemeLayoutTGfg, SchemeLayoutTGbg, SchemeLayoutTGbr },
+    [SchemeLayoutMS]   = { SchemeLayoutMSfg, SchemeLayoutMSbg, SchemeLayoutMSbr },
+    [SchemeLayoutPC]   = { SchemeLayoutPCfg, SchemeLayoutPCbg, SchemeLayoutPCbr },
+    [SchemeLayoutVV]   = { SchemeLayoutVVfg, SchemeLayoutVVbg, SchemeLayoutVVbr },
+    [SchemeLayoutOP]   = { SchemeLayoutOPfg, SchemeLayoutOPbg, SchemeLayoutOPbr },
 };
 
 /* tagging */
@@ -150,7 +160,7 @@ static const Layout layouts[] = {
     /* symbol     arrange function */
     { "[\\]",     dwindle },    /* first entry is default */
     { "[]=",      tile },
-    { "[M]",      monocle },
+    /*{ "[M]",      monocle }, */
     { "[@]",      spiral },
     { "H[]",      deck },
     { "TTT",      bstack },
@@ -293,8 +303,8 @@ static const Key keys[] = {
     { MODKEY|ControlMask,               XK_q,       killall,        {0} },
 
     // restart
-    { MODKEY|ShiftMask,                 XK_r,       restart,           {0} },
-
+    { MODKEY|ShiftMask,                 XK_r,       restart,        {0} },
+    { MODKEY|ShiftMask|ControlMask,     XK_r,       spawn,          SHCMD("alacritty -e bash -c 'cd ~/.config/ohmychadwm/chadwm && ./rebuild.sh; exec bash'") },
     // hide & restore windows
     //{ MODKEY,                           XK_i,       hidewin,        {0} },
     //{ MODKEY|ShiftMask,                 XK_i,       restorewin,     {0} },
@@ -328,8 +338,8 @@ static const Key keys[] = {
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
     /* click                event mask      button          function        argument */
-    { ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-    { ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
+    { ClkLtSymbol,          0,              Button1,        cyclelayout,    {.i = +1 } }, // next
+    { ClkLtSymbol,          0,              Button3,        cyclelayout,    {.i = -1 } }, // previous
     { ClkWinTitle,          0,              Button2,        zoom,           {0} },
     { ClkStatusText,        0,              Button2,        spawn,          SHCMD("st") },
 

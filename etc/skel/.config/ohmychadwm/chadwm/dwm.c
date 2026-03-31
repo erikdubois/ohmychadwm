@@ -1172,6 +1172,13 @@ int drawstatusbar(Monitor *m, int bh, char *stext) {
   }
 
   drw_setscheme(drw, scheme[SchemeNorm]);
+
+  /* top and bottom borders for status area */
+  int sw_total = (floatbar ? m->ww - m->gappov * 2 - borderpx : m->ww - borderpx) - ret;
+  XSetForeground(drw->dpy, drw->gc, scheme[SchemeNorm][ColBorder].pixel);
+  XFillRectangle(drw->dpy, drw->drawable, drw->gc, ret, 0, sw_total, borderpx);
+  XFillRectangle(drw->dpy, drw->drawable, drw->gc, ret, borderpx + bh, sw_total, borderpx);
+
   free(p);
 
   return ret;
@@ -1531,10 +1538,20 @@ void drawbar(Monitor *m) {
     x += w;
   }
 
-w = TEXTW(m->ltsymbol);
-// Set scheme for layout symbol (if needed, uncomment and set the appropriate scheme)
-// drw_setscheme(drw, scheme[SchemeLayout]);
-x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
+  w = TEXTW(m->ltsymbol);
+  drw_setscheme(drw, scheme[SchemeLayout]);
+
+  /* optional: draw a filled layout box using SchemeLayout colors */
+  drw_rect(drw, x, y, w, bh_n, 1, 1);
+
+  /* draw the layout text */
+  drw_text(drw, x, y, w, bh_n, lrpad / 2, m->ltsymbol, 0);
+
+  /* draw the layout border/underline using SchemeLayoutbr */
+  XSetForeground(drw->dpy, drw->gc, scheme[SchemeLayout][ColBorder].pixel);
+  XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y + bh_n, w, 1);
+
+  x += w;
 
 for (i = 0; i < LENGTH(launchers); i++) {
     if (!launchers[i].command) break;
@@ -1566,7 +1583,19 @@ for (i = 0; i < LENGTH(launchers); i++) {
     if (m->sel) {
       drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
      	drw_text(drw, x, 0, w, bh, lrpad / 2 + (m->sel->icon ? m->sel->icw + ICONSPACING : 0), m->sel->name, 0);
-			if (m->sel->icon) drw_pic(drw, x + lrpad / 2, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
+			
+    XSetForeground(drw->dpy, drw->gc,
+        scheme[m == selmon ? SchemeTitle : SchemeNorm][ColBorder].pixel);
+
+    /* top border */
+    XFillRectangle(drw->dpy, drw->drawable, drw->gc,
+        x, y - borderpx, w, borderpx);
+
+    /* bottom border */
+    XFillRectangle(drw->dpy, drw->drawable, drw->gc,
+        x, y + bh_n, w, borderpx);
+        
+if (m->sel->icon) drw_pic(drw, x + lrpad / 2, (bh - m->sel->ich) / 2, m->sel->icw, m->sel->ich, m->sel->icon);
       if (m->sel->isfloating)
         drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
     } else {
@@ -2528,7 +2557,7 @@ void propertynotify(XEvent *e) {
 void
 quit(const Arg *arg)
 {
-  system("pkill dwm");
+  system("pkill ohmychadwm");
 }
 
 void restart(const Arg *arg) {
@@ -3709,6 +3738,14 @@ void updatesystray(void) {
   /* redraw background */
   XSetForeground(dpy, drw->gc, scheme[SchemeNorm][ColBg].pixel);
   XFillRectangle(dpy, systray->win, drw->gc, 0, 0, w, bh);
+
+  /* top, bottom, left, and right borders for systray area */
+  XSetForeground(dpy, drw->gc, scheme[SchemeTitle][ColBorder].pixel);
+  XFillRectangle(dpy, systray->win, drw->gc, 0, 0, w, borderpx);
+  XFillRectangle(dpy, systray->win, drw->gc, 0, bh - borderpx, w, borderpx);
+
+  XFillRectangle(dpy, systray->win, drw->gc, w - borderpx, 0, borderpx, bh);
+
   XSync(dpy, False);
 }
 

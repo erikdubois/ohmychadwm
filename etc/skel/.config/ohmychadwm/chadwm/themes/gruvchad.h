@@ -1,13 +1,113 @@
-static const char black[]       = "#1e2122";
-static const char white[]       = "#c7b89d";
-static const char gray2[]       = "#282b2c"; // unfocused window border
-static const char gray3[]       = "#5d6061";
-static const char gray4[]       = "#282b2c";
-static const char blue[]        = "#6f8faf";  // focused window border
-static const char green[]       = "#89b482";
-static const char red[]         = "#ec6b64";
-static const char orange[]      = "#d6b676";
-static const char yellow[]      = "#d1b171";
-static const char pink[]        = "#cc7f94";
-static const char pinky[]       = "#d57780";
-static const char col_borderbar[]  = "#1e2122"; // inner border
+static const char col_borderbar[]      = "#2b3339";
+
+static const char SchemeNormfg[]       = "#465058";
+static const char SchemeNormbg[]       = "#2b3339";
+static const char SchemeNormbr[]       = "#323c41";
+
+static const char SchemeSelfg[]        = "#abb2bf";
+static const char SchemeSelbg[]        = "#dbbc7f";
+static const char SchemeSelbr[]        = "#dbbc7f";
+
+static const char SchemeTitlefg[]      = "#abb2bf";
+static const char SchemeTitlebg[]      = "#2b3339";
+static const char SchemeTitlebr[]      = "#2b3339";
+
+static const char TabSelfg[]           = "#dbbc7f";
+static const char TabSelbg[]           = "#323c41";
+static const char TabSelbr[]           = "#2b3339";
+
+static const char TabNormfg[]          = "#465058";
+static const char TabNormbg[]          = "#2b3339";
+static const char TabNormbr[]          = "#2b3339";
+
+static const char SchemeTagfg[]        = "#465058";
+static const char SchemeTagbg[]        = "#2b3339";
+static const char SchemeTagbr[]        = "#2b3339";
+
+static const char SchemeTag1fg[]       = "#dbbc7f";
+static const char SchemeTag1bg[]       = "#2b3339";
+static const char SchemeTag1br[]       = "#2b3339";
+
+static const char SchemeTag2fg[]       = "#e67e80";
+static const char SchemeTag2bg[]       = "#2b3339";
+static const char SchemeTag2br[]       = "#2b3339";
+
+static const char SchemeTag3fg[]       = "#e69875";
+static const char SchemeTag3bg[]       = "#2b3339";
+static const char SchemeTag3br[]       = "#2b3339";
+
+static const char SchemeTag4fg[]       = "#a7c080";
+static const char SchemeTag4bg[]       = "#2b3339";
+static const char SchemeTag4br[]       = "#2b3339";
+
+static const char SchemeTag5fg[]       = "#dbbc7f";
+static const char SchemeTag5bg[]       = "#2b3339";
+static const char SchemeTag5br[]       = "#2b3339";
+
+static const char SchemeTag6fg[]       = "#d699b6";
+static const char SchemeTag6bg[]       = "#2b3339";
+static const char SchemeTag6br[]       = "#2b3339";
+
+static const char SchemeTag7fg[]       = "#d699b6";
+static const char SchemeTag7bg[]       = "#2b3339";
+static const char SchemeTag7br[]       = "#2b3339";
+
+static const char SchemeTag8fg[]       = "#e69875";
+static const char SchemeTag8bg[]       = "#2b3339";
+static const char SchemeTag8br[]       = "#2b3339";
+
+static const char SchemeTag9fg[]       = "#e67e80";
+static const char SchemeTag9bg[]       = "#2b3339";
+static const char SchemeTag9br[]       = "#2b3339";
+
+static const char SchemeTag10fg[]      = "#dbbc7f";
+static const char SchemeTag10bg[]      = "#2b3339";
+static const char SchemeTag10br[]      = "#2b3339";
+
+static const char SchemeLayoutfg[]     = "#a7c080";
+static const char SchemeLayoutbg[]     = "#2b3339";
+static const char SchemeLayoutbr[]     = "#2b3339";
+
+static const char SchemeBtnPrevfg[]    = "#a7c080";
+static const char SchemeBtnPrevbg[]    = "#2b3339";
+static const char SchemeBtnPrevbr[]    = "#2b3339";
+
+static const char SchemeBtnNextfg[]    = "#dbbc7f";
+static const char SchemeBtnNextbg[]    = "#2b3339";
+static const char SchemeBtnNextbr[]    = "#2b3339";
+
+static const char SchemeBtnClosefg[]   = "#e67e80";
+static const char SchemeBtnClosebg[]   = "#2b3339";
+static const char SchemeBtnClosebr[]   = "#2b3339";
+
+static const char SchemeLayoutFFfg[]   = "#e69875";
+static const char SchemeLayoutFFbg[]   = "#2b3339";
+static const char SchemeLayoutFFbr[]   = "#2b3339";
+
+static const char SchemeLayoutEWfg[]   = "#dbbc7f";
+static const char SchemeLayoutEWbg[]   = "#2b3339";
+static const char SchemeLayoutEWbr[]   = "#2b3339";
+
+static const char SchemeLayoutDSfg[]   = "#e67e80";
+static const char SchemeLayoutDSbg[]   = "#2b3339";
+static const char SchemeLayoutDSbr[]   = "#2b3339";
+
+static const char SchemeLayoutTGfg[]   = "#a7c080";
+static const char SchemeLayoutTGbg[]   = "#2b3339";
+static const char SchemeLayoutTGbr[]   = "#2b3339";
+
+static const char SchemeLayoutMSfg[]   = "#d699b6";
+static const char SchemeLayoutMSbg[]   = "#2b3339";
+static const char SchemeLayoutMSbr[]   = "#2b3339";
+
+static const char SchemeLayoutPCfg[]   = "#e69875";
+static const char SchemeLayoutPCbg[]   = "#2b3339";
+static const char SchemeLayoutPCbr[]   = "#2b3339";
+
+static const char SchemeLayoutVVfg[]   = "#dbbc7f";
+static const char SchemeLayoutVVbg[]   = "#2b3339";
+static const char SchemeLayoutVVbr[]   = "#2b3339";
+
+static const char SchemeLayoutOPfg[]   = "#e67e80";
+static const char SchemeLayoutOPbg[]   = "#2b3339";
+static const char SchemeLayoutOPbr[]   = "#2b3339";
