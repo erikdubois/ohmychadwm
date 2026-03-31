@@ -657,6 +657,7 @@ void buttonpress(XEvent *e) {
 		x += TEXTW(selmon->ltsymbol);
 
 		for(i = 0; i < LENGTH(launchers); i++) {
+			if (!launchers[i].command) break;
 			x += TEXTW(launchers[i].name);
 
 			if (ev->x < x) {
@@ -1536,6 +1537,7 @@ w = TEXTW(m->ltsymbol);
 x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
 for (i = 0; i < LENGTH(launchers); i++) {
+    if (!launchers[i].command) break;
     if (launchers[i].command == firefox) {
         drw_setscheme(drw, scheme[SchemeLayoutFF]);
     } else if (launchers[i].command == brave) {

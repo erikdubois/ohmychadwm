@@ -108,10 +108,11 @@ static const Launcher launchers[] = {
     //{ firefox,       "" },
     //{ brave,         "" },
     //{ opera,         "" },
-    { mintstick,     "虜" },
+    //{ mintstick,     "虜" },
     //{ pavucontrol,   "墳" },
     //{ telegram,      "" },
     //{ vivaldi,       "" },
+    { NULL, NULL }, /* sentinel — keep last, allows commenting out all entries above */
 };
 
 static const int tagschemes[] = {

@@ -418,7 +418,7 @@ _apply_theme() {
     local alacritty_theme="${OHMYCHADWM_CONFIG}/chadwm/themes/alacritty/${theme}.toml"
     [[ -f "$alacritty_theme" ]] && cp "$alacritty_theme" "${HOME}/.config/alacritty/colors.toml"
     # Rebuild chadwm
-    (cd "${OHMYCHADWM_CONFIG}/chadwm" && bash rebuildlocal.sh)
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && bash localrebuild.sh)
     notify-send "ohmychadwm" "Theme '${theme}' applied — reboot your system"
 }
 
