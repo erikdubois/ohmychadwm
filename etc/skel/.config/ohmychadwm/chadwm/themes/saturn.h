@@ -16,7 +16,7 @@ static const char TabSelfg[]           = "#e5c07b";
 static const char TabSelbg[]           = "#7f848e";
 static const char TabSelbr[]           = "#5f9ea0";
 
-static const char TabNormfg[]          = "#a6a9b6";
+static const char TabNormfg[]          = "#666f96";
 static const char TabNormbg[]          = "#16161a";
 static const char TabNormbr[]          = "#5f9ea0";
 

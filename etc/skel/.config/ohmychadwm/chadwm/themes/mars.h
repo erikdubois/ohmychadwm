@@ -16,11 +16,11 @@ static const char TabSelfg[]           = "#e5c07b";
 static const char TabSelbg[]           = "#d9a5a5";
 static const char TabSelbr[]           = "#b56565";
 
-static const char TabNormfg[]          = "#1a0f0f";
+static const char TabNormfg[]          = "#3b3939";
 static const char TabNormbg[]          = "#1a0f0f";
 static const char TabNormbr[]          = "#b56565";
 
-static const char SchemeTagfg[]        = "#1a0f0f";
+static const char SchemeTagfg[]        = "#505050";
 static const char SchemeTagbg[]        = "#1a0f0f";
 static const char SchemeTagbr[]        = "#b56565";
 
