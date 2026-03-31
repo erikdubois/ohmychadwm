@@ -9,7 +9,7 @@ Renders via **rofi** (the X11 equivalent of Omarchy's Walker).
 
 ```bash
 # 1. Install hard dependencies
-sudo pacman -S rofi libnotify dunst maim slop xclip fzf
+sudo pacman -S rofi libnotify fastcompmgr maim slop xclip fzf
 
 # 2. Put the script on your PATH
 install -Dm755 ohmychadwm-menu ~/.local/bin/ohmychadwm-menu

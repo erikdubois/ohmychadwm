@@ -57,10 +57,10 @@ show_nas_menu() {
 show_system_menu() {
     local options=" Lock\n Suspend\n Relaunch ohmychadwm\n Restart\n Shutdown"
 
-    if swapon --show | grep -q partition 2>/dev/null || \
-       swapon --show | grep -q file      2>/dev/null; then
-        options+=" \n Hibernate"
-    fi
+    # if swapon --show | grep -q partition 2>/dev/null || \
+    #    swapon --show | grep -q file      2>/dev/null; then
+    #     options+=" \n Hibernate"
+    # fi
 
     case $(menu "System" "$options") in
         *Lock*)      _lock_screen ;;

@@ -5,7 +5,7 @@
 #
 # Dependencies:
 #   rofi          — menu renderer  (pacman -S rofi)
-#   dunst         — notifications  (pacman -S dunst)
+#   fastcompmgr   — compositor     (pacman -S fastcompmgr)
 #   notify-send   — part of libnotify
 #   xclip         — clipboard      (pacman -S xclip)
 #   maim + slop   — screenshots    (pacman -S maim slop)
@@ -470,7 +470,7 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Autostart\n Picom\n Dunst\n Rofi\n Alacritty\n Defaults"
+        local options=" Autostart\n Picom\n Rofi\n Alacritty\n Defaults"
 
         # Show Xresources option only if the file exists
         [[ -f "${HOME}/.Xresources" ]] && options+=" \n Xresources"
@@ -478,7 +478,6 @@ show_setup_menu() {
         case $(menu "Setup" "$options") in
             *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
             *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf" && _restart_picom; return 0 ;;
-            *Dunst*)        edit_in_editor "${HOME}/.config/ohmychadwm/dunst/dunstrc"    && _restart_dunst; return 0 ;;
             *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
             *Defaults*)     show_defaults_menu || continue; return 0 ;;
@@ -529,16 +528,29 @@ _set_default_browser() {
 # ---------------------------------------------------------------------------
 # Install
 # ---------------------------------------------------------------------------
+show_pamac_menu() {
+    if ! command -v pamac &>/dev/null; then
+        present_terminal "yay -S pamac-aur"
+        return 0
+    fi
+    pamac-manager &
+}
+
 show_install_menu() {
     while true; do
-        case $(menu "Install" "Package\n Aur package\n Terminal\n Editor\n Browser\n Dev environment\n Ai tools\n Gaming\n Fonts\n Extras") in
+        local items="Pamac"
+        command -v octopi &>/dev/null && items+=" \n Octopi"
+        items+="\n Package\n Aur package\n Terminal\n Editor\n Browser\n Dev environment\n Ai tools\n Gaming\n Fonts\n Extras"
+        case $(menu "Install" "$items") in
             *"Package"*)  present_terminal 'pacman -Slq | fzf --multi --preview "pacman -Si {}" | xargs -ro sudo pacman -S --needed'; return 0 ;;
-            *"AUR"*)      present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S'; return 0 ;;
+            *"Aur"*)      present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S'; return 0 ;;
+            *Pamac*)      show_pamac_menu || continue; return 0 ;;
+            *Octopi*)     octopi & return 0 ;;
             *Terminal*)   show_install_terminal_menu || continue; return 0 ;;
             *Editor*)     show_install_editor_menu   || continue; return 0 ;;
             *Browser*)    show_install_browser_menu  || continue; return 0 ;;
             *"Dev"*)      show_install_dev_menu      || continue; return 0 ;;
-            *AI*)         show_install_ai_menu       || continue; return 0 ;;
+            *Ai*)         show_install_ai_menu       || continue; return 0 ;;
             *Gaming*)     show_install_gaming_menu   || continue; return 0 ;;
             *Fonts*)      show_install_fonts_menu    || continue; return 0 ;;
             *Extras*)     show_install_extras_menu   || continue; return 0 ;;
@@ -601,12 +613,19 @@ show_install_ai_menu() {
     command -v rocminfo   &>/dev/null && ollama_pkg="ollama-rocm"
 
     case $(menu "AI tools" " Claude Code\n Ollama (${ollama_pkg})\n OpenCode\n GitHub Copilot (nvim)") in
-        *"Claude Code"*)   present_terminal "npm install -g @anthropic-ai/claude-code && echo 'Done. Run: claude'" ;;
-        *Ollama*)          install "Ollama" "$ollama_pkg" && \
-                           present_terminal "sudo systemctl enable --now ollama && echo 'Ollama running. Try: ollama run llama3'" ;;
-        *OpenCode*)        present_terminal "npm install -g opencode-ai && echo 'Done. Run: opencode'" ;;
-        *Copilot*)         present_terminal "nvim --headless '+Lazy install copilot.vim' +q && echo 'Copilot plugin installed'" ;;
-        *)                 return 1 ;;
+        *"Claude Code"*)
+            present_terminal "sudo pacman -S --needed --noconfirm nodejs npm && npm install -g @anthropic-ai/claude-code && echo 'Done. Run: claude'"
+            ;;
+        *Ollama*)
+            present_terminal "sudo pacman -S --needed --noconfirm ${ollama_pkg} && sudo systemctl enable --now ollama && echo 'Ollama running. Try: ollama run llama3'"
+            ;;
+        *OpenCode*)
+            present_terminal "sudo pacman -S --needed --noconfirm nodejs npm && npm install -g opencode-ai && echo 'Done. Run: opencode'"
+            ;;
+        *Copilot*)
+            present_terminal "sudo pacman -S --needed --noconfirm neovim && nvim --headless '+Lazy install copilot.vim' +q && echo 'Copilot plugin installed'"
+            ;;
+        *)  return 1 ;;
     esac
 }
 
@@ -649,10 +668,9 @@ show_install_extras_menu() {
 # ---------------------------------------------------------------------------
 show_remove_menu() {
     while true; do
-        case $(menu "Remove" " Package\n Dev environment\n Theme\n Autostart entry") in
+        case $(menu "Remove" " Package\n Dev environment\n Autostart entry") in
             *Package*)   present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns'; return 0 ;;
             *"Dev"*)     show_remove_dev_menu   || continue; return 0 ;;
-            *Theme*)     show_remove_theme_menu || continue; return 0 ;;
             *Autostart*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
             *)           return 1 ;;
         esac
@@ -660,10 +678,7 @@ show_remove_menu() {
 }
 
 show_remove_dev_menu() {
-    case $(menu "Remove dev env" " Node.js\n Ruby\n Python\n Go\n Rust\n Docker") in
-        *Node*)   present_terminal "mise uninstall node && echo Done" ;;
-        *Ruby*)   present_terminal "mise uninstall ruby && echo Done" ;;
-        *Python*) present_terminal "mise uninstall python && echo Done" ;;
+    case $(menu "Remove dev" "Go\n Rust\n Docker") in
         *Go*)     remove_pkg "Go" "go" ;;
         *Rust*)   present_terminal "rustup self uninstall" ;;
         *Docker*) remove_pkg "Docker" "docker docker-compose" ;;
@@ -671,69 +686,79 @@ show_remove_dev_menu() {
     esac
 }
 
-show_remove_theme_menu() {
-    local themes_dir="${OHMYCHADWM_CONFIG}/themes"
-    local theme_list
-    theme_list=$(ls -1 "$themes_dir" 2>/dev/null)
-    [[ -z "$theme_list" ]] && { notify-send "ohmychadwm" "No themes to remove"; return 1; }
-    local chosen
-    chosen=$(echo "$theme_list" | rofi -dmenu -p "Remove theme…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
-    rm -rf "${themes_dir}/${chosen}" && notify-send "ohmychadwm" "Theme '${chosen}' removed"
-}
-
 # ---------------------------------------------------------------------------
 # Update
 # ---------------------------------------------------------------------------
 show_update_menu() {
     while true; do
-        case $(menu "Update" "System packages\n AUR packages\n Full update\n Restart process\n Hardware\n Timezone\n Time sync") in
+        case $(menu "Update" "System packages\n Aur packages\n Full update\n Restart process\n Hardware\n Timezone\n Keyboard\n Time sync") in
             *"System"*)    present_terminal "sudo pacman -Syu"; return 0 ;;
-            *"AUR"*)       present_terminal "yay -Sua"; return 0 ;;
+            *"Aur"*)       present_terminal "yay -Sua"; return 0 ;;
             *"Full"*)      present_terminal "yay -Syu"; return 0 ;;
             *"Restart"*)   show_restart_process_menu  || continue; return 0 ;;
             *Hardware*)    show_restart_hardware_menu || continue; return 0 ;;
             *Timezone*)    present_terminal "tzselect && echo 'Run: sudo timedatectl set-timezone <zone>'"; return 0 ;;
+            *Keyboard*)    show_keyboard_menu || continue; return 0 ;;
             *"Time sync"*) present_terminal "sudo timedatectl set-ntp true && timedatectl status"; return 0 ;;
             *)             return 1 ;;
         esac
     done
 }
 
+show_keyboard_menu() {
+    local keymap
+    keymap=$(localectl list-keymaps | rofi -dmenu -p "Keyboard layout" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    [[ -z "$keymap" ]] && return 1
+    present_terminal "sudo localectl set-keymap '$keymap' && localectl status"
+}
+
 show_restart_process_menu() {
-    case $(menu "Restart process" " Picom\n Dunst\n Sxhkd") in
+    case $(menu "Restart process" "Picom\n Fastcompmgr\n Sxhkd") in
         *Picom*)      _restart_picom ;;
-        *Dunst*)      _restart_dunst ;;
-        *Sxhkd*)      pkill sxhkd; setsid sxhkd &>/dev/null & disown; notify-send "ohmychadwm" "Sxhkd restarted" ;;
+        *Fastcompmgr*)  _restart_fastcompmgr ;;
+        *Sxhkd*)      pkill sxhkd; setsid sxhkd -c "${HOME}/.config/ohmychadwm/sxhkd/sxhkdrc" &>/dev/null & disown; notify-send "ohmychadwm" "Sxhkd restarted" ;;
         *)            return 1 ;;
     esac
 }
 
 show_restart_hardware_menu() {
-    case $(menu "Restart hardware" "Audio (PipeWire)\n WiFi\n Bluetooth") in
-        *Audio*)     _restart_pipewire ;;
-        *WiFi*)      present_terminal "sudo systemctl restart NetworkManager && echo Done" ;;
-        *Bluetooth*) present_terminal "sudo systemctl restart bluetooth && echo Done" ;;
+    case $(menu "Restart hardware" "Audio (PipeWire)\n Audio (PulseAudio)\n WiFi\n Bluetooth") in
+        *PipeWire*)  _restart_pipewire ;;
+        *PulseAudio*) _restart_pulseaudio ;;
+        *WiFi*)      present_terminal "printf 'Running: sudo systemctl restart NetworkManager\n\n'; sudo systemctl restart NetworkManager && echo Done" ;;
+        *Bluetooth*) present_terminal "printf 'Running: sudo systemctl restart bluetooth\n\n'; sudo systemctl restart bluetooth && echo Done" ;;
         *)           return 1 ;;
     esac
 }
 
 _restart_picom() {
+    local run="${HOME}/.config/ohmychadwm/scripts/run.sh"
+    sed -i 's|^#run "picom|run "picom|' "$run"
+    sed -i 's|^run "fastcompmgr|#run "fastcompmgr|' "$run"
+    pkill fastcompmgr 2>/dev/null
     pkill picom 2>/dev/null
     setsid picom --config "${HOME}/.config/ohmychadwm/picom/picom.conf" -b &>/dev/null &
     disown
     notify-send "ohmychadwm" "Picom restarted"
 }
 
-_restart_dunst() {
-    pkill dunst 2>/dev/null
-    setsid dunst &>/dev/null &
+_restart_fastcompmgr() {
+    local run="${HOME}/.config/ohmychadwm/scripts/run.sh"
+    sed -i 's|^#run "fastcompmgr|run "fastcompmgr|' "$run"
+    sed -i 's|^run "picom|#run "picom|' "$run"
+    pkill picom 2>/dev/null
+    pkill fastcompmgr 2>/dev/null
+    setsid fastcompmgr -c &>/dev/null &
     disown
-    notify-send "ohmychadwm" "Dunst restarted"
+    notify-send "ohmychadwm" "Fastcompmgr restarted"
 }
 
 _restart_pipewire() {
-    systemctl --user restart pipewire pipewire-pulse wireplumber
-    notify-send "ohmychadwm" "PipeWire restarted"
+    present_terminal "printf 'Running: systemctl --user restart pipewire pipewire-pulse wireplumber\n\n'; systemctl --user restart pipewire pipewire-pulse wireplumber && notify-send 'ohmychadwm' 'PipeWire restarted' && echo Done"
+}
+
+_restart_pulseaudio() {
+    present_terminal "printf 'Running: systemctl --user restart pulseaudio\n\n'; systemctl --user restart pulseaudio && notify-send 'ohmychadwm' 'PulseAudio restarted' && echo Done"
 }
 
 # ---------------------------------------------------------------------------

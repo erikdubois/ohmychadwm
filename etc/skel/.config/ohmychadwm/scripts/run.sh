@@ -21,7 +21,7 @@ run "blueberry-tray"
 run "/usr/lib/xfce4/notifyd/xfce4-notifyd"
 run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 run "fastcompmgr -c"
-#picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &
+#run "picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &"
 run "numlockx on"
 run "volctl"
 sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
