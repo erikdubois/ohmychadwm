@@ -140,6 +140,19 @@ present_terminal() {
     disown
 }
 
+# Like present_terminal but closes immediately when the command exits — no keypress prompt.
+plain_terminal() {
+    local cmd="$*"
+    setsid "$TERMINAL" \
+        --class OhmychadwmPresent \
+        -e bash -c "
+            echo
+            printf '  \e[1m%s\e[0m\n\n' 'ohmychadwm'
+            ${cmd}
+        " >/dev/null 2>&1 &
+    disown
+}
+
 # Open a file in $EDITOR inside a floating terminal
 edit_in_editor() {
     local file="$1"
@@ -372,23 +385,32 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Alacritty\n Font\n Wallpaper\n Picom / compositor\n Colours (Xresources)") in
-            *Theme*)           show_theme_menu        || continue; return 0 ;;
-            *Tags*)            show_tags_menu         || continue; return 0 ;;
-            *Border*)          show_border_menu       || continue; return 0 ;;
-            *Gaps*)            show_gaps_menu         || continue; return 0 ;;
-            *"Bar position"*)  show_bar_menu          || continue; return 0 ;;
-            *"Smart gaps"*)    show_smartgaps_menu    || continue; return 0 ;;
-            *"Hide systray"*)  show_systray_menu      || continue; return 0 ;;
-            *"New window"*)    show_newwindow_menu    || continue; return 0 ;;
+        case $(menu "Style" " chadwm\n Alacritty\n Picom / compositor\n Wallpaper") in
+            *chadwm*)    show_chadwm_menu      || continue; return 0 ;;
+            *Alacritty*) show_alacritty_menu   || continue; return 0 ;;
+            *Picom*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+            *Wallpaper*) show_wallpaper_menu   || continue; return 0 ;;
+            *)           return 1 ;;
+        esac
+    done
+}
+
+show_chadwm_menu() {
+    while true; do
+        case $(menu "chadwm" " Theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Colours (Xresources)") in
+            *Theme*)            show_theme_menu      || continue; return 0 ;;
+            *Tags*)             show_tags_menu       || continue; return 0 ;;
+            *Border*)           show_border_menu     || continue; return 0 ;;
+            *Gaps*)             show_gaps_menu       || continue; return 0 ;;
+            *"Bar position"*)   show_bar_menu        || continue; return 0 ;;
+            *"Smart gaps"*)     show_smartgaps_menu  || continue; return 0 ;;
+            *"Hide systray"*)   show_systray_menu    || continue; return 0 ;;
+            *"New window"*)     show_newwindow_menu  || continue; return 0 ;;
             *"Launcher icons"*) show_launchers_menu  || continue; return 0 ;;
-            *"Master area"*)   show_mfact_menu        || continue; return 0 ;;
-            *Alacritty*)       show_alacritty_menu   || continue; return 0 ;;
-            *Font*)            show_font_menu         || continue; return 0 ;;
-            *Wallpaper*)     show_wallpaper_menu  || continue; return 0 ;;
-            *"Picom"*)       edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
-            *"Colours"*)     edit_in_editor "${HOME}/.Xresources"; return 0 ;;
-            *)             return 1 ;;
+            *"Master area"*)    show_mfact_menu      || continue; return 0 ;;
+            *Font*)             show_font_menu       || continue; return 0 ;;
+            *"Colours"*)        edit_in_editor "${HOME}/.Xresources"; return 0 ;;
+            *)                  return 1 ;;
         esac
     done
 }
@@ -549,18 +571,44 @@ show_mfact_menu() {
 }
 
 ALACRITTY_CONF="${HOME}/.config/alacritty/alacritty.toml"
+ALACRITTY_THEMES_DIR="${HOME}/.config/ohmychadwm/alacritty/alacritty-themes"
+ALACRITTY_DEFAULT_THEME="ohmychadwm-theme.toml"
 
 show_alacritty_menu() {
     while true; do
-        case $(menu "Alacritty" " Font family\n Font size\n Opacity\n Shell\n Back to default") in
+        case $(menu "Alacritty" " Font family\n Font size\n Opacity\n Theme\n Shell\n Back to default") in
             *"Font family"*)    show_alacritty_font_menu    || continue; return 0 ;;
             *"Font size"*)      show_alacritty_size_menu    || continue; return 0 ;;
             *Opacity*)          show_alacritty_opacity_menu || continue; return 0 ;;
+            *Theme*)            show_alacritty_theme_menu   || continue; return 0 ;;
             *Shell*)            show_alacritty_shell_menu   || continue; return 0 ;;
             *"Back to default"*) _alacritty_reset_default  ; return 0 ;;
             *)                  return 1 ;;
         esac
     done
+}
+
+_alacritty_apply_colors() {
+    local theme_file="$1"
+    local colors
+    colors=$(sed -n '/^\[colors/,$p' "$theme_file")
+    local sep_line
+    sep_line=$(grep -n '^###' "$ALACRITTY_CONF" | head -1 | cut -d: -f1)
+    {
+        echo "$colors"
+        echo ""
+        tail -n +"${sep_line}" "$ALACRITTY_CONF"
+    } > "${ALACRITTY_CONF}.tmp" && mv "${ALACRITTY_CONF}.tmp" "$ALACRITTY_CONF"
+}
+
+show_alacritty_theme_menu() {
+    local other_themes
+    other_themes=$(ls "$ALACRITTY_THEMES_DIR" | grep -v "^${ALACRITTY_DEFAULT_THEME}$" | sort)
+    local chosen
+    chosen=$(printf "%s\n%s" "$ALACRITTY_DEFAULT_THEME" "$other_themes" | \
+        rofi -dmenu -p "Alacritty theme" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1
+    _alacritty_apply_colors "${ALACRITTY_THEMES_DIR}/${chosen}"
+    notify-send "ohmychadwm" "Alacritty theme set to '${chosen}'"
 }
 
 show_alacritty_font_menu() {
@@ -604,12 +652,12 @@ show_alacritty_shell_menu() {
 }
 
 _alacritty_reset_default() {
-    local default="${HOME}/.config/alacritty/default-arcolinux.toml"
-    if [[ ! -f "$default" ]]; then
-        notify-send -u critical "ohmychadwm" "Default not found: ${default}"
+    local backup="${HOME}/.config/alacritty/default-arcolinux.toml"
+    if [[ ! -f "$backup" ]]; then
+        notify-send -u critical "ohmychadwm" "Backup not found: ${backup}"
         return 1
     fi
-    cp "$default" "$ALACRITTY_CONF"
+    cp "$backup" "$ALACRITTY_CONF"
     notify-send "ohmychadwm" "Alacritty reset to default"
 }
 
@@ -1066,11 +1114,43 @@ _lock_screen() {
 }
 
 # ---------------------------------------------------------------------------
+# Info
+# ---------------------------------------------------------------------------
+show_info_menu() {
+    while true; do
+        local options=" System\n Processes\n Disk overview\n Disk explorer\n Temperatures\n Logs"
+        upower -e 2>/dev/null | grep -qi bat && options+=" \n Battery"
+
+        case $(menu "Info" "$options") in
+            *System*)      present_terminal "inxi -Fxxx"; return 0 ;;
+            *Processes*)   command -v btop &>/dev/null || install "btop" "btop"; present_terminal "btop"; return 0 ;;
+            *"Disk overview"*) present_terminal "df -h | (read -r header; echo \"\$header\"; sort)"; return 0 ;;
+            *"Disk explorer"*) command -v ncdu &>/dev/null || install "ncdu" "ncdu"; present_terminal "ncdu ${HOME}"; return 0 ;;
+            *Temp*)        present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
+            *Battery*)     present_terminal "upower -i \$(upower -e | grep -i bat | head -1)" ;;
+            *Logs*)        show_logs_menu || continue; return 0 ;;
+            *)             return 1 ;;
+        esac
+    done
+}
+
+show_logs_menu() {
+    case $(menu "Logs" " System log\n Boot log\n Errors only\n Kernel (dmesg)\n Follow live") in
+        *System*)  plain_terminal "journalctl -n 200 --no-pager | less -R"; return 0 ;;
+        *Boot*)    plain_terminal "journalctl -b --no-pager | less -R"; return 0 ;;
+        *Errors*)  plain_terminal "journalctl -p err -b --no-pager | less -R"; return 0 ;;
+        *Kernel*)  plain_terminal "sudo dmesg --color=always | less -R"; return 0 ;;
+        *Follow*)  plain_terminal "journalctl -f"; return 0 ;;
+        *)         return 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------
 # MAIN MENU
 # ---------------------------------------------------------------------------
 show_main_menu() {
     while true; do
-        case $(menu "ohmychadwm" " Apps\n Style\n Learn\n Trigger\n Setup\n Install\n Remove\n Update\n System") in
+        case $(menu "ohmychadwm" " Apps\n Style\n Learn\n Trigger\n Setup\n Install\n Remove\n Update\n Info\n System") in
             *Apps*)    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi; break ;;
             *Learn*)   show_learn_menu   || continue; break ;;
             *Trigger*) show_trigger_menu || continue; break ;;
@@ -1079,6 +1159,7 @@ show_main_menu() {
             *Install*) show_install_menu || continue; break ;;
             *Remove*)  show_remove_menu  || continue; break ;;
             *Update*)  show_update_menu  || continue; break ;;
+            *Info*)    show_info_menu    || continue; break ;;
             *System*)  show_system_menu  || continue; break ;;
             *)         break ;;
         esac
@@ -1106,6 +1187,8 @@ if [[ -n "${1:-}" ]]; then
         *system*)        show_system_menu ;;
         *setup*)         show_setup_menu ;;
         *learn*)         show_learn_menu ;;
+        *info*)          show_info_menu ;;
+        *logs*)          show_logs_menu ;;
         *lock*)          _lock_screen ;;
         *toggle*)        show_toggle_menu ;;
         *ai*)            show_install_ai_menu ;;
