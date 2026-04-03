@@ -96,7 +96,7 @@ alt + x
 
 #Rofi theme selector
 super + r
-    rofi-theme-selector
+    rofi -show drun
 
 #Alacritty
 super + t

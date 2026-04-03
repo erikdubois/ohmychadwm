@@ -106,7 +106,7 @@ menu() {
     # Empty result (Escape / no selection) → navigate back or exit
     if [[ -z "$choice" ]]; then
         go_back
-        return
+        return 1
     fi
 
     echo "$choice"
@@ -372,14 +372,291 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Theme\n Font\n Wallpaper\n Colours (Xresources)\n Picom / compositor") in
-            *Theme*)       show_theme_menu    || continue; return 0 ;;
-            *Font*)        show_font_menu     || continue; return 0 ;;
-            *Wallpaper*)   show_wallpaper_menu || continue; return 0 ;;
-            *"Colours"*)   edit_in_editor "${HOME}/.Xresources"; return 0 ;;
-            *"Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+        case $(menu "Style" " Theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Alacritty\n Font\n Wallpaper\n Picom / compositor\n Colours (Xresources)") in
+            *Theme*)           show_theme_menu        || continue; return 0 ;;
+            *Tags*)            show_tags_menu         || continue; return 0 ;;
+            *Border*)          show_border_menu       || continue; return 0 ;;
+            *Gaps*)            show_gaps_menu         || continue; return 0 ;;
+            *"Bar position"*)  show_bar_menu          || continue; return 0 ;;
+            *"Smart gaps"*)    show_smartgaps_menu    || continue; return 0 ;;
+            *"Hide systray"*)  show_systray_menu      || continue; return 0 ;;
+            *"New window"*)    show_newwindow_menu    || continue; return 0 ;;
+            *"Launcher icons"*) show_launchers_menu  || continue; return 0 ;;
+            *"Master area"*)   show_mfact_menu        || continue; return 0 ;;
+            *Alacritty*)       show_alacritty_menu   || continue; return 0 ;;
+            *Font*)            show_font_menu         || continue; return 0 ;;
+            *Wallpaper*)     show_wallpaper_menu  || continue; return 0 ;;
+            *"Picom"*)       edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+            *"Colours"*)     edit_in_editor "${HOME}/.Xresources"; return 0 ;;
             *)             return 1 ;;
         esac
+    done
+}
+
+show_tags_menu() {
+    local chosen
+    chosen=$(menu "Tags" "default tags\nArabic numbers\nRoman numbers\nPowerline\nWebdings\nJapanese numbers\nAlphabetic\nEmoji\nGeometric shapes\nChinese numbers\nPurposemenu") || return 1
+    _apply_tags "$chosen"
+}
+
+_apply_tags() {
+    local chosen="$1"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+
+    python3 - "$chosen" "$config" <<'PYEOF'
+import sys, re
+
+chosen = sys.argv[1]
+config = sys.argv[2]
+
+with open(config) as f:
+    content = f.read()
+
+# Comment out any currently active tags line
+content = re.sub(r'^(static char \*tags\[\])', r'//\1', content, flags=re.MULTILINE)
+
+# Uncomment the tags line that immediately follows the matching comment
+pattern = r'(//' + re.escape(chosen) + r'\n)//(static char \*tags\[\])'
+new_content, n = re.subn(pattern, r'\1\2', content)
+
+if n == 0:
+    print(f"No tags entry found for '{chosen}'", file=sys.stderr)
+    sys.exit(1)
+
+with open(config, 'w') as f:
+    f.write(new_content)
+PYEOF
+
+    if [[ $? -ne 0 ]]; then
+        notify-send -u critical "ohmychadwm" "Tags '${chosen}' not found in config.def.h"
+        return 1
+    fi
+
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Tags set to '${chosen}'"
+}
+
+show_border_menu() {
+    local current
+    current=$(grep -oP 'borderpx\s*=\s*\K[0-9]+' "${OHMYCHADWM_CONFIG}/chadwm/config.def.h")
+    local chosen
+    chosen=$(menu "Border (current: ${current}px)" "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10") || return 1
+    _apply_border "$chosen"
+}
+
+_apply_border() {
+    local px="$1"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    sed -i "s/static const unsigned int borderpx\s*=\s*[0-9]\+/static const unsigned int borderpx  = ${px}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Border set to ${px}px"
+}
+
+show_gaps_menu() {
+    local current
+    current=$(grep -oP 'gappih\s*=\s*\K[0-9]+' "${OHMYCHADWM_CONFIG}/chadwm/config.def.h")
+    local chosen
+    chosen=$(menu "Gaps (current: ${current}px)" "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10") || return 1
+    _apply_gaps "$chosen"
+}
+
+_apply_gaps() {
+    local px="$1"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    sed -i "s/\(gappih\s*=\s*\)[0-9]\+/\1${px}/" "$config"
+    sed -i "s/\(gappiv\s*=\s*\)[0-9]\+/\1${px}/" "$config"
+    sed -i "s/\(gappoh\s*=\s*\)[0-9]\+/\1${px}/" "$config"
+    sed -i "s/\(gappov\s*=\s*\)[0-9]\+/\1${px}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Gaps set to ${px}px"
+}
+
+show_bar_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local current
+    current=$(grep -oP 'topbar\s*=\s*\K[01]' "$config")
+    local current_label="top"
+    [[ "$current" == "0" ]] && current_label="bottom"
+    local chosen
+    chosen=$(menu "Bar position (current: ${current_label})" "top\nbottom") || return 1
+    local value=1
+    [[ "$chosen" == "bottom" ]] && value=0
+    sed -i "s/\(static const int topbar\s*=\s*\)[01]/\1${value}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Bar moved to ${chosen}"
+}
+
+show_smartgaps_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local current
+    current=$(grep -oP 'smartgaps\s*=\s*\K[01]' "$config")
+    local current_label="no"
+    [[ "$current" == "1" ]] && current_label="yes"
+    local chosen
+    chosen=$(menu "Smart gaps (current: ${current_label})" "yes\nno") || return 1
+    local value=0
+    [[ "$chosen" == "yes" ]] && value=1
+    sed -i "s/\(static const int smartgaps\s*=\s*\)[01]/\1${value}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Smart gaps set to ${chosen}"
+}
+
+show_systray_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local current
+    current=$(grep -oP 'showsystray\s*=\s*\K[01]' "$config")
+    local current_label="no"
+    [[ "$current" == "1" ]] && current_label="yes"
+    local chosen
+    chosen=$(menu "Hide systray (currently hidden: ${current_label})" "yes\nno") || return 1
+    local value=1
+    [[ "$chosen" == "yes" ]] && value=0
+    sed -i "s/\(static const int showsystray\s*=\s*\)[01]/\1${value}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Systray hidden: ${chosen}"
+}
+
+show_newwindow_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local current
+    current=$(grep -oP 'new_window_attach_on_end\s*=\s*\K[01]' "$config")
+    local current_label="on the front"
+    [[ "$current" == "1" ]] && current_label="on the end"
+    local chosen
+    chosen=$(menu "New window (current: ${current_label})" "on the front\non the end") || return 1
+    local value=0
+    [[ "$chosen" == "on the end" ]] && value=1
+    sed -i "s/\(new_window_attach_on_end\s*=\s*\)[01]/\1${value}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "New windows open ${chosen}"
+}
+
+show_mfact_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local current
+    current=$(grep -oP 'mfact\s*=\s*\K[0-9.]+' "$config")
+    local current_pct
+    current_pct=$(printf "%.0f" "$(echo "$current * 100" | bc)")
+    local chosen
+    chosen=$(menu "Master area (current: ${current_pct}%)" \
+        "10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%") || return 1
+    local pct="${chosen/\%/}"
+    local value
+    value=$(printf "0.%02d" "$pct")
+    sed -i "s/\(static const float mfact\s*=\s*\)[0-9.]*/\1${value}/" "$config"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Master area set to ${chosen}"
+}
+
+ALACRITTY_CONF="${HOME}/.config/alacritty/alacritty.toml"
+
+show_alacritty_menu() {
+    while true; do
+        case $(menu "Alacritty" " Font family\n Font size\n Opacity\n Shell\n Back to default") in
+            *"Font family"*)    show_alacritty_font_menu    || continue; return 0 ;;
+            *"Font size"*)      show_alacritty_size_menu    || continue; return 0 ;;
+            *Opacity*)          show_alacritty_opacity_menu || continue; return 0 ;;
+            *Shell*)            show_alacritty_shell_menu   || continue; return 0 ;;
+            *"Back to default"*) _alacritty_reset_default  ; return 0 ;;
+            *)                  return 1 ;;
+        esac
+    done
+}
+
+show_alacritty_font_menu() {
+    local font_list
+    font_list=$(fc-list : family | sort -u)
+    local chosen
+    chosen=$(echo "$font_list" | rofi -dmenu -p "Alacritty font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1
+    sed -i "s|^\(family = \).*|\1\"${chosen}\"|" "$ALACRITTY_CONF"
+    notify-send "ohmychadwm" "Alacritty font set to '${chosen}'"
+}
+
+show_alacritty_size_menu() {
+    local current
+    current=$(grep -oP 'size\s*=\s*\K[0-9.]+' "$ALACRITTY_CONF" | head -1)
+    local chosen
+    chosen=$(menu "Font size (current: ${current})" \
+        "8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n20\n22\n24") || return 1
+    sed -i "s/^\(size\s*=\s*\)[0-9.]*/\1${chosen}.0/" "$ALACRITTY_CONF"
+    notify-send "ohmychadwm" "Alacritty font size set to ${chosen}"
+}
+
+show_alacritty_opacity_menu() {
+    local current
+    current=$(grep -oP 'opacity\s*=\s*\K[0-9.]+' "$ALACRITTY_CONF" | head -1)
+    local chosen
+    chosen=$(menu "Opacity (current: ${current})" \
+        "0.1\n0.2\n0.3\n0.4\n0.5\n0.6\n0.7\n0.8\n0.9\n1.0") || return 1
+    sed -i "s/^\(opacity\s*=\s*\)[0-9.]*/\1${chosen}/" "$ALACRITTY_CONF"
+    notify-send "ohmychadwm" "Alacritty opacity set to ${chosen}"
+}
+
+show_alacritty_shell_menu() {
+    local current
+    current=$(grep -oP 'program\s*=\s*"\K[^"]+' "$ALACRITTY_CONF" | head -1)
+    local shell_list
+    shell_list=$(grep -v '^#' /etc/shells | grep '^/bin/')
+    local chosen
+    chosen=$(echo "$shell_list" | rofi -dmenu -p "Shell (current: ${current})" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    sed -i "s|^\(program\s*=\s*\)\"[^\"]*\"|\1\"${chosen}\"|" "$ALACRITTY_CONF"
+    notify-send "ohmychadwm" "Alacritty shell set to ${chosen}"
+}
+
+_alacritty_reset_default() {
+    local default="${HOME}/.config/alacritty/default-arcolinux.toml"
+    if [[ ! -f "$default" ]]; then
+        notify-send -u critical "ohmychadwm" "Default not found: ${default}"
+        return 1
+    fi
+    cp "$default" "$ALACRITTY_CONF"
+    notify-send "ohmychadwm" "Alacritty reset to default"
+}
+
+show_launchers_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local -a names=(discord firefox brave opera mintstick pavucontrol telegram vivaldi)
+    local -A labels=(
+        [discord]="Discord"
+        [firefox]="Firefox"
+        [brave]="Brave"
+        [opera]="Opera"
+        [mintstick]="Mintstick"
+        [pavucontrol]="Pavucontrol"
+        [telegram]="Telegram"
+        [vivaldi]="Vivaldi"
+    )
+
+    while true; do
+        local options=""
+        for name in "${names[@]}"; do
+            if grep -qP "^\s*\{\s*${name}," "$config"; then
+                options+="✓ ${labels[$name]}\n"
+            else
+                options+="✗ ${labels[$name]}\n"
+            fi
+        done
+        options+=" Apply & rebuild"
+
+        local chosen
+        chosen=$(menu "Launcher icons" "$options") || return 1
+
+        if [[ "$chosen" == *"Apply"* ]]; then
+            (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+            notify-send "ohmychadwm" "Launcher icons updated"
+            return 0
+        fi
+
+        for name in "${names[@]}"; do
+            if [[ "$chosen" == *"${labels[$name]}"* ]]; then
+                if grep -qP "^\s*\{\s*${name}," "$config"; then
+                    sed -i "s|^\(\s*\){ ${name},|\1//{ ${name},|" "$config"
+                else
+                    sed -i "s|^\(\s*\)//{ ${name},|\1{ ${name},|" "$config"
+                fi
+                break
+            fi
+        done
     done
 }
 
@@ -395,8 +672,10 @@ show_theme_menu() {
         notify-send "ohmychadwm" "No themes found in ${themes_dir}"
         return 1
     fi
+    local count
+    count=$(echo "$theme_list" | wc -l)
     local chosen
-    chosen=$(menu "Theme" "$theme_list") || return 1
+    chosen=$(menu "Theme  ($count total — ↑↓ scroll)" "$theme_list" "-lines 8") || return 1
     _apply_theme "$chosen"
 }
 
@@ -433,18 +712,11 @@ show_font_menu() {
 _apply_font() {
     local font="$1"
     local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
-    # Save selection
-    echo "$font" > "${OHMYCHADWM_CONFIG}/chadwm/current-font"
     # Update fonts[] in config.def.h
     sed -i "s|static const char \*fonts\[\].*|static const char *fonts[] = {\"${font}:style:bold:size=13\"};|" "$config"
-    # Apply to alacritty if used
-    local alacritty_conf="${HOME}/.config/alacritty/alacritty.toml"
-    if [[ -f "$alacritty_conf" ]]; then
-        sed -i "s/family = .*/family = \"${font}\"/" "$alacritty_conf"
-    fi
     # Rebuild chadwm
-    (cd "${OHMYCHADWM_CONFIG}/chadwm" && bash rebuildlocal.sh)
-    notify-send "ohmychadwm" "Font set to '${font}' — reboot your system"
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    notify-send "ohmychadwm" "Font set to '${font}'"
 }
 
 show_wallpaper_menu() {
@@ -798,7 +1070,7 @@ _lock_screen() {
 # ---------------------------------------------------------------------------
 show_main_menu() {
     while true; do
-        case $(menu "ohmychadwm" " Apps\n Learn\n Trigger\n Style\n Setup\n Install\n Remove\n Update\n System") in
+        case $(menu "ohmychadwm" " Apps\n Style\n Learn\n Trigger\n Setup\n Install\n Remove\n Update\n System") in
             *Apps*)    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi; break ;;
             *Learn*)   show_learn_menu   || continue; break ;;
             *Trigger*) show_trigger_menu || continue; break ;;

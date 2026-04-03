@@ -6,10 +6,10 @@
 static const unsigned int borderpx  = 2;        /* border pixel of windows */
 static const unsigned int default_border = 0;   /* to switch back to default border after dynamic border resizing via keybinds */
 static const unsigned int snap      = 32;       /* snap pixel */
-static const unsigned int gappih    = 10;       /* horiz inner gap between windows */
-static const unsigned int gappiv    = 10;       /* vert inner gap between windows */
-static const unsigned int gappoh    = 10;       /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov    = 10;       /* vert outer gap between windows and screen edge */
+static const unsigned int gappih    = 5;        /* horiz inner gap between windows */
+static const unsigned int gappiv    = 5;        /* vert inner gap between windows */
+static const unsigned int gappoh    = 5;        /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov    = 5;        /* vert outer gap between windows and screen edge */
 static const int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
@@ -102,12 +102,28 @@ static const char *colors[][3] = {
 };
 
 /* tagging */
-static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+//default tags
+//static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+//Arabic numbers
 //static char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+//Roman numbers
 //static char *tags[] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+//Powerline
 //static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+//Webdings
 //static char *tags[] = { "Web", "Chat", "Edit", "Meld", "Vb", "Mail", "Video", "Image", "Files", "Music" };
+//Japanese numbers
 //static char *tags[] = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
+//Alphabetic
+//static char *tags[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+//Emoji
+//static char *tags[] = { "👨‍💻", "🌐", "🖥️", "📟", "📜", "👋", "📺", "✉️", "💬", "🎮" };
+//Geometric shapes
+//static char *tags[] = { "●", "■", "▲", "◆", "◇", "★", "✗", "✓", "+", "○" };
+//Chinese numbers
+//static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
+//Purposemenu
+static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
 
 static const char* firefox[] = { "firefox", NULL };
 static const char* vivaldi[] = { "vivaldi", NULL };

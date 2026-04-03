@@ -129,7 +129,7 @@ show_my_custom_tools() {
 | `wf-recorder`            | `ffmpeg -f x11grab`                  |
 | `waybar` signals         | polybar IPC / `pkill -SIGUSR1`       |
 | `hyprctl dispatch`       | `xdotool` / direct WM control        |
-| `swayosd`                | `dunst` + `notify-send`              |
+| `swayosd`                | `fastcompmgr -c` + `notify-send`     |
 | `hypridle` + `hyprlock`  | `xautolock` + `slock` / `i3lock`     |
 | `hyprsunset`             | `redshift`                           |
 | `setsid gtk-launch`      | `setsid xdg-open` / direct launch    |
