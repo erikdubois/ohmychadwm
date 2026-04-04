@@ -103,7 +103,7 @@ static const char *colors[][3] = {
 
 /* tagging */
 //default tags
-//static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
 //Arabic numbers
 //static char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
 //Roman numbers
@@ -123,7 +123,7 @@ static const char *colors[][3] = {
 //Chinese numbers
 //static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
 //Purposemenu
-static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
+//static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
 
 static const char* firefox[] = { "firefox", NULL };
 static const char* vivaldi[] = { "vivaldi", NULL };
@@ -283,22 +283,21 @@ static const Key keys[] = {
     { MODKEY|ControlMask|ShiftMask,     XK_ccedilla,          incrovgaps,     {.i = -1 } },
 
     { MODKEY|ControlMask|ShiftMask,     XK_d,                 defaultgaps,    {0} },
-    { MODKEY|ControlMask|ShiftMask,     XK_space,             spawn, SHCMD("$HOME/.config/ohmychadwm/scripts/theme-switch.sh") },
     { MODKEY|ControlMask|ShiftMask,     XK_r,                 spawn, SHCMD("$HOME/.config/ohmychadwm/chadwm/rebuild.sh") },
 
     // layout (preferences = no 1,3,4,8,9)
     { MODKEY|ControlMask,               XK_F1,       setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F2,       setlayout,      {.v = &layouts[2]} },
-    { MODKEY|ControlMask,               XK_F3,       setlayout,      {.v = &layouts[5]} },
-    { MODKEY|ControlMask,               XK_F4,       setlayout,      {.v = &layouts[6]} },
-    { MODKEY|ControlMask,               XK_F5,       setlayout,      {.v = &layouts[7]} },
-    { MODKEY|ControlMask,               XK_F6,       setlayout,      {.v = &layouts[11]} },
-    { MODKEY|ControlMask,               XK_F7,       setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F8,       setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F9,       setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F10,      setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F11,      setlayout,      {.v = &layouts[0]} },
-    { MODKEY|ControlMask,               XK_F12,      setlayout,      {.v = &layouts[0]} },
+    { MODKEY|ControlMask,               XK_F2,       setlayout,      {.v = &layouts[1]} },
+    { MODKEY|ControlMask,               XK_F3,       setlayout,      {.v = &layouts[2]} },
+    { MODKEY|ControlMask,               XK_F4,       setlayout,      {.v = &layouts[3]} },
+    { MODKEY|ControlMask,               XK_F5,       setlayout,      {.v = &layouts[4]} },
+    { MODKEY|ControlMask,               XK_F6,       setlayout,      {.v = &layouts[5]} },
+    { MODKEY|ControlMask,               XK_F7,       setlayout,      {.v = &layouts[6]} },
+    { MODKEY|ControlMask,               XK_F8,       setlayout,      {.v = &layouts[7]} },
+    { MODKEY|ControlMask,               XK_F9,       setlayout,      {.v = &layouts[8]} },
+    { MODKEY|ControlMask,               XK_F10,      setlayout,      {.v = &layouts[9]} },
+    { MODKEY|ControlMask,               XK_F11,      setlayout,      {.v = &layouts[10]} },
+    { MODKEY|ControlMask,               XK_F12,      setlayout,      {.v = &layouts[11]} },
 
     //{ MODKEY,                           XK_space,   setlayout,      {0} },
     { MODKEY|ControlMask,               XK_p,       cyclelayout,    {.i = -1 } },

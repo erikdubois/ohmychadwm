@@ -203,13 +203,12 @@ show_learn_menu() {
 }
 
 # ---------------------------------------------------------------------------
-# Trigger — Capture / Share / Toggle
+# Trigger — Capture / Toggle
 # ---------------------------------------------------------------------------
 show_trigger_menu() {
     while true; do
-        case $(menu "Trigger" " Capture\n Share\n Toggle") in
+        case $(menu "Trigger" " Capture\n Toggle") in
             *Capture*) show_capture_menu || continue; return 0 ;;
-            *Share*)   show_share_menu   || continue; return 0 ;;
             *Toggle*)  show_toggle_menu  || continue; return 0 ;;
             *)         return 1 ;;
         esac
@@ -218,11 +217,11 @@ show_trigger_menu() {
 
 show_capture_menu() {
     while true; do
-        case $(menu "Capture" " Screenshot\n Screenshot → clipboard\n Screenshot region\n Screen record\n Colour picker") in
+        case $(menu "Capture" " Screenshot\n Screenshot → clipboard\n Screenshot region\n Simplescreenrecorder\n Colour picker") in
             *"Screenshot →"*)      _screenshot_clipboard; return 0 ;;
             *"Screenshot region"*) _screenshot_region;    return 0 ;;
             *"Screenshot"*)        _screenshot_smart;     return 0 ;;
-            *"Screen record"*)     show_screenrecord_menu || continue; return 0 ;;
+            *"Simple"*)            show_screenrecord_menu || continue; return 0 ;;
             *"Colour picker"*)     _colour_picker;        return 0 ;;
             *)                     return 1 ;;
         esac
@@ -230,13 +229,24 @@ show_capture_menu() {
 }
 
 _screenshot_smart() {
-    # Full-screen screenshot saved to ~/Pictures/Screenshots, notified with option to annotate
     local dir="${HOME}/Pictures/Screenshots"
     mkdir -p "$dir"
     local file="${dir}/$(date +%Y-%m-%d_%H-%M-%S).png"
     maim "$file"
     xclip -selection clipboard -t image/png < "$file"
-    notify-send -t 5000 "Screenshot saved" "$file" --action="Edit=xdg-open '${file}'"
+    # Run in background: --wait blocks until the notification is dismissed or the button clicked
+    (
+        action=$(notify-send -t 5000 "Screenshot saved" "$(basename "$file")" \
+            --action="open=Open in nomacs" --wait 2>/dev/null)
+        if [[ "$action" == "open" ]]; then
+            if ! command -v nomacs &>/dev/null; then
+                notify-send "ohmychadwm" "Installing nomacs..."
+                sudo pacman -S --needed --noconfirm nomacs
+            fi
+            nomacs "$file" &
+        fi
+    ) &
+    disown
 }
 
 _screenshot_clipboard() {
@@ -258,98 +268,68 @@ _colour_picker() {
         local color
         color=$(xcolor)
         echo -n "$color" | xclip -selection clipboard
-        notify-send -t 2000 "Colour picked" "$color"
+        notify-send -t 0 "Colour picked" "$color (copied to clipboard)"
     else
         notify-send -u critical "ohmychadwm" "xcolor not installed. Run: sudo pacman -S xcolor"
     fi
 }
 
 show_screenrecord_menu() {
-    case $(menu "Screen record" "Record screen\nRecord screen + mic\n Stop recording") in
-        *"Record screen + mic"*) _screenrecord start mic ;;
-        *"Record screen"*)       _screenrecord start ;;
-        *"Stop"*)                _screenrecord stop ;;
-        *)                       return 1 ;;
-    esac
-}
-
-_screenrecord() {
-    local action="${1:-start}"
-    local dir="${HOME}/Videos/Recordings"
-    mkdir -p "$dir"
-    local file="${dir}/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-
-    if [[ "$action" == "stop" ]]; then
-        pkill -INT ffmpeg 2>/dev/null && notify-send "Screen record" "Recording stopped"
-        return
+    if ! command -v simplescreenrecorder &>/dev/null; then
+        notify-send "ohmychadwm" "Installing SimpleScreenRecorder..."
+        sudo pacman -S --needed --noconfirm simplescreenrecorder
     fi
-
-    local audio_flags=""
-    if [[ "${2:-}" == "mic" ]]; then
-        audio_flags="-f pulse -i default"
-    fi
-
-    # Get screen geometry
-    local display="${DISPLAY:-:0}"
-    local geo
-    geo=$(xdpyinfo | grep dimensions | awk '{print $2}')
-
-    setsid bash -c "
-        ffmpeg -f x11grab -r 30 -s '${geo}' -i '${display}' \
-            ${audio_flags} \
-            -c:v libx264 -preset ultrafast -crf 18 \
-            '${file}' >/dev/null 2>&1
-        notify-send 'Screen record' 'Saved to ${file}'
-    " &
-    disown
-    notify-send "Screen record" "Recording started (run Trigger > Stop recording to finish)"
-}
-
-show_share_menu() {
-    if ! command -v localsend &>/dev/null; then
-        notify-send -u critical "ohmychadwm" "LocalSend not installed. Install via Install > Apps > LocalSend"
-        return 1
-    fi
-    case $(menu "Share" " Clipboard\n File\n Folder") in
-        *Clipboard*) _share_clipboard ;;
-        *File*)      _share_file ;;
-        *Folder*)    _share_folder ;;
-        *)           return 1 ;;
-    esac
-}
-
-_share_clipboard() {
-    local tmp
-    tmp=$(mktemp /tmp/ohmychadwm-share-XXXX.txt)
-    xclip -selection clipboard -o > "$tmp"
-    localsend "$tmp" &
+    setsid simplescreenrecorder &>/dev/null &
     disown
 }
 
-_share_file() {
-    local file
-    file=$(find "${HOME}" -maxdepth 5 -type f 2>/dev/null | fzf --prompt="Select file to share: ")
-    [[ -n "$file" ]] && setsid localsend "$file" &>/dev/null &
-}
-
-_share_folder() {
-    local folder
-    folder=$(find "${HOME}" -maxdepth 4 -type d 2>/dev/null | fzf --prompt="Select folder to share: ")
-    [[ -n "$folder" ]] && setsid localsend "$folder" &>/dev/null &
-}
 
 show_toggle_menu() {
     local _nightlight_state="Enable"
     local _autolock_state="Enable"
+    local _picom_state="Start"
+    local _fastcompmgr_state="Start"
 
     [[ -f "${HOME}/.local/state/ohmychadwm/toggles/nightlight-on" ]] && _nightlight_state="Disable"
     [[ -f "${HOME}/.local/state/ohmychadwm/toggles/autolock-on" ]]   && _autolock_state="Disable"
+    pgrep -x picom       &>/dev/null && _picom_state="Stop"
+    pgrep -x fastcompmgr &>/dev/null && _fastcompmgr_state="Stop"
 
-    case $(menu "Toggle" "${_nightlight_state} night light\n ${_autolock_state} auto-lock") in
+    case $(menu "Toggle" "${_nightlight_state} night light\n ${_autolock_state} auto-lock\n ${_picom_state} picom\n ${_fastcompmgr_state} fastcompmgr") in
         *"night light"*) _toggle_nightlight ;;
         *"auto-lock"*)   _toggle_autolock ;;
+        *picom*)         _toggle_picom ;;
+        *fastcompmgr*)   _toggle_fastcompmgr ;;
         *)               return 1 ;;
     esac
+}
+
+_toggle_picom() {
+    if pgrep -x picom &>/dev/null; then
+        pkill picom && notify-send "Picom" "Stopped"
+    else
+        if pgrep -x fastcompmgr &>/dev/null; then
+            pkill fastcompmgr 2>/dev/null
+            while pgrep -x fastcompmgr &>/dev/null; do sleep 0.1; done
+        fi
+        setsid picom --config "${HOME}/.config/ohmychadwm/picom/picom.conf" -b &>/dev/null &
+        disown
+        notify-send "Picom" "Started"
+    fi
+}
+
+_toggle_fastcompmgr() {
+    if pgrep -x fastcompmgr &>/dev/null; then
+        pkill fastcompmgr && notify-send "Fastcompmgr" "Stopped"
+    else
+        if pgrep -x picom &>/dev/null; then
+            pkill picom 2>/dev/null
+            while pgrep -x picom &>/dev/null; do sleep 0.1; done
+        fi
+        setsid fastcompmgr -c &>/dev/null &
+        disown
+        notify-send "Fastcompmgr" "Started"
+    fi
 }
 
 _toggle_nightlight() {
@@ -359,6 +339,10 @@ _toggle_nightlight() {
         pkill redshift 2>/dev/null; rm -f "$state_file"
         notify-send "Night light" "Disabled"
     else
+        if ! command -v redshift &>/dev/null; then
+            notify-send "ohmychadwm" "Installing redshift..."
+            sudo pacman -S --needed --noconfirm redshift
+        fi
         touch "$state_file"
         redshift -O 4000 &>/dev/null &
         disown
@@ -374,7 +358,7 @@ _toggle_autolock() {
         notify-send "Auto-lock" "Disabled"
     else
         touch "$state_file"
-        xautolock -time 10 -locker slock &>/dev/null &
+        xautolock -time 10 -locker betterlockscreen -l dim -- --time-str="%H:%M" &>/dev/null &
         disown
         notify-send "Auto-lock" "Enabled (10 min)"
     fi
@@ -385,13 +369,73 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " chadwm\n Alacritty\n Picom / compositor\n Wallpaper") in
-            *chadwm*)    show_chadwm_menu      || continue; return 0 ;;
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom / compositor\n Slstatus\n Wallpaper") in
+            *Ohmychadwm*)    show_chadwm_menu      || continue; return 0 ;;
             *Alacritty*) show_alacritty_menu   || continue; return 0 ;;
             *Picom*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *Wallpaper*) show_wallpaper_menu   || continue; return 0 ;;
+            *Slstatus*)  show_slstatus_menu    || continue; return 0 ;;
             *)           return 1 ;;
         esac
+    done
+}
+
+show_slstatus_menu() {
+    local config="${OHMYCHADWM_CONFIG}/slstatus/config.def.h"
+    local -a names=(datetime uptime cpu_perc disk_free disk_used hostname kernel_release load_avg netspeed_rx netspeed_tx ram_free ram_perc ram_used swap_free swap_perc)
+    local -A labels=(
+        [datetime]="Date & time"
+        [uptime]="Uptime"
+        [cpu_perc]="CPU usage %"
+        [disk_free]="Disk free"
+        [disk_used]="Disk used"
+        [hostname]="Hostname"
+        [kernel_release]="Kernel"
+        [load_avg]="Load average"
+        [netspeed_rx]="Net download speed"
+        [netspeed_tx]="Net upload speed"
+        [ram_free]="RAM free"
+        [ram_perc]="RAM usage %"
+        [ram_used]="RAM used"
+        [swap_free]="Swap free"
+        [swap_perc]="Swap usage %"
+    )
+
+    local selected_row=0
+
+    while true; do
+        local options=""
+        for name in "${names[@]}"; do
+            if grep -qP "^\s*\{\s*${name}," "$config"; then
+                options+="✓ ${labels[$name]}\n"
+            else
+                options+="✗ ${labels[$name]}\n"
+            fi
+        done
+        options+=" Apply & rebuild"
+
+        local chosen
+        chosen=$(menu "slstatus" "$options" "-lines 16 -selected-row ${selected_row}") || return 1
+
+        if [[ "$chosen" == *"Apply"* ]]; then
+            selected_row=$(( ${#names[@]} ))
+            (cd "${OHMYCHADWM_CONFIG}/slstatus" && alacritty -e bash -c './rebuild.sh; exec bash')
+            notify-send "ohmychadwm" "slstatus updated — press Super+Shift+R to reload"
+            return 0
+        fi
+
+        for i in "${!names[@]}"; do
+            local name="${names[$i]}"
+            if [[ "$chosen" == *"${labels[$name]}"* ]]; then
+                selected_row=$i
+                if grep -qP "^\s*\{\s*${name}," "$config"; then
+                    sed -i "s|^\(\s*\){ ${name},|\1//{ ${name},|" "$config"
+                else
+                    sed -i "s|^\(\s*\)//{ ${name},|\1{ ${name},|" "$config"
+                fi
+                break
+            fi
+        done
     done
 }
 
@@ -769,20 +813,28 @@ _apply_font() {
 
 show_wallpaper_menu() {
     local walls_dir="${OHMYCHADWM_CONFIG}/wallpapers"
-    if [[ ! -d "$walls_dir" ]]; then
-        notify-send "ohmychadwm" "No wallpapers directory at ${walls_dir}"
-        return 1
+    local extra_dir="${HOME}/Templates/wallpapers"
+
+    local -a all_images=()
+    while IFS= read -r f; do all_images+=("$f"); done \
+        < <(find "$walls_dir" -maxdepth 1 -type f 2>/dev/null | grep -E '\.(jpg|jpeg|png|webp)$' | sort)
+    if [[ -d "$extra_dir" ]]; then
+        while IFS= read -r f; do all_images+=("$f"); done \
+            < <(find "$extra_dir" -maxdepth 1 -type f 2>/dev/null | grep -E '\.(jpg|jpeg|png|webp)$' | sort)
     fi
-    local wall_list
-    wall_list=$(ls -1 "$walls_dir" 2>/dev/null | grep -E '\.(jpg|jpeg|png|webp)$')
-    if [[ -z "$wall_list" ]]; then
+
+    if [[ ${#all_images[@]} -eq 0 ]]; then
         notify-send "ohmychadwm" "No wallpaper images found"
         return 1
     fi
+
     local chosen
-    chosen=$(echo "$wall_list" | rofi -dmenu -p "Wallpaper…" -width "$MENU_WIDTH" 2>/dev/null) || return 1 1
-    feh --bg-fill "${walls_dir}/${chosen}" && \
-        notify-send "ohmychadwm" "Wallpaper set to '${chosen}'"
+    chosen=$(for f in "${all_images[@]}"; do
+        printf '%s\0icon\x1f%s\n' "$f" "$f"
+    done | rofi -dmenu -p "Wallpaper…" -show-icons -width "$MENU_WIDTH" 2>/dev/null) || return 1
+
+    feh --bg-fill "$chosen" && \
+        notify-send "ohmychadwm" "Wallpaper set to '$(basename "$chosen")'"
 }
 
 # ---------------------------------------------------------------------------
@@ -790,20 +842,42 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Autostart\n Picom\n Rofi\n Alacritty\n Defaults"
+        local options=" Autostart\n Alacritty\n Picom\n Rofi\n Lan/Wifi\n Defaults"
 
         # Show Xresources option only if the file exists
-        [[ -f "${HOME}/.Xresources" ]] && options+=" \n Xresources"
+        [[ -f "${HOME}/.Xresources" ]] && options+="\n Xresources"
 
         case $(menu "Setup" "$options") in
             *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
             *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf" && _restart_picom; return 0 ;;
             *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
+            *"Lan/Wifi"*)   show_lanwifi_menu || continue; return 0 ;;
             *Defaults*)     show_defaults_menu || continue; return 0 ;;
             *)              return 1 ;;
         esac
     done
+}
+
+show_lanwifi_menu() {
+    case $(menu "Lan/Wifi" " Network Manager\n nmtui") in
+        *"Network Manager"*)
+            if ! command -v nm-connection-editor &>/dev/null; then
+                notify-send "ohmychadwm" "Installing network-manager-applet..."
+                sudo pacman -S --needed --noconfirm network-manager-applet
+            fi
+            setsid nm-connection-editor &>/dev/null &
+            disown
+            ;;
+        *nmtui*)
+            if ! command -v nmtui &>/dev/null; then
+                notify-send "ohmychadwm" "Installing networkmanager..."
+                sudo pacman -S --needed --noconfirm networkmanager
+            fi
+            present_terminal "nmtui"
+            ;;
+        *) return 1 ;;
+    esac
 }
 
 show_defaults_menu() {
@@ -858,9 +932,9 @@ show_pamac_menu() {
 
 show_install_menu() {
     while true; do
-        local items="Pamac"
-        command -v octopi &>/dev/null && items+=" \n Octopi"
-        items+="\n Package\n Aur package\n Terminal\n Editor\n Browser\n Dev environment\n Ai tools\n Gaming\n Fonts\n Extras"
+        local items=" Pamac"
+        command -v octopi &>/dev/null && items+="\n Octopi"
+        items+="\n AI tools\n Aur package\n Browser\n Dev environment\n Editor\n Extras\n Fonts\n Gaming\n Package\n Terminal"
         case $(menu "Install" "$items") in
             *"Package"*)  present_terminal 'pacman -Slq | fzf --multi --preview "pacman -Si {}" | xargs -ro sudo pacman -S --needed'; return 0 ;;
             *"Aur"*)      present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S'; return 0 ;;
@@ -870,7 +944,7 @@ show_install_menu() {
             *Editor*)     show_install_editor_menu   || continue; return 0 ;;
             *Browser*)    show_install_browser_menu  || continue; return 0 ;;
             *"Dev"*)      show_install_dev_menu      || continue; return 0 ;;
-            *Ai*)         show_install_ai_menu       || continue; return 0 ;;
+            *AI*)         show_install_ai_menu       || continue; return 0 ;;
             *Gaming*)     show_install_gaming_menu   || continue; return 0 ;;
             *Fonts*)      show_install_fonts_menu    || continue; return 0 ;;
             *Extras*)     show_install_extras_menu   || continue; return 0 ;;
@@ -932,7 +1006,7 @@ show_install_ai_menu() {
     command -v nvidia-smi &>/dev/null && ollama_pkg="ollama-cuda"
     command -v rocminfo   &>/dev/null && ollama_pkg="ollama-rocm"
 
-    case $(menu "AI tools" " Claude Code\n Ollama (${ollama_pkg})\n OpenCode\n GitHub Copilot (nvim)") in
+    case $(menu "AI tools" " Claude Code\n Ollama (${ollama_pkg})\n OpenCode") in
         *"Claude Code"*)
             present_terminal "sudo pacman -S --needed --noconfirm nodejs npm && npm install -g @anthropic-ai/claude-code && echo 'Done. Run: claude'"
             ;;
@@ -940,10 +1014,7 @@ show_install_ai_menu() {
             present_terminal "sudo pacman -S --needed --noconfirm ${ollama_pkg} && sudo systemctl enable --now ollama && echo 'Ollama running. Try: ollama run llama3'"
             ;;
         *OpenCode*)
-            present_terminal "sudo pacman -S --needed --noconfirm nodejs npm && npm install -g opencode-ai && echo 'Done. Run: opencode'"
-            ;;
-        *Copilot*)
-            present_terminal "sudo pacman -S --needed --noconfirm neovim && nvim --headless '+Lazy install copilot.vim' +q && echo 'Copilot plugin installed'"
+            present_terminal "sudo pacman -S --needed --noconfirm opencode && echo 'Done. Run: opencode'"
             ;;
         *)  return 1 ;;
     esac
@@ -972,8 +1043,7 @@ show_install_fonts_menu() {
 }
 
 show_install_extras_menu() {
-    case $(menu "Extras" "LocalSend\n Obsidian\n Signal\n Spotify\n OBS Studio\n Bitwarden") in
-        *LocalSend*)  aur_install "LocalSend" "localsend-bin" ;;
+    case $(menu "Extras" "Obsidian\n Signal\n Spotify\n OBS Studio\n Bitwarden") in
         *Obsidian*)   aur_install "Obsidian"  "obsidian" ;;
         *Signal*)     install    "Signal"    "signal-desktop" ;;
         *Spotify*)    aur_install "Spotify"   "spotify" ;;
@@ -988,7 +1058,7 @@ show_install_extras_menu() {
 # ---------------------------------------------------------------------------
 show_remove_menu() {
     while true; do
-        case $(menu "Remove" " Package\n Dev environment\n Autostart entry") in
+        case $(menu "Remove" " Autostart entry\n Dev environment\n Package") in
             *Package*)   present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns'; return 0 ;;
             *"Dev"*)     show_remove_dev_menu   || continue; return 0 ;;
             *Autostart*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
@@ -998,7 +1068,7 @@ show_remove_menu() {
 }
 
 show_remove_dev_menu() {
-    case $(menu "Remove dev" "Go\n Rust\n Docker") in
+    case $(menu "Remove dev" " Docker\n Go\n Rust") in
         *Go*)     remove_pkg "Go" "go" ;;
         *Rust*)   present_terminal "rustup self uninstall" ;;
         *Docker*) remove_pkg "Docker" "docker docker-compose" ;;
@@ -1011,7 +1081,7 @@ show_remove_dev_menu() {
 # ---------------------------------------------------------------------------
 show_update_menu() {
     while true; do
-        case $(menu "Update" "System packages\n Aur packages\n Full update\n Restart process\n Hardware\n Timezone\n Keyboard\n Time sync") in
+        case $(menu "Update" " Aur packages\n Full update\n Hardware\n Keyboard\n Restart process\n System packages\n Time sync\n Timezone") in
             *"System"*)    present_terminal "sudo pacman -Syu"; return 0 ;;
             *"Aur"*)       present_terminal "yay -Sua"; return 0 ;;
             *"Full"*)      present_terminal "yay -Syu"; return 0 ;;
@@ -1033,7 +1103,7 @@ show_keyboard_menu() {
 }
 
 show_restart_process_menu() {
-    case $(menu "Restart process" "Picom\n Fastcompmgr\n Sxhkd") in
+    case $(menu " Restart process" " Picom\n Fastcompmgr\n Sxhkd") in
         *Picom*)      _restart_picom ;;
         *Fastcompmgr*)  _restart_fastcompmgr ;;
         *Sxhkd*)      pkill sxhkd; setsid sxhkd -c "${HOME}/.config/ohmychadwm/sxhkd/sxhkdrc" &>/dev/null & disown; notify-send "ohmychadwm" "Sxhkd restarted" ;;
@@ -1042,7 +1112,7 @@ show_restart_process_menu() {
 }
 
 show_restart_hardware_menu() {
-    case $(menu "Restart hardware" "Audio (PipeWire)\n Audio (PulseAudio)\n WiFi\n Bluetooth") in
+    case $(menu "Restart hardware" " Audio (PipeWire)\n Audio (PulseAudio)\n WiFi\n Bluetooth") in
         *PipeWire*)  _restart_pipewire ;;
         *PulseAudio*) _restart_pulseaudio ;;
         *WiFi*)      present_terminal "printf 'Running: sudo systemctl restart NetworkManager\n\n'; sudo systemctl restart NetworkManager && echo Done" ;;

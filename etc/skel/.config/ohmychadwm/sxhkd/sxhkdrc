@@ -317,10 +317,10 @@ ctrl + shift + Escape
     xfce4-taskmanager
 
 ctrl + alt + End
-    dex --term alacritty /usr/share/applications/btop.desktop
+    alacritty -e btop
 
 ctrl + alt + n
-    dex --term alacritty /usr/share/applications/btop.desktop
+    alacritty -e btop
 
 #################################################################
 #     SCREENSHOTS

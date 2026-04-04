@@ -9,50 +9,10 @@
 #     aur_install(), edit_in_editor(), go_back(), notify-send, etc.
 #
 # This example adds:
-#   1. A VPN section bolted onto the Install menu
-#   2. A custom NAS mount section in Trigger
-#   3. An override of show_system_menu to add a Relaunch ohmychadwm option
+#   1. An override of show_system_menu to add a Relaunch ohmychadwm option
 
 # ---------------------------------------------------------------------------
-# Example 1: add a VPN submenu
-# ---------------------------------------------------------------------------
-show_vpn_menu() {
-    case $(menu "VPN" "󰖂 Mullvad connect\n Mullvad disconnect\n OpenVPN config\n WireGuard status") in
-        *"connect"*)    setsid mullvad connect &>/dev/null & disown ;;
-        *"disconnect"*) setsid mullvad disconnect &>/dev/null & disown ;;
-        *OpenVPN*)      present_terminal "ls /etc/openvpn/*.conf | fzf | xargs -ro sudo openvpn --config" ;;
-        *WireGuard*)    present_terminal "sudo wg show; read -n1" ;;
-        *)              return 1 ;;
-    esac
-}
-
-# ---------------------------------------------------------------------------
-# Example 2: override the Trigger menu to bolt on NAS and VPN entries
-# ---------------------------------------------------------------------------
-show_trigger_menu() {
-    while true; do
-        case $(menu "Trigger" " Capture\n Share\n Toggle\n VPN\n NAS") in
-            *Capture*) show_capture_menu || continue; return 0 ;;
-            *Share*)   show_share_menu   || continue; return 0 ;;
-            *Toggle*)  show_toggle_menu  || continue; return 0 ;;
-            *VPN*)     show_vpn_menu     || continue; return 0 ;;
-            *NAS*)     show_nas_menu     || continue; return 0 ;;
-            *)         return 1 ;;
-        esac
-    done
-}
-
-show_nas_menu() {
-    case $(menu "NAS" "󰒋 Mount NAS\n Unmount NAS\n Open /mnt") in
-        *"Mount"*)   present_terminal "sudo mount /mnt/nas && echo 'Mounted'" ;;
-        *"Unmount"*) present_terminal "sudo umount /mnt/nas && echo 'Unmounted'" ;;
-        *"/mnt"*)    setsid thunar /mnt &>/dev/null & disown ;;
-        *)           return 1 ;;
-    esac
-}
-
-# ---------------------------------------------------------------------------
-# Example 3: override the System menu to add a Relaunch ohmychadwm option
+# Override the System menu to add a Relaunch ohmychadwm option
 # ---------------------------------------------------------------------------
 show_system_menu() {
     local options=" Lock\n Suspend\n Relaunch ohmychadwm\n Restart\n Shutdown"

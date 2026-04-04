@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function run {
+run() {
  if ! pgrep $1 ;
   then
     $@&
@@ -9,7 +9,8 @@ function run {
 
 #for virtualbox
 #run xrandr --output Virtual-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal
-sh /home/erik/.screenlayout/erik.sh
+# screen layout generated with arandr
+[ -f "$HOME/.screenlayout/$(whoami).sh" ] && sh "$HOME/.screenlayout/$(whoami).sh"
 run "signal-in-tray"
 run "nm-applet"
 run "pamac-tray"

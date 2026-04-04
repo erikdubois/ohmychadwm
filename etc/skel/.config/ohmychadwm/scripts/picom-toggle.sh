@@ -12,7 +12,7 @@ else
     # Use rofi to prompt the user
     chosen=$(echo "$options" | rofi -dmenu -p "Choose picom config:")
 
-    if [[ -n $chosen && -f "$CONFIG_DIR/$chosen" ]]; then
+    if [[ -n "$chosen" && -f "$CONFIG_DIR/$chosen" ]]; then
         notify-send "Picom" "Starting picom with: $chosen"
         picom -b --config "$CONFIG_DIR/$chosen" &
     else
