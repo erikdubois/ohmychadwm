@@ -191,11 +191,10 @@ remove_pkg() {
 # Learn
 # ---------------------------------------------------------------------------
 show_learn_menu() {
-    case $(menu "Learn" " Keybindings\n Arch Wiki\n Chadwm source\n Neovim\n Bash\n Man pages") in
+    case $(menu "Learn" " Keybindings\n Arch Wiki\n Chadwm source\n Bash\n Man pages") in
         *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh ;;
         *"Arch Wiki"*)  setsid "$BROWSER" "https://wiki.archlinux.org" >/dev/null 2>&1 & disown ;;
         *Chadwm*)       setsid "$BROWSER" "https://github.com/erikdubois/ohmychadwm" >/dev/null 2>&1 & disown ;;
-        *Neovim*)       setsid "$BROWSER" "https://www.lazyvim.org/keymaps" >/dev/null 2>&1 & disown ;;
         *Bash*)         setsid "$BROWSER" "https://devhints.io/bash" >/dev/null 2>&1 & disown ;;
         *"Man pages"*)  present_terminal "man -k . | fzf --preview 'man {1}' | awk '{print \$1}' | xargs -r man" ;;
         *)              return 1 ;;
@@ -369,7 +368,7 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom / compositor\n Slstatus\n Wallpaper") in
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom.conf \n Slstatus\n Wallpaper") in
             *Ohmychadwm*)    show_chadwm_menu      || continue; return 0 ;;
             *Alacritty*) show_alacritty_menu   || continue; return 0 ;;
             *Picom*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
@@ -441,8 +440,9 @@ show_slstatus_menu() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Colours (Xresources)") in
+        case $(menu "chadwm" " Theme\n Create your own theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Colours (Xresources)") in
             *Theme*)            show_theme_menu      || continue; return 0 ;;
+            *"Create your own theme"*) setsid alacritty -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Tags*)             show_tags_menu       || continue; return 0 ;;
             *Border*)           show_border_menu     || continue; return 0 ;;
             *Gaps*)             show_gaps_menu       || continue; return 0 ;;

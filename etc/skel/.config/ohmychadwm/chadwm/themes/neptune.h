@@ -1,3 +1,9 @@
+/* Neptune — deep ocean blue, wave teal, seafoam */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#475569";
 
 static const char SchemeNormfg[]       = "#334155";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#475569";
 static const char SchemeLayoutOPfg[]   = "#ef4444";
 static const char SchemeLayoutOPbg[]   = "#0f172a";
 static const char SchemeLayoutOPbr[]   = "#475569";
+static const char SchemeMenufg[]       = "#0f172a";
+static const char SchemeMenubg[]       = "#facc15";
+static const char SchemeMenubr[]       = "#facc15";

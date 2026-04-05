@@ -1,3 +1,9 @@
+/* Mercury — cool silver, graphite, quicksilver */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#7a7a7a";
 
 static const char SchemeNormfg[]       = "#5c5c5c";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#7a7a7a";
 static const char SchemeLayoutOPfg[]   = "#e06c75";
 static const char SchemeLayoutOPbg[]   = "#121212";
 static const char SchemeLayoutOPbr[]   = "#7a7a7a";
+static const char SchemeMenufg[]       = "#121212";
+static const char SchemeMenubg[]       = "#e5c07b";
+static const char SchemeMenubr[]       = "#e5c07b";

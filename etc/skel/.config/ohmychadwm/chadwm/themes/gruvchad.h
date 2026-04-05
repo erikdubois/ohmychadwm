@@ -1,3 +1,9 @@
+/* Gruvchad — warm amber, retro brown, golden tan */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   5
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#2b3339";
 
 static const char SchemeNormfg[]       = "#465058";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#2b3339";
 static const char SchemeLayoutOPfg[]   = "#e67e80";
 static const char SchemeLayoutOPbg[]   = "#2b3339";
 static const char SchemeLayoutOPbr[]   = "#2b3339";
+static const char SchemeMenufg[]       = "#dbbc7f";
+static const char SchemeMenubg[]       = "#2b3339";
+static const char SchemeMenubr[]       = "#2b3339";

@@ -1,0 +1,438 @@
+#!/usr/bin/env bash
+# generate-chadwm-theme.sh
+# Create a chadwm theme from the current wallpaper colors.
+
+set -euo pipefail
+
+THEMES_DIR="$HOME/.config/ohmychadwm/chadwm/themes"
+CONFIG="$HOME/.config/ohmychadwm/chadwm/config.def.h"
+
+# ── terminal colors ──────────────────────────────────────────────────────────
+R='\033[0;31m'; G='\033[0;32m'; Y='\033[1;33m'
+B='\033[0;34m'; C='\033[0;36m'; W='\033[1;37m'; NC='\033[0m'
+
+header() { echo -e "\n${C}${W}$*${NC}"; }
+ask()    { echo -e "${Y}$*${NC}"; }
+ok()     { echo -e "${G}✔ $*${NC}"; }
+err()    { echo -e "${R}✘ $*${NC}" >&2; }
+
+# ── detect current wallpaper ─────────────────────────────────────────────────
+detect_wallpaper() {
+    local wp=""
+    # variety stores current wallpaper in ~/.config/variety/wallpaper/
+    if [[ -f "$HOME/.config/variety/wallpaper/wallpaper.jpg" ]]; then
+        wp="$HOME/.config/variety/wallpaper/wallpaper.jpg"
+    elif [[ -f "$HOME/.fehbg" ]]; then
+        wp=$(grep -oP "(?<='|\")/[^'\"]+(?='|\")" "$HOME/.fehbg" | head -1)
+    fi
+
+    if [[ -z "$wp" || ! -f "$wp" ]]; then
+        ask "Could not detect wallpaper automatically."
+        read -rp "Enter wallpaper path: " wp
+    fi
+
+    if [[ ! -f "$wp" ]]; then
+        err "File not found: $wp"
+        exit 1
+    fi
+    echo "$wp"
+}
+
+# ── extract N dominant colors, sorted darkest → lightest ─────────────────────
+extract_colors() {
+    local wallpaper="$1"
+    local count="${2:-12}"
+
+    magick "$wallpaper" \
+        -resize 200x200^ -gravity Center -extent 200x200 \
+        +dither -colors "$count" -unique-colors txt:- \
+        2>/dev/null \
+        | grep -oE '#[0-9A-Fa-f]{6}' \
+        | head -"$count"
+}
+
+# luminance of a hex color (0–255 scale)
+luminance() {
+    local hex="${1#'#'}"
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    echo $(( (299*r + 587*g + 114*b) / 1000 ))
+}
+
+# saturation of a hex color (0–255 scale, higher = more vivid)
+saturation() {
+    local hex="${1#'#'}"
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    local max min
+    max=$r; [[ $g -gt $max ]] && max=$g; [[ $b -gt $max ]] && max=$b
+    min=$r; [[ $g -lt $min ]] && min=$g; [[ $b -lt $min ]] && min=$b
+    [[ $max -eq 0 ]] && echo 0 || echo $(( (max - min) * 255 / max ))
+}
+
+# darken a hex color by a fixed amount (clamps to 0)
+darken() {
+    local hex="${1#'#'}" amt="${2:-20}"
+    local r=$(( 16#${hex:0:2} - amt )); r=$(( r < 0 ? 0 : r ))
+    local g=$(( 16#${hex:2:2} - amt )); g=$(( g < 0 ? 0 : g ))
+    local b=$(( 16#${hex:4:2} - amt )); b=$(( b < 0 ? 0 : b ))
+    printf '#%02x%02x%02x' $r $g $b
+}
+
+# lighten a hex color by a fixed amount (clamps to 255)
+lighten() {
+    local hex="${1#'#'}" amt="${2:-20}"
+    local r=$(( 16#${hex:0:2} + amt )); r=$(( r > 255 ? 255 : r ))
+    local g=$(( 16#${hex:2:2} + amt )); g=$(( g > 255 ? 255 : g ))
+    local b=$(( 16#${hex:4:2} + amt )); b=$(( b > 255 ? 255 : b ))
+    printf '#%02x%02x%02x' $r $g $b
+}
+
+# sort colors by luminance (darkest first), output one per line
+sort_by_luminance() {
+    local colors=("$@")
+    local pairs=()
+    for c in "${colors[@]}"; do
+        pairs+=("$(luminance "$c") $c")
+    done
+    printf '%s\n' "${pairs[@]}" | sort -n | awk '{print $2}'
+}
+
+# pick the most saturated color from a list
+most_saturated() {
+    local best="" best_sat=-1
+    for c in "$@"; do
+        local s; s=$(saturation "$c")
+        if [[ $s -gt $best_sat ]]; then best_sat=$s; best=$c; fi
+    done
+    echo "$best"
+}
+
+# ── build color palette from sorted list ─────────────────────────────────────
+build_palette() {
+    local -a sorted=("$@")
+    local n=${#sorted[@]}
+
+    # background: darkest color, with a slightly lighter border variant
+    BG="${sorted[0]}"
+    BR=$(darken "$BG" -12)   # slightly lighter than bg for borders
+
+    # dim foreground: near-darkest, for empty tags and inactive window text
+    local dim_idx=$(( n / 8 ))
+    [[ $dim_idx -lt 1 ]] && dim_idx=1
+    DIM_FG="${sorted[$dim_idx]}"
+
+    # muted normal foreground: ~1/4 from darkest
+    local idx=$(( n / 4 ))
+    NORM_FG="${sorted[$idx]}"
+
+    # bright foreground / title: ~90% from darkest
+    local bright_idx=$(( n * 9 / 10 ))
+    [[ $bright_idx -ge $n ]] && bright_idx=$(( n - 1 ))
+    BRIGHT="${sorted[$bright_idx]}"
+
+    # accent / selection: most saturated of the mid-range colors
+    local mid_start=$(( n / 4 ))
+    local mid_end=$(( n * 3 / 4 ))
+    local mids=("${sorted[@]:$mid_start:$(( mid_end - mid_start ))}")
+    ACCENT=$(most_saturated "${mids[@]}")
+
+    # 10 tag colors: spread across the bright half of the palette
+    # (occupied tags must be visibly brighter than empty tags which use DIM_FG)
+    local range_start=$(( n / 2 ))
+    local range_end=$(( n - 1 ))
+    local range_colors=("${sorted[@]:$range_start:$(( range_end - range_start + 1 ))}")
+    local rc=${#range_colors[@]}
+
+    TAG=()
+    for i in {0..9}; do
+        local pick=$(( i * rc / 10 ))
+        [[ $pick -ge $rc ]] && pick=$(( rc - 1 ))
+        TAG+=("${range_colors[$pick]}")
+    done
+}
+
+# ── interactive questions ─────────────────────────────────────────────────────
+ask_questions() {
+    header "── chadwm theme generator ──────────────────────────────"
+    echo -e "${W}Wallpaper:${NC} $WALLPAPER"
+    echo -e "${W}Extracted ${#SORTED[@]} colors${NC}"
+    echo
+
+    # name
+    # names that ship with ohmychadwm and must not be overwritten
+    local -a DEFAULT_NAMES=(
+        saturn pluto uranus jupiter venus mercury mars neptune
+        catppuccin dracula everforest gruvchad kanagawa material
+        monokai nord onedark prime rosepine solarized tokyonight tundra
+        elephant giraffe hippo rhino buffalo
+    )
+
+    while true; do
+        ask "Theme name (lowercase, no spaces, e.g. 'savannah'):"
+        read -rp "> " THEME_NAME
+        THEME_NAME="${THEME_NAME,,}"
+        THEME_NAME="${THEME_NAME// /_}"
+        if [[ -z "$THEME_NAME" ]]; then
+            err "Name cannot be empty."
+            continue
+        fi
+        local is_default=0
+        for d in "${DEFAULT_NAMES[@]}"; do
+            [[ "$THEME_NAME" == "$d" ]] && is_default=1 && break
+        done
+        if [[ $is_default -eq 1 ]]; then
+            err "'$THEME_NAME' is a built-in theme and cannot be overwritten. Choose another name."
+            continue
+        fi
+        if [[ -f "$THEMES_DIR/$THEME_NAME.h" ]]; then
+            ask "Theme '$THEME_NAME' already exists. Overwrite? [y/N]:"
+            read -rp "> " ow
+            [[ "$ow" =~ ^[Yy]$ ]] && break || continue
+        fi
+        break
+    done
+
+    # bar position
+    ask "Bar position — (t)op or (b)ottom? [t/B]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[Tt]$ ]]; then
+        THEME_TOPBAR=1
+    else
+        THEME_TOPBAR=0
+    fi
+
+    # gaps
+    ask "Gap size between windows in pixels? [0-20, default 0]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[0-9]+$ ]] && (( ans <= 20 )); then
+        THEME_GAPS=$ans
+    else
+        THEME_GAPS=0
+    fi
+
+    # autohide
+    ask "Auto-hide bar after how many seconds? [0 = disabled, default 0]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[0-9]+$ ]]; then
+        THEME_AUTOHIDE=$ans
+    else
+        THEME_AUTOHIDE=0
+    fi
+
+    # systray
+    ask "Show systray? [Y/n]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[Nn]$ ]]; then
+        THEME_SHOWSYSTRAY=0
+    else
+        THEME_SHOWSYSTRAY=1
+    fi
+}
+
+# ── write theme file ──────────────────────────────────────────────────────────
+write_theme() {
+    local file="$THEMES_DIR/$THEME_NAME.h"
+
+    # cycle tag colors
+    local t0="${TAG[0]}" t1="${TAG[1]}" t2="${TAG[2]}" t3="${TAG[3]}" t4="${TAG[4]}"
+    local t5="${TAG[5]}" t6="${TAG[6]}" t7="${TAG[7]}" t8="${TAG[8]}" t9="${TAG[9]}"
+
+    cat > "$file" <<EOF
+/* ${THEME_NAME^} — generated from wallpaper */
+#define THEME_TOPBAR   $THEME_TOPBAR
+#define THEME_GAPS     $THEME_GAPS
+#define THEME_AUTOHIDE    $THEME_AUTOHIDE
+#define THEME_SHOWSYSTRAY $THEME_SHOWSYSTRAY
+
+static const char col_borderbar[]      = "$BG";
+
+static const char SchemeNormfg[]       = "$DIM_FG";
+static const char SchemeNormbg[]       = "$BG";
+static const char SchemeNormbr[]       = "$BR";
+
+static const char SchemeSelfg[]        = "$BG";
+static const char SchemeSelbg[]        = "$ACCENT";
+static const char SchemeSelbr[]        = "$ACCENT";
+
+static const char SchemeTitlefg[]      = "$BRIGHT";
+static const char SchemeTitlebg[]      = "$BG";
+static const char SchemeTitlebr[]      = "$BG";
+
+static const char TabSelfg[]           = "$ACCENT";
+static const char TabSelbg[]           = "$BR";
+static const char TabSelbr[]           = "$BG";
+
+static const char TabNormfg[]          = "$DIM_FG";
+static const char TabNormbg[]          = "$BG";
+static const char TabNormbr[]          = "$BG";
+
+static const char SchemeTagfg[]        = "$DIM_FG";
+static const char SchemeTagbg[]        = "$BG";
+static const char SchemeTagbr[]        = "$BG";
+
+static const char SchemeTag1fg[]       = "$t0";
+static const char SchemeTag1bg[]       = "$BG";
+static const char SchemeTag1br[]       = "$BG";
+
+static const char SchemeTag2fg[]       = "$t1";
+static const char SchemeTag2bg[]       = "$BG";
+static const char SchemeTag2br[]       = "$BG";
+
+static const char SchemeTag3fg[]       = "$t2";
+static const char SchemeTag3bg[]       = "$BG";
+static const char SchemeTag3br[]       = "$BG";
+
+static const char SchemeTag4fg[]       = "$t3";
+static const char SchemeTag4bg[]       = "$BG";
+static const char SchemeTag4br[]       = "$BG";
+
+static const char SchemeTag5fg[]       = "$t4";
+static const char SchemeTag5bg[]       = "$BG";
+static const char SchemeTag5br[]       = "$BG";
+
+static const char SchemeTag6fg[]       = "$t5";
+static const char SchemeTag6bg[]       = "$BG";
+static const char SchemeTag6br[]       = "$BG";
+
+static const char SchemeTag7fg[]       = "$t6";
+static const char SchemeTag7bg[]       = "$BG";
+static const char SchemeTag7br[]       = "$BG";
+
+static const char SchemeTag8fg[]       = "$t7";
+static const char SchemeTag8bg[]       = "$BG";
+static const char SchemeTag8br[]       = "$BG";
+
+static const char SchemeTag9fg[]       = "$t8";
+static const char SchemeTag9bg[]       = "$BG";
+static const char SchemeTag9br[]       = "$BG";
+
+static const char SchemeTag10fg[]      = "$t9";
+static const char SchemeTag10bg[]      = "$BG";
+static const char SchemeTag10br[]      = "$BG";
+
+static const char SchemeLayoutfg[]     = "$ACCENT";
+static const char SchemeLayoutbg[]     = "$BG";
+static const char SchemeLayoutbr[]     = "$BG";
+
+static const char SchemeBtnPrevfg[]    = "$t3";
+static const char SchemeBtnPrevbg[]    = "$BG";
+static const char SchemeBtnPrevbr[]    = "$BG";
+
+static const char SchemeBtnNextfg[]    = "$t5";
+static const char SchemeBtnNextbg[]    = "$BG";
+static const char SchemeBtnNextbr[]    = "$BG";
+
+static const char SchemeBtnClosefg[]   = "$t1";
+static const char SchemeBtnClosebg[]   = "$BG";
+static const char SchemeBtnClosebr[]   = "$BG";
+
+static const char SchemeLayoutFFfg[]   = "$t2";
+static const char SchemeLayoutFFbg[]   = "$BG";
+static const char SchemeLayoutFFbr[]   = "$BG";
+
+static const char SchemeLayoutEWfg[]   = "$t4";
+static const char SchemeLayoutEWbg[]   = "$BG";
+static const char SchemeLayoutEWbr[]   = "$BG";
+
+static const char SchemeLayoutDSfg[]   = "$t1";
+static const char SchemeLayoutDSbg[]   = "$BG";
+static const char SchemeLayoutDSbr[]   = "$BG";
+
+static const char SchemeLayoutTGfg[]   = "$t3";
+static const char SchemeLayoutTGbg[]   = "$BG";
+static const char SchemeLayoutTGbr[]   = "$BG";
+
+static const char SchemeLayoutMSfg[]   = "$t6";
+static const char SchemeLayoutMSbg[]   = "$BG";
+static const char SchemeLayoutMSbr[]   = "$BG";
+
+static const char SchemeLayoutPCfg[]   = "$t2";
+static const char SchemeLayoutPCbg[]   = "$BG";
+static const char SchemeLayoutPCbr[]   = "$BG";
+
+static const char SchemeLayoutVVfg[]   = "$t4";
+static const char SchemeLayoutVVbg[]   = "$BG";
+static const char SchemeLayoutVVbr[]   = "$BG";
+
+static const char SchemeLayoutOPfg[]   = "$t1";
+static const char SchemeLayoutOPbg[]   = "$BG";
+static const char SchemeLayoutOPbr[]   = "$BG";
+
+static const char SchemeMenufg[]       = "$ACCENT";
+static const char SchemeMenubg[]       = "$BG";
+static const char SchemeMenubr[]       = "$BG";
+EOF
+
+    ok "Theme written to $file"
+}
+
+# ── update config.def.h ───────────────────────────────────────────────────────
+update_config() {
+    local active_line="#include \"themes/${THEME_NAME}.h\""
+    local section="// custom themes"
+
+    # deactivate all active theme includes
+    sed -i 's|^#include "themes/\(.*\)\.h"|//&|' "$CONFIG"
+
+    # ensure custom themes section exists
+    if ! grep -q "$section" "$CONFIG"; then
+        sed -i "/^\/\* fallback layout settings/i $section\n" "$CONFIG"
+    fi
+
+    # add or uncomment this theme's include line, then activate it
+    if ! grep -q "themes/${THEME_NAME}.h" "$CONFIG"; then
+        sed -i "/^$section/a $active_line" "$CONFIG"
+    else
+        sed -i "s|^//\(#include \"themes/${THEME_NAME}.h\"\)|\1|" "$CONFIG"
+    fi
+
+    ok "config.def.h updated — theme activated"
+}
+
+# ── main ──────────────────────────────────────────────────────────────────────
+main() {
+    header "Detecting wallpaper..."
+    WALLPAPER=$(detect_wallpaper)
+    ok "Wallpaper: $WALLPAPER"
+
+    header "Extracting colors..."
+    mapfile -t COLORS < <(extract_colors "$WALLPAPER" 12)
+
+    if [[ ${#COLORS[@]} -lt 4 ]]; then
+        err "Could not extract enough colors from the wallpaper (got ${#COLORS[@]})."
+        exit 1
+    fi
+
+    mapfile -t SORTED < <(sort_by_luminance "${COLORS[@]}")
+    build_palette "${SORTED[@]}"
+
+    echo -e "\n${W}Color palette:${NC}"
+    printf "  BG      %s  (bar/window background)\n"    "$BG"
+    printf "  Dim     %s  (empty tags, inactive text)\n" "$DIM_FG"
+    printf "  Muted   %s  (normal foreground)\n"        "$NORM_FG"
+    printf "  Accent  %s  (active window / selection)\n" "$ACCENT"
+    printf "  Bright  %s  (focused title text)\n"       "$BRIGHT"
+    printf "  Tags    %s\n" "${TAG[*]}"
+
+    ask_questions
+    write_theme
+    update_config
+
+    echo
+    header "Done!"
+    echo -e "  Theme file : ${W}$THEMES_DIR/$THEME_NAME.h${NC}"
+    echo -e "  config     : ${W}$CONFIG${NC}"
+    echo
+    ask "Run ./rebuild.sh now? [y/N]:"
+    read -rp "> " do_rebuild
+    if [[ "$do_rebuild" =~ ^[Yy]$ ]]; then
+        cd "$HOME/.config/ohmychadwm/chadwm" && ./rebuild.sh
+    else
+        echo -e "  Rebuild manually: ${W}cd ~/.config/ohmychadwm/chadwm && ./rebuild.sh${NC}"
+    fi
+}
+
+main "$@"

@@ -11,6 +11,7 @@ run() {
 #run xrandr --output Virtual-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal
 # screen layout generated with arandr
 [ -f "$HOME/.screenlayout/$(whoami).sh" ] && sh "$HOME/.screenlayout/$(whoami).sh"
+
 run "signal-in-tray"
 run "nm-applet"
 run "pamac-tray"
@@ -31,3 +32,9 @@ run "insync start"
 run "slstatus"
 
 while type ohmychadwm >/dev/null; do ohmychadwm && continue || break; done
+
+# ohmychadwm quit cleanly — kill session processes before returning to SDDM
+pkill -x sxhkd
+pkill -x slstatus
+pkill -x picom
+pkill -x fastcompmgr

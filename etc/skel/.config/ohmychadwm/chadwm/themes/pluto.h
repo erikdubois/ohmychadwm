@@ -1,3 +1,9 @@
+/* Pluto — icy blue, distant grey, deep space */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#2e3440";
 
 static const char SchemeNormfg[]       = "#2e3440";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#2e3440";
 static const char SchemeLayoutOPfg[]   = "#bf616a";
 static const char SchemeLayoutOPbg[]   = "#0b0c10";
 static const char SchemeLayoutOPbr[]   = "#2e3440";
+static const char SchemeMenufg[]       = "#0b0c10";
+static const char SchemeMenubg[]       = "#ebcb8b";
+static const char SchemeMenubr[]       = "#ebcb8b";

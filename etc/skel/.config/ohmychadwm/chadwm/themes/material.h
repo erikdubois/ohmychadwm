@@ -1,3 +1,9 @@
+/* Material — deep teal, ocean blue, slate grey */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#212121";
 
 static const char SchemeNormfg[]       = "#546e7a";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#212121";
 static const char SchemeLayoutOPfg[]   = "#f07178";
 static const char SchemeLayoutOPbg[]   = "#212121";
 static const char SchemeLayoutOPbr[]   = "#212121";
+
+static const char SchemeMenufg[]       = "#82aaff";
+static const char SchemeMenubg[]       = "#212121";
+static const char SchemeMenubr[]       = "#212121";

@@ -33,8 +33,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 #include <limits.h>
 #include <stdint.h>
@@ -122,7 +124,8 @@ enum {
   SchemeLayoutMS,
   SchemeLayoutPC,
   SchemeLayoutTG,
-  SchemeLayoutVV
+  SchemeLayoutVV,
+  SchemeMenu
 }; /* color schemes */
 enum {
   NetSupported,
@@ -269,6 +272,7 @@ static void dragmfact(const Arg *arg);
 static void dragcfact(const Arg *arg);
 static void drawbar(Monitor *m);
 static void drawbars(void);
+static void setshowbar(Monitor *m, int show);
 static int drawstatusbar(Monitor *m, int bh, char *text);
 static void drawtab(Monitor *m);
 static void drawtabs(void);
@@ -408,6 +412,9 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [UnmapNotify] = unmapnotify};
 static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
 static int running = 1;
+static int quitting = 0;       /* 1 when exiting session (not restarting) */
+static time_t barhide_at = 0;  /* epoch when to auto-hide bar; 0 = no pending hide */
+static int barautohidden = 0;  /* 1 while bar is auto-hidden */
 static Cur *cursor[CurLast];
 static Clr **scheme, clrborder;
 static Display *dpy;
@@ -450,6 +457,7 @@ struct Monitor {
   Window barwin;
   Window tabwin;
   Window tagwin;
+  Window hotwin;  /* 1px InputOnly edge strip for auto-hide reveal */
   Pixmap tagmap[LENGTH(tags)];
   int previewshow;
   int ntabs;
@@ -642,6 +650,18 @@ void buttonpress(XEvent *e) {
 			selmon->previewshow = 0;
 	}
     i = x = 0;
+    if (showmenu)
+    for(i = 0; i < LENGTH(launchers); i++) {
+      if (!launchers[i].command) break;
+      x += TEXTW(launchers[i].name);
+      if (ev->x < x) {
+        Arg a;
+        a.v = launchers[i].command;
+        spawn(&a);
+        return;
+      }
+    }
+    i = 0;
     do
       x += TEXTW(tags[i]);
     while (ev->x >= x && ++i < LENGTH(tags));
@@ -655,18 +675,6 @@ void buttonpress(XEvent *e) {
       }
 
 		x += TEXTW(selmon->ltsymbol);
-
-		for(i = 0; i < LENGTH(launchers); i++) {
-			if (!launchers[i].command) break;
-			x += TEXTW(launchers[i].name);
-
-			if (ev->x < x) {
-				Arg a;
-				a.v = launchers[i].command;
-				spawn(&a);
-				return;
-			}
-	}
 
   if (ev->x > selmon->ww - (int)TEXTW(stext))
          click = ClkStatusText;
@@ -775,6 +783,7 @@ void cleanupmon(Monitor *mon) {
   XDestroyWindow(dpy, mon->barwin);
   XUnmapWindow(dpy, mon->tabwin);
   XDestroyWindow(dpy, mon->tabwin);
+  if (mon->hotwin) XDestroyWindow(dpy, mon->hotwin);
   XUnmapWindow(dpy, mon->tagwin);
   XDestroyWindow(dpy, mon->tagwin);
   free(mon);
@@ -1521,6 +1530,33 @@ void drawbar(Monitor *m) {
       urg |= c->tags;
   }
   x = borderpx;
+  if (showmenu) for (i = 0; i < LENGTH(launchers); i++) {
+    if (!launchers[i].command) break;
+    if (launchers[i].command == ohmychadwm_menu) {
+        drw_setscheme(drw, scheme[SchemeMenu]);
+    } else if (launchers[i].command == firefox) {
+        drw_setscheme(drw, scheme[SchemeLayoutFF]);
+    } else if (launchers[i].command == brave) {
+        drw_setscheme(drw, scheme[SchemeLayoutEW]);
+    } else if (launchers[i].command == opera) {
+        drw_setscheme(drw, scheme[SchemeLayoutOP]);
+    } else if (launchers[i].command == discord) {
+        drw_setscheme(drw, scheme[SchemeLayoutDS]);
+    } else if (launchers[i].command == telegram) {
+        drw_setscheme(drw, scheme[SchemeLayoutTG]);
+    } else if (launchers[i].command == mintstick) {
+        drw_setscheme(drw, scheme[SchemeLayoutMS]);
+    } else if (launchers[i].command == pavucontrol) {
+        drw_setscheme(drw, scheme[SchemeLayoutPC]);
+    } else if (launchers[i].command == vivaldi) {
+        drw_setscheme(drw, scheme[SchemeLayoutVV]);
+    }
+
+    w = TEXTW(launchers[i].name);
+    drw_text(drw, x, 0, w, bh, lrpad / 2, launchers[i].name, urg & 1 << i);
+    x += w;
+}
+
   for (i = 0; i < LENGTH(tags); i++) {
     w = TEXTW(tags[i]);
     drw_setscheme(drw, scheme[occ & 1 << i ? (m->colorfultag ? tagschemes[i] : SchemeSel) : SchemeTag]);
@@ -1552,31 +1588,6 @@ void drawbar(Monitor *m) {
   XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y + bh_n, w, 1);
 
   x += w;
-
-for (i = 0; i < LENGTH(launchers); i++) {
-    if (!launchers[i].command) break;
-    if (launchers[i].command == firefox) {
-        drw_setscheme(drw, scheme[SchemeLayoutFF]);
-    } else if (launchers[i].command == brave) {
-        drw_setscheme(drw, scheme[SchemeLayoutEW]);
-    } else if (launchers[i].command == opera) {
-        drw_setscheme(drw, scheme[SchemeLayoutOP]);
-    } else if (launchers[i].command == discord) {
-        drw_setscheme(drw, scheme[SchemeLayoutDS]);
-    } else if (launchers[i].command == telegram) {
-        drw_setscheme(drw, scheme[SchemeLayoutTG]);
-    } else if (launchers[i].command == mintstick) {
-        drw_setscheme(drw, scheme[SchemeLayoutMS]);
-    } else if (launchers[i].command == pavucontrol) {
-        drw_setscheme(drw, scheme[SchemeLayoutPC]);
-    } else if (launchers[i].command == vivaldi) {
-        drw_setscheme(drw, scheme[SchemeLayoutVV]);
-    }
-
-    w = TEXTW(launchers[i].name);
-    drw_text(drw, x, 0, w, bh, lrpad / 2, launchers[i].name, urg & 1 << i);
-    x += w;
-}
 
   w = floatbar?mw + m->gappov * 2 - sw - stw - x:mw - sw - stw - x;
   if (w > bh_n) {
@@ -1781,6 +1792,17 @@ void enternotify(XEvent *e) {
   Client *c;
   Monitor *m;
   XCrossingEvent *ev = &e->xcrossing;
+
+  if (autohidebar > 0) {
+    for (m = mons; m; m = m->next) {
+      if (ev->window == m->hotwin) {
+        barautohidden = 0;
+        setshowbar(m, 1);
+        barhide_at = time(NULL) + autohidebar;
+        return;
+      }
+    }
+  }
 
   if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) &&
       ev->window != root)
@@ -2182,6 +2204,15 @@ void manage(Window w, XWindowAttributes *wa) {
   arrange(c->mon);
 	if (!HIDDEN(c))
 		XMapWindow(dpy, c->win);
+  if (autohidebar > 0) {
+    Monitor *am;
+    if (barautohidden) {
+      barautohidden = 0;
+      for (am = mons; am; am = am->next)
+        if (!am->showbar) setshowbar(am, 1);
+    }
+    barhide_at = time(NULL) + autohidebar;
+  }
   focus(NULL);
 }
 
@@ -2251,6 +2282,12 @@ void motionnotify(XEvent *e) {
 
   if (ev->window == selmon->barwin) {
 		i = x = 0;
+		if (showmenu)
+		for(i = 0; i < LENGTH(launchers); i++) {
+			if (!launchers[i].command) break;
+			x += TEXTW(launchers[i].name);
+		}
+		i = 0;
 		do
 			x += TEXTW(tags[i]);
 		while (ev->x >= x && ++i < LENGTH(tags));
@@ -2557,7 +2594,8 @@ void propertynotify(XEvent *e) {
 void
 quit(const Arg *arg)
 {
-  system("pkill ohmychadwm");
+  quitting = 1;
+  running = 0;
 }
 
 void restart(const Arg *arg) {
@@ -2737,13 +2775,57 @@ void restack(Monitor *m) {
     ;
 }
 
+static void
+setshowbar(Monitor *m, int show) {
+  m->showbar = show;
+  updatebarpos(m);
+  resizebarwin(m);
+  if (showsystray && m == systraytomon(m)) {
+    XWindowChanges wc;
+    wc.y = show ? (m->topbar ? m->gappoh : m->mh - bh + m->gappoh) : -bh;
+    XConfigureWindow(dpy, systray->win, CWY, &wc);
+  }
+  if (m->hotwin) {
+    if (!show) {
+      int hy = m->topbar ? m->my : m->my + m->mh - 1;
+      XMoveResizeWindow(dpy, m->hotwin, m->mx, hy, m->mw, 1);
+      XMapRaised(dpy, m->hotwin);
+    } else {
+      XUnmapWindow(dpy, m->hotwin);
+    }
+  }
+  arrange(m);
+}
+
 void run(void) {
   XEvent ev;
-  /* main event loop */
+  int xfd = ConnectionNumber(dpy);
+  fd_set rfds;
+  struct timeval tv;
+
   XSync(dpy, False);
-  while (running && !XNextEvent(dpy, &ev))
-    if (handler[ev.type])
-      handler[ev.type](&ev); /* call handler */
+  while (running) {
+    while (XPending(dpy)) {
+      XNextEvent(dpy, &ev);
+      if (handler[ev.type])
+        handler[ev.type](&ev);
+    }
+
+    if (autohidebar > 0 && barhide_at && !barautohidden
+        && time(NULL) >= barhide_at) {
+      Monitor *m;
+      barhide_at = 0;
+      barautohidden = 1;
+      for (m = mons; m; m = m->next)
+        if (m->showbar) setshowbar(m, 0);
+    }
+
+    FD_ZERO(&rfds);
+    FD_SET(xfd, &rfds);
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    select(xfd + 1, &rfds, NULL, NULL, &tv);
+  }
 }
 
 void scan(void) {
@@ -3352,6 +3434,20 @@ void unmanage(Client *c, int destroyed) {
     XUngrabServer(dpy);
   }
   free(c);
+  if (autohidebar > 0) {
+    Monitor *am;
+    int any_clients = 0;
+    for (am = mons; am; am = am->next)
+      if (am->clients) { any_clients = 1; break; }
+    if (!any_clients) {
+      barhide_at = 0;
+      if (barautohidden) {
+        barautohidden = 0;
+        for (am = mons; am; am = am->next)
+          if (!am->showbar) setshowbar(am, 1);
+      }
+    }
+  }
   focus(NULL);
   updateclientlist();
   arrange(m);
@@ -3396,6 +3492,17 @@ void updatebars(void) {
     if (showsystray && m == systraytomon(m))
       XMapRaised(dpy, systray->win);
     XMapRaised(dpy, m->barwin);
+    if (!m->hotwin) {
+      XSetWindowAttributes hwa = {
+        .override_redirect = True,
+        .event_mask = EnterWindowMask,
+      };
+      m->hotwin = XCreateWindow(dpy, root,
+        m->mx, m->my, m->mw, 1, 0,
+        CopyFromParent, InputOnly, CopyFromParent,
+        CWOverrideRedirect | CWEventMask, &hwa);
+      /* starts unmapped; only raised when bar auto-hides */
+    }
     m->tabwin = XCreateWindow(dpy, root, m->wx + m->gappov, m->ty, m->ww - 2 * m->gappov, th, 0, DefaultDepth(dpy, screen),
 						CopyFromParent, DefaultVisual(dpy, screen),
 						CWOverrideRedirect|CWBackPixmap|CWEventMask, &wa);
@@ -3938,5 +4045,5 @@ int main(int argc, char *argv[]) {
   run();
   cleanup();
   XCloseDisplay(dpy);
-  return EXIT_SUCCESS;
+  return quitting ? EXIT_FAILURE : EXIT_SUCCESS;
 }

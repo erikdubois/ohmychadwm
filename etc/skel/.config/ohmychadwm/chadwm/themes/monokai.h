@@ -1,3 +1,9 @@
+/* Monokai — jungle green, hot pink, electric yellow */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#272822";
 
 static const char SchemeNormfg[]       = "#75715e";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#272822";
 static const char SchemeLayoutOPfg[]   = "#f92672";
 static const char SchemeLayoutOPbg[]   = "#272822";
 static const char SchemeLayoutOPbr[]   = "#272822";
+
+static const char SchemeMenufg[]       = "#a6e22e";
+static const char SchemeMenubg[]       = "#272822";
+static const char SchemeMenubr[]       = "#272822";

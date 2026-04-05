@@ -1,3 +1,9 @@
+/* One Dark — atom charcoal, muted blue, soft cyan */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   5
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#1a1b26";
 
 static const char SchemeNormfg[]       = "#414868";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#1a1b26";
 static const char SchemeLayoutOPfg[]   = "#f7768e";
 static const char SchemeLayoutOPbg[]   = "#1a1b26";
 static const char SchemeLayoutOPbr[]   = "#1a1b26";
+static const char SchemeMenufg[]       = "#e0af68";
+static const char SchemeMenubg[]       = "#1a1b26";
+static const char SchemeMenubr[]       = "#1a1b26";

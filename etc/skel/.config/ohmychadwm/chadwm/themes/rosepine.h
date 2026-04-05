@@ -1,3 +1,9 @@
+/* Rose Pine — rose gold, dusty pine, moon glow */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#c4a7e7";
 
 static const char SchemeNormfg[]       = "#6e6a86";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#c4a7e7";
 static const char SchemeLayoutOPfg[]   = "#eb6f92";
 static const char SchemeLayoutOPbg[]   = "#191724";
 static const char SchemeLayoutOPbr[]   = "#c4a7e7";
+
+static const char SchemeMenufg[]       = "#eb6f92";
+static const char SchemeMenubg[]       = "#191724";
+static const char SchemeMenubr[]       = "#191724";

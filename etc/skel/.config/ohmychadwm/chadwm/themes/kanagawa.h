@@ -1,3 +1,9 @@
+/* Kanagawa — feudal blue, ink grey, dragon red */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#957fb8";
 
 static const char SchemeNormfg[]       = "#54546d";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#957fb8";
 static const char SchemeLayoutOPfg[]   = "#c34043";
 static const char SchemeLayoutOPbg[]   = "#1f1f28";
 static const char SchemeLayoutOPbr[]   = "#957fb8";
+
+static const char SchemeMenufg[]       = "#7e9cd8";
+static const char SchemeMenubg[]       = "#1f1f28";
+static const char SchemeMenubr[]       = "#1f1f28";

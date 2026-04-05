@@ -1,3 +1,9 @@
+/* Nord — arctic blue, frost grey, polar white */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   5
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#1e2122";
 
 static const char SchemeNormfg[]       = "#5d6061";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#1e2122";
 static const char SchemeLayoutOPfg[]   = "#ec6b64";
 static const char SchemeLayoutOPbg[]   = "#1e2122";
 static const char SchemeLayoutOPbr[]   = "#1e2122";
+static const char SchemeMenufg[]       = "#d1b171";
+static const char SchemeMenubg[]       = "#1e2122";
+static const char SchemeMenubr[]       = "#1e2122";

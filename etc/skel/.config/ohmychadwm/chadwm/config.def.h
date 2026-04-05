@@ -2,25 +2,80 @@
 
 #include <X11/XF86keysym.h>
 
+// default themes
+//#include "themes/catppuccin.h"
+#include "themes/dracula.h"
+//#include "themes/everforest.h"
+//#include "themes/gruvchad.h"
+//#include "themes/nord.h"
+//#include "themes/onedark.h"
+//#include "themes/prime.h"
+//#include "themes/tokyonight.h"
+//#include "themes/tundra.h"
+
+// stellar themes
+//#include "themes/jupiter.h"
+//#include "themes/saturn.h"
+//#include "themes/mars.h"
+//#include "themes/venus.h"
+//#include "themes/mercury.h"
+//#include "themes/neptune.h"
+//#include "themes/uranus.h"
+//#include "themes/pluto.h"
+
+// other themes
+//#include "themes/kanagawa.h"
+//#include "themes/monokai.h"
+//#include "themes/rose-pine.h"
+//#include "themes/material.h"
+//#include "themes/solarized.h"
+
+// african themes (bottom bar, zero gaps)
+//#include "themes/elephant.h"
+//#include "themes/giraffe.h"
+//#include "themes/hippo.h"
+//#include "themes/rhino.h"
+//#include "themes/buffalo.h"
+
+// custom themes
+
+//#include "themes/test.h"
+
+/* fallback layout settings for themes that don't define them */
+#ifndef THEME_TOPBAR
+#define THEME_TOPBAR 1
+#endif
+#ifndef THEME_GAPS
+#define THEME_GAPS     5
+#endif
+#ifndef THEME_AUTOHIDE
+#define THEME_AUTOHIDE 0
+#endif
+#ifndef THEME_SHOWSYSTRAY
+#define THEME_SHOWSYSTRAY 1
+#endif
+
 /* appearance */
 static const unsigned int borderpx  = 2;        /* border pixel of windows */
 static const unsigned int default_border = 0;   /* to switch back to default border after dynamic border resizing via keybinds */
 static const unsigned int snap      = 32;       /* snap pixel */
-static const unsigned int gappih    = 5;        /* horiz inner gap between windows */
-static const unsigned int gappiv    = 5;        /* vert inner gap between windows */
-static const unsigned int gappoh    = 5;        /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov    = 5;        /* vert outer gap between windows and screen edge */
+static const unsigned int gappih    = THEME_GAPS; /* horiz inner gap between windows */
+static const unsigned int gappiv    = THEME_GAPS; /* vert inner gap between windows */
+static const unsigned int gappoh    = THEME_GAPS; /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov    = THEME_GAPS; /* vert outer gap between windows and screen edge */
 static const int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const unsigned int systrayiconsize = 24; /* systray icon size in px */
 static const int systraypinningfailfirst = 1;   /* 1: if pinning fails,display systray on the 1st monitor,False: display systray on last monitor*/
-static const int showsystray        = 1;        /* 0 means no systray */
+static const int showsystray        = THEME_SHOWSYSTRAY; /* 0 means no systray */
+static const int autohidebar        = THEME_AUTOHIDE; /* seconds before bar auto-hides; 0 = disabled */
+static const int showmenu           = 1;        /* 0 means no menu launcher in bar */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int showtab            = showtab_auto;
 static const int toptab             = 1;        /* 0 means bottom tab */
 static const int floatbar           = 1;        /* 1 means the bar will float(don't have padding),0 means the bar have padding */
-static const int topbar             = 1;        /* 0 means bottom bar */
+static const int topbar             = THEME_TOPBAR; /* 0 means bottom bar */
 static const int horizpadbar        = 5;        /* padding inside the bar */
 static const int vertpadbar         = 11;       /* padding inside the bar */
 static const int vertpadtab         = 35;
@@ -39,35 +94,6 @@ static const int new_window_attach_on_end = 0; /*  1 means the new window will a
 #define ICONSPACING 8 /* space between icon and title */
 
 static const char *fonts[] = {"JetBrainsMono Nerd Font Mono:style:bold:size=13"};
-
-// default themes
-//#include "themes/catppuccin.h"
-#include "themes/dracula.h"
-//#include "themes/everforest.h"
-//#include "themes/gruvchad.h"
-//#include "themes/nord.h"
-//#include "themes/onedark.h"
-//#include "themes/prime.h"
-//#include "themes/tokyonight.h"
-//#include "themes/tundra.h"
-
-
-// stellar themes
-//#include "themes/jupiter.h"
-//#include "themes/saturn.h"
-//#include "themes/mars.h"
-//#include "themes/venus.h"
-//#include "themes/mercury.h"
-//#include "themes/neptune.h"
-//#include "themes/uranus.h"
-//#include "themes/pluto.h"
-
-// other themes
-//#include "themes/kanagawa.h"
-//#include "themes/monokai.h"
-//#include "themes/rose-pine.h"
-//#include "themes/material.h"
-//#include "themes/solarized.h"
 
 static const char *colors[][3] = {
     /*                     fg                bg                border */
@@ -99,6 +125,7 @@ static const char *colors[][3] = {
     [SchemeLayoutPC]   = { SchemeLayoutPCfg, SchemeLayoutPCbg, SchemeLayoutPCbr },
     [SchemeLayoutVV]   = { SchemeLayoutVVfg, SchemeLayoutVVbg, SchemeLayoutVVbr },
     [SchemeLayoutOP]   = { SchemeLayoutOPfg, SchemeLayoutOPbg, SchemeLayoutOPbr },
+    [SchemeMenu]       = { SchemeMenufg,     SchemeMenubg,     SchemeMenubr },
 };
 
 /* tagging */
@@ -125,6 +152,7 @@ static char *tags[] = { "", "", "", "", "", "", "", "", 
 //Purposemenu
 //static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
 
+static const char* ohmychadwm_menu[] = { "/bin/sh", "-c", "/home/erik/.config/ohmychadwm/menu/ohmychadwm-menu.sh", NULL };
 static const char* firefox[] = { "firefox", NULL };
 static const char* vivaldi[] = { "vivaldi", NULL };
 static const char* brave[] = { "brave", "--password-store=basic", "%U", NULL };
@@ -136,6 +164,7 @@ static const char* pavucontrol[] = { "pavucontrol", NULL };
 
 static const Launcher launchers[] = {
     /* command     name to display */
+    { ohmychadwm_menu, "󱪾" },
 
     //{ discord,       "ﱲ" },
     //{ firefox,       "" },

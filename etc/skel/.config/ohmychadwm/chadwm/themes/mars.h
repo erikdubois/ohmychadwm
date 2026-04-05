@@ -1,3 +1,9 @@
+/* Mars — dusty red, iron rust, arid sand */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#b56565";
 
 static const char SchemeNormfg[]       = "#1a0f0f";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#b56565";
 static const char SchemeLayoutOPfg[]   = "#ff6b6b";
 static const char SchemeLayoutOPbg[]   = "#1a0f0f";
 static const char SchemeLayoutOPbr[]   = "#b56565";
+static const char SchemeMenufg[]       = "#1a0f0f";
+static const char SchemeMenubg[]       = "#e5c07b";
+static const char SchemeMenubr[]       = "#e5c07b";

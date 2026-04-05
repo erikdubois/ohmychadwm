@@ -1,3 +1,9 @@
+/* Solarized — warm tan, solar yellow, bay blue */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   0
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#002b36";
 
 static const char SchemeNormfg[]       = "#586e75";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#002b36";
 static const char SchemeLayoutOPfg[]   = "#dc322f";
 static const char SchemeLayoutOPbg[]   = "#002b36";
 static const char SchemeLayoutOPbr[]   = "#002b36";
+
+static const char SchemeMenufg[]       = "#268bd2";
+static const char SchemeMenubg[]       = "#002b36";
+static const char SchemeMenubr[]       = "#002b36";

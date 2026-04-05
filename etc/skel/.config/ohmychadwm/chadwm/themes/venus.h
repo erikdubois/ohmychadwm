@@ -1,3 +1,8 @@
+/* Venus — warm rose, copper gold, dawn peach */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   2
+#define THEME_AUTOHIDE 3
+#define THEME_SHOWSYSTRAY 1
 static const char col_borderbar[]      = "#c4a69d";
 
 static const char SchemeNormfg[]       = "#a38b7b";
@@ -111,3 +116,6 @@ static const char SchemeLayoutVVbr[]   = "#c4a69d";
 static const char SchemeLayoutOPfg[]   = "#e06c75";
 static const char SchemeLayoutOPbg[]   = "#1a1412";
 static const char SchemeLayoutOPbr[]   = "#c4a69d";
+static const char SchemeMenufg[]       = "#1a1412";
+static const char SchemeMenubg[]       = "#e5c07b";
+static const char SchemeMenubr[]       = "#e5c07b";

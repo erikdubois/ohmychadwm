@@ -1,3 +1,9 @@
+/* Tundra — frozen slate, arctic moss, ice white */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   1
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 0
+
 static const char col_borderbar[]      = "#111827";
 
 static const char SchemeNormfg[]       = "#3e4554";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#111827";
 static const char SchemeLayoutOPfg[]   = "#FCA5A5";
 static const char SchemeLayoutOPbg[]   = "#111827";
 static const char SchemeLayoutOPbr[]   = "#111827";
+static const char SchemeMenufg[]       = "#E8D4B0";
+static const char SchemeMenubg[]       = "#111827";
+static const char SchemeMenubr[]       = "#111827";

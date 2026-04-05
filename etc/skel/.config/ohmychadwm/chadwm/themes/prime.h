@@ -1,3 +1,9 @@
+/* Prime — deep charcoal, electric blue, crisp white */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   5
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#1e222a";
 
 static const char SchemeNormfg[]       = "#545862";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#1e222a";
 static const char SchemeLayoutOPfg[]   = "#e06c75";
 static const char SchemeLayoutOPbg[]   = "#1e222a";
 static const char SchemeLayoutOPbr[]   = "#1e222a";
+static const char SchemeMenufg[]       = "#EBCB8B";
+static const char SchemeMenubg[]       = "#1e222a";
+static const char SchemeMenubr[]       = "#1e222a";

@@ -1,3 +1,9 @@
+/* Dracula — deep purple, vivid pink, spectral green */
+#define THEME_TOPBAR 1
+#define THEME_GAPS   5
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#1E1D2D";
 
 static const char SchemeNormfg[]       = "#585767";
@@ -111,3 +117,7 @@ static const char SchemeLayoutVVbr[]   = "#1E1D2D";
 static const char SchemeLayoutOPfg[]   = "#F28FAD";
 static const char SchemeLayoutOPbg[]   = "#1E1D2D";
 static const char SchemeLayoutOPbr[]   = "#1E1D2D";
+
+static const char SchemeMenufg[]       = "#FAE3B0";
+static const char SchemeMenubg[]       = "#1E1D2D";
+static const char SchemeMenubr[]       = "#1E1D2D";

@@ -1,3 +1,9 @@
+/* Uranus — cool cyan, misty teal, pale blue */
+#define THEME_TOPBAR 0
+#define THEME_GAPS   3
+#define THEME_AUTOHIDE 0
+#define THEME_SHOWSYSTRAY 1
+
 static const char col_borderbar[]      = "#5f9ea0";
 
 static const char SchemeNormfg[]       = "#3a6e6e";
@@ -111,3 +117,6 @@ static const char SchemeLayoutVVbr[]   = "#5f9ea0";
 static const char SchemeLayoutOPfg[]   = "#fc8181";
 static const char SchemeLayoutOPbg[]   = "#0e1b1b";
 static const char SchemeLayoutOPbr[]   = "#5f9ea0";
+static const char SchemeMenufg[]       = "#0e1b1b";
+static const char SchemeMenubg[]       = "#f6e05e";
+static const char SchemeMenubr[]       = "#f6e05e";
