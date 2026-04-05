@@ -981,7 +981,7 @@ show_install_menu() {
     while true; do
         local items=" Pamac"
         command -v octopi &>/dev/null && items+="\n Octopi"
-        items+="\n AI tools\n Aur package\n Browser\n Dev environment\n Editor\n Extras\n Fonts\n Gaming\n Package\n Terminal"
+        items+="\n AI tools\n Aur package\n Browser\n Dev environment\n Editor\n Extras\n Gaming\n Package\n Terminal"
         case $(menu "Install" "$items") in
             *"Package"*)  present_terminal 'pacman -Slq | fzf --multi --preview "pacman -Si {}" | xargs -ro sudo pacman -S --needed'; return 0 ;;
             *"Aur"*)      present_terminal 'yay -Slq | fzf --multi --preview "yay -Si {}" | xargs -ro yay -S'; return 0 ;;
@@ -993,7 +993,6 @@ show_install_menu() {
             *"Dev"*)      show_install_dev_menu      || continue; return 0 ;;
             *AI*)         show_install_ai_menu       || continue; return 0 ;;
             *Gaming*)     show_install_gaming_menu   || continue; return 0 ;;
-            *Fonts*)      show_install_fonts_menu    || continue; return 0 ;;
             *Extras*)     show_install_extras_menu   || continue; return 0 ;;
             *)            return 1 ;;
         esac
@@ -1001,48 +1000,50 @@ show_install_menu() {
 }
 
 show_install_terminal_menu() {
-    case $(menu "Terminal" " Alacritty\n Ghostty\n Kitty\n Urxvt\n Xterm") in
-        *Alacritty*) install "Alacritty" "alacritty" ;;
-        *Ghostty*)   aur_install "Ghostty" "ghostty" ;;
-        *Kitty*)     install "Kitty" "kitty" ;;
-        *Urxvt*)     install "Urxvt" "rxvt-unicode" ;;
-        *Xterm*)     install "Xterm" "xterm" ;;
+    case $(menu "Terminal" " Alacritty\n Ghostty\n Kitty\n Terminator\n Urxvt\n WezTerm\n Xterm") in
+        *Alacritty*)   install     "Alacritty"  "alacritty" ;;
+        *Ghostty*)     install     "Ghostty"    "ghostty" ;;
+        *Kitty*)       install     "Kitty"      "kitty" ;;
+        *Terminator*)  install     "Terminator" "terminator" ;;
+        *Urxvt*)       install     "Urxvt"      "rxvt-unicode" ;;
+        *WezTerm*)     aur_install "WezTerm"    "wezterm" ;;
+        *Xterm*)       install     "Xterm"      "xterm" ;;
         *)           return 1 ;;
     esac
 }
 
 show_install_editor_menu() {
-    case $(menu "Editor" " Neovim\n VSCode\n Cursor\n Zed\n Helix\n Emacs") in
+    case $(menu "Editor" " Cursor\n Emacs\n Helix\n Neovim\n VSCode\n Zed") in
+        *Cursor*) aur_install "Cursor" "cursor-bin" ;;
+        *Emacs*)  install    "Emacs"  "emacs" ;;
+        *Helix*)  install    "Helix"  "helix" ;;
         *Neovim*) install    "Neovim"  "neovim" ;;
         *VSCode*) aur_install "VSCode" "visual-studio-code-bin" ;;
-        *Cursor*) aur_install "Cursor" "cursor-bin" ;;
         *Zed*)    install    "Zed"    "zed" ;;
-        *Helix*)  install    "Helix"  "helix" ;;
-        *Emacs*)  install    "Emacs"  "emacs" ;;
         *)        return 1 ;;
     esac
 }
 
 show_install_browser_menu() {
-    case $(menu "Browser" " Firefox\n Chromium\n Brave\n Qutebrowser") in
-        *Firefox*)     install    "Firefox"     "firefox" ;;
+    case $(menu "Browser" " Brave\n Chromium\n Firefox\n Qutebrowser") in
+        *Brave*)       aur_install "Brave"       "brave-bin" ;;
         *Chromium*)    install    "Chromium"    "chromium" ;;
-        *Brave*)       aur_install "Brave"      "brave-bin" ;;
+        *Firefox*)     install    "Firefox"     "firefox" ;;
         *Qutebrowser*) install    "Qutebrowser" "qutebrowser" ;;
         *)             return 1 ;;
     esac
 }
 
 show_install_dev_menu() {
-    case $(menu "Dev environment" " Node.js + mise\n Ruby + mise\n Python + mise\n Go\n Rust\n Docker\n Podman") in
-        *Node*)   present_terminal "mise use -g node@lts && node --version" ;;
-        *Ruby*)   present_terminal "mise use -g ruby@latest && ruby --version" ;;
-        *Python*) present_terminal "mise use -g python@latest && python --version" ;;
-        *Go*)     install "Go" "go" ;;
-        *Rust*)   present_terminal "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" ;;
+    case $(menu "Dev environment" " Docker\n Go\n Node.js + mise\n Podman\n Python + mise\n Ruby + mise\n Rust") in
         *Docker*) install "Docker" "docker docker-compose" && \
                   present_terminal "sudo systemctl enable --now docker && sudo usermod -aG docker \$USER && echo 'Log out and back in for group change'" ;;
+        *Go*)     install "Go" "go" ;;
+        *Node*)   present_terminal "mise use -g node@lts && node --version" ;;
         *Podman*) install "Podman" "podman" ;;
+        *Python*) present_terminal "mise use -g python@latest && python --version" ;;
+        *Ruby*)   present_terminal "mise use -g ruby@latest && ruby --version" ;;
+        *Rust*)   present_terminal "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" ;;
         *)        return 1 ;;
     esac
 }
@@ -1078,24 +1079,13 @@ show_install_gaming_menu() {
     esac
 }
 
-show_install_fonts_menu() {
-    case $(menu "Fonts" " Nerd Fonts (JetBrains)\n Nerd Fonts (FiraCode)\n Noto fonts\n Inter\n Custom (AUR)") in
-        *JetBrains*)  aur_install "JetBrains Nerd Font" "ttf-jetbrains-mono-nerd" ;;
-        *FiraCode*)   aur_install "FiraCode Nerd Font"  "ttf-firacode-nerd" ;;
-        *Noto*)       install "Noto Fonts" "noto-fonts noto-fonts-emoji noto-fonts-cjk" ;;
-        *Inter*)      install "Inter" "ttf-inter" ;;
-        *Custom*)     present_terminal 'yay -Slq | grep -i font | fzf --multi | xargs -ro yay -S' ;;
-        *)            return 1 ;;
-    esac
-}
-
 show_install_extras_menu() {
-    case $(menu "Extras" "Obsidian\n Signal\n Spotify\n OBS Studio\n Bitwarden") in
+    case $(menu "Extras" " Bitwarden\n OBS Studio\n Obsidian\n Signal\n Spotify") in
+        *Bitwarden*)  install    "Bitwarden"  "bitwarden" ;;
+        *OBS*)        install    "OBS Studio" "obs-studio" ;;
         *Obsidian*)   aur_install "Obsidian"  "obsidian" ;;
         *Signal*)     install    "Signal"    "signal-desktop" ;;
         *Spotify*)    aur_install "Spotify"   "spotify" ;;
-        *OBS*)        install    "OBS Studio" "obs-studio" ;;
-        *Bitwarden*)  install    "Bitwarden"  "bitwarden" ;;
         *)            return 1 ;;
     esac
 }
@@ -1128,8 +1118,7 @@ show_remove_dev_menu() {
 # ---------------------------------------------------------------------------
 show_update_menu() {
     while true; do
-        case $(menu "Update" " Aur packages\n Full update\n Hardware\n Keyboard\n Restart process\n System packages\n Time sync\n Timezone") in
-            *"System"*)    present_terminal "sudo pacman -Syu"; return 0 ;;
+        case $(menu "Update" " Aur packages\n Full update\n Hardware\n Keyboard\n Restart process\n Time sync\n Timezone") in
             *"Aur"*)       present_terminal "yay -Sua"; return 0 ;;
             *"Full"*)      present_terminal "yay -Syu"; return 0 ;;
             *"Restart"*)   show_restart_process_menu  || continue; return 0 ;;
