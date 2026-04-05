@@ -38,7 +38,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
-#include "themes/clonewar.h"
+//#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
 
 //#include "themes/test.h"
