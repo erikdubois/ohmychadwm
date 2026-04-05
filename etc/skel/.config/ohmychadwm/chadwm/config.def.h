@@ -38,10 +38,9 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+//#include "themes/summit.h"
 //#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
-
-//#include "themes/test.h"
 
 /* fallback layout settings for themes that don't define them */
 #ifndef THEME_TOPBAR

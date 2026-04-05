@@ -33,9 +33,3 @@ run "insync start"
 run "slstatus"
 
 while type ohmychadwm >/dev/null; do ohmychadwm && continue || break; done
-
-# ohmychadwm quit cleanly — kill session processes before returning to SDDM
-pkill -x sxhkd
-pkill -x slstatus
-pkill -x picom
-pkill -x fastcompmgr

@@ -416,7 +416,9 @@ EOF
     # save wallpaper alongside the theme so it can be restored when activated
     local wp_dir="$HOME/.config/ohmychadwm/wallpapers"
     mkdir -p "$wp_dir"
-    cp "$WALLPAPER" "$wp_dir/${THEME_NAME}.jpg"
+    if [[ "$WALLPAPER" != "$wp_dir/${THEME_NAME}.jpg" ]]; then
+        cp -f "$WALLPAPER" "$wp_dir/${THEME_NAME}.jpg"
+    fi
     ok "Wallpaper saved to $wp_dir/${THEME_NAME}.jpg"
 }
 
