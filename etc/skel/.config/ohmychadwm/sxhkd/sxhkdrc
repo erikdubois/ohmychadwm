@@ -68,7 +68,7 @@ super + e
 
 #Browser
 super + w
-    vivaldi-stable
+    firefox
 
 #Conky-toggle
 super + c
@@ -96,7 +96,7 @@ super + r
 
 #Alacritty
 super + t
-    alacritty
+    kitty
 
 #Pavucontrol
 super + v

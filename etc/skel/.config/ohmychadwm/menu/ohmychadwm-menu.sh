@@ -788,6 +788,9 @@ _apply_theme() {
     # Apply alacritty colours if present
     local alacritty_theme="${OHMYCHADWM_CONFIG}/chadwm/themes/alacritty/${theme}.toml"
     [[ -f "$alacritty_theme" ]] && cp "$alacritty_theme" "${HOME}/.config/alacritty/colors.toml"
+    # Restore theme wallpaper if one was saved during generation
+    local theme_wp="${OHMYCHADWM_CONFIG}/wallpapers/${theme}.jpg"
+    [[ -f "$theme_wp" ]] && feh --bg-fill "$theme_wp"
     # Rebuild chadwm
     (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c 'cd ~/.config/ohmychadwm/chadwm && ./rebuild.sh; exec bash')
     notify-send "ohmychadwm" "Theme '${theme}' applied — reboot your system"
@@ -835,6 +838,9 @@ show_wallpaper_menu() {
 
     feh --bg-fill "$chosen" && \
         notify-send "ohmychadwm" "Wallpaper set to '$(basename "$chosen")'"
+
+    # save as the active wallpaper in ohmychadwm wallpapers folder
+    cp "$chosen" "${OHMYCHADWM_CONFIG}/wallpapers/wallpaper.jpg"
 }
 
 # ---------------------------------------------------------------------------
@@ -880,11 +886,25 @@ show_lanwifi_menu() {
     esac
 }
 
+# binary→package name map + silent install
+_ensure_installed() {
+    local bin="$1"
+    command -v "$bin" &>/dev/null && return 0
+    local pkg
+    case "$bin" in
+        nvim) pkg="neovim" ;;
+        *)    pkg="$bin" ;;
+    esac
+    notify-send "ohmychadwm" "Installing '${pkg}'..."
+    present_terminal "sudo pacman -S --noconfirm ${pkg}"
+    command -v "$bin" &>/dev/null || { notify-send -u critical "ohmychadwm" "Installation of '${pkg}' failed"; return 1; }
+}
+
 show_defaults_menu() {
     case $(menu "Defaults" " Terminal\n Editor\n Browser") in
-        *Terminal*) _set_default_terminal ;;
-        *Editor*)   _set_default_editor ;;
-        *Browser*)  _set_default_browser ;;
+        *Terminal*) _set_default_terminal; return 0 ;;
+        *Editor*)   _set_default_editor;   return 0 ;;
+        *Browser*)  _set_default_browser;  return 0 ;;
         *)          return 1 ;;
     esac
 }
@@ -893,30 +913,57 @@ _set_default_terminal() {
     local terminals="alacritty\nghostty\nkitty\nxterm\nurxvt"
     local chosen
     chosen=$(echo -e "$terminals" | rofi -dmenu -p "Terminal…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    _ensure_installed "$chosen" || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^TERMINAL=.*|TERMINAL=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "TERMINAL=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
-    notify-send "ohmychadwm" "Default terminal set to ${chosen} (takes effect on next menu open)"
+    # update super + t keybinding in sxhkdrc
+    local sxhkdrc="${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"
+    if [[ -f "$sxhkdrc" ]]; then
+        sed -i '/^super + t$/{n; s|.*|    '"${chosen}"'|}' "$sxhkdrc"
+        sleep 0.2 && pkill -USR1 sxhkd 2>/dev/null
+    fi
+    notify-send "ohmychadwm" "Default terminal set to ${chosen} — Super+T updated"
 }
 
 _set_default_editor() {
-    local editors="nvim\nvim\nemacs\nnano\ngedit\ncode"
+    local editors="code\nnvim\nvim\nemacs\ngedit"
     local chosen
     chosen=$(echo -e "$editors" | rofi -dmenu -p "Editor…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    _ensure_installed "$chosen" || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^EDITOR=.*|EDITOR=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "EDITOR=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
-    notify-send "ohmychadwm" "Default editor set to ${chosen}"
+    # update super + e keybinding in sxhkdrc
+    # terminal editors must be wrapped in a terminal emulator
+    local launch
+    case "$chosen" in
+        nvim|vim) launch="${TERMINAL} -e ${chosen}" ;;
+        *)        launch="${chosen}" ;;
+    esac
+    local sxhkdrc="${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"
+    if [[ -f "$sxhkdrc" ]]; then
+        sed -i '/^super + e$/{n; s|.*|    '"${launch}"'|}' "$sxhkdrc"
+        sleep 0.2 && pkill -USR1 sxhkd 2>/dev/null
+    fi
+    notify-send "ohmychadwm" "Default editor set to ${chosen} — Super+E updated"
 }
 
 _set_default_browser() {
-    local browsers="firefox\nchromium\nbrave\nqutebrowser\nmidori"
+    local browsers="firefox\nchromium\nbrave\nqutebrowser\nvivaldi"
     local chosen
     chosen=$(echo -e "$browsers" | rofi -dmenu -p "Browser…" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    _ensure_installed "$chosen" || return 1
     mkdir -p "${OHMYCHADWM_CONFIG}"
     sed -i "s|^BROWSER=.*|BROWSER=${chosen}|" "${OHMYCHADWM_CONFIG}/menu.conf" 2>/dev/null || \
         echo "BROWSER=${chosen}" >> "${OHMYCHADWM_CONFIG}/menu.conf"
-    notify-send "ohmychadwm" "Default browser set to ${chosen}"
+    # update super + w keybinding in sxhkdrc
+    local sxhkdrc="${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"
+    if [[ -f "$sxhkdrc" ]]; then
+        sed -i '/^super + w$/{n; s|.*|    '"${chosen}"'|}' "$sxhkdrc"
+        sleep 0.2 && pkill -USR1 sxhkd 2>/dev/null
+    fi
+    notify-send "ohmychadwm" "Default browser set to ${chosen} — Super+W updated"
 }
 
 # ---------------------------------------------------------------------------
@@ -1197,7 +1244,7 @@ show_info_menu() {
             *"Disk overview"*) present_terminal "df -h | (read -r header; echo \"\$header\"; sort)"; return 0 ;;
             *"Disk explorer"*) command -v ncdu &>/dev/null || install "ncdu" "ncdu"; present_terminal "ncdu ${HOME}"; return 0 ;;
             *Temp*)        present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
-            *Battery*)     present_terminal "upower -i \$(upower -e | grep -i bat | head -1)" ;;
+            *Battery*)     present_terminal "upower -i \$(upower -e | grep -i bat | head -1)"; return 0 ;;
             *Logs*)        show_logs_menu || continue; return 0 ;;
             *)             return 1 ;;
         esac

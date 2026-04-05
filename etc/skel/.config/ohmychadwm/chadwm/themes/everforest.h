@@ -3,6 +3,8 @@
 #define THEME_GAPS   5
 #define THEME_AUTOHIDE 0
 #define THEME_SHOWSYSTRAY 1
+#define THEME_BORDER 2
+#define THEME_SMARTGAPS 0
 
 static const char col_borderbar[]      = "#2b3339";
 

@@ -38,6 +38,8 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+#include "themes/clonewar.h"
+//#include "themes/goodnight.h"
 
 //#include "themes/test.h"
 
@@ -54,16 +56,22 @@
 #ifndef THEME_SHOWSYSTRAY
 #define THEME_SHOWSYSTRAY 1
 #endif
+#ifndef THEME_BORDER
+#define THEME_BORDER 2
+#endif
+#ifndef THEME_SMARTGAPS
+#define THEME_SMARTGAPS 0
+#endif
 
 /* appearance */
-static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int borderpx  = THEME_BORDER; /* border pixel of windows */
 static const unsigned int default_border = 0;   /* to switch back to default border after dynamic border resizing via keybinds */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const unsigned int gappih    = THEME_GAPS; /* horiz inner gap between windows */
 static const unsigned int gappiv    = THEME_GAPS; /* vert inner gap between windows */
 static const unsigned int gappoh    = THEME_GAPS; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov    = THEME_GAPS; /* vert outer gap between windows and screen edge */
-static const int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
+static const int smartgaps          = THEME_SMARTGAPS; /* 1 means no outer gap when there is only one window */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static const unsigned int systrayiconsize = 24; /* systray icon size in px */

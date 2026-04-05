@@ -15,7 +15,7 @@ run() {
 run "signal-in-tray"
 run "nm-applet"
 run "pamac-tray"
-run "variety -n"
+#run "variety"
 run "flameshot"
 run "xfce4-power-manager"
 run "xfce4-clipman"
@@ -27,7 +27,8 @@ run "fastcompmgr -c"
 run "numlockx on"
 run "volctl"
 sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
-feh --bg-fill ~/.config/ohmychadwm/wallpapers/cyborg.jpg &
+# restore last wallpaper (feh writes ~/.fehbg on every bg change)
+[ -f "$HOME/.fehbg" ] && sh "$HOME/.fehbg" &
 run "insync start"
 run "slstatus"
 

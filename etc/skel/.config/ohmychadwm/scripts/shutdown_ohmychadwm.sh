@@ -6,12 +6,14 @@ SCRIPT_PATH_PATTERN="/.*bar\.sh$"  # loose: matches any bar.sh in cmd line
 DASH_INV_PATTERN="/bin/dash .*bar\.sh$"
 
 # Kill the main components
-pkill -x chadwm
+pkill -x ohmychadwm
 # Prefer the exact dash invocation if possible, then fallback to generic bar.sh
 pkill -f "$DASH_INV_PATTERN" 2>/dev/null || true
 pkill -f "$SCRIPT_PATH_PATTERN" 2>/dev/null || true
 pkill picom
 pkill sxhkd
+
+sleep 1
 
 # Helper: wait for a given process-like string to disappear, with timeout
 wait_until_gone() {
@@ -26,7 +28,7 @@ wait_until_gone() {
 }
 
 # Wait for the known targets to disappear
-wait_until_gone chadwm
+wait_until_gone ohmychadwm
 wait_until_gone "$SCRIPT_PATH_PATTERN"   # matches any bar.sh candidate
 
 # If still present, try explicit PIDs for the most stubborn cases
@@ -48,3 +50,7 @@ done
 
 wait_until_gone picom
 wait_until_gone sxhkd
+
+if [ -n "$XDG_SESSION_ID" ]; then
+    loginctl terminate-session "$XDG_SESSION_ID"
+fi

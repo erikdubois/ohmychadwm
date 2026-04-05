@@ -277,6 +277,7 @@ static int drawstatusbar(Monitor *m, int bh, char *text);
 static void drawtab(Monitor *m);
 static void drawtabs(void);
 static void enternotify(XEvent *e);
+static void leavenotify(XEvent *e);
 static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
@@ -401,6 +402,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [ConfigureNotify] = configurenotify,
     [DestroyNotify] = destroynotify,
     [EnterNotify] = enternotify,
+    [LeaveNotify] = leavenotify,
     [Expose] = expose,
     [FocusIn] = focusin,
     [KeyPress] = keypress,
@@ -1801,6 +1803,11 @@ void enternotify(XEvent *e) {
         barhide_at = time(NULL) + autohidebar;
         return;
       }
+      /* mouse entered the bar itself — suspend countdown */
+      if (ev->window == m->barwin) {
+        barhide_at = 0;
+        return;
+      }
     }
   }
 
@@ -1815,6 +1822,21 @@ void enternotify(XEvent *e) {
   } else if (!c || c == selmon->sel)
     return;
   focus(c);
+}
+
+void leavenotify(XEvent *e) {
+  Monitor *m;
+  XCrossingEvent *ev = &e->xcrossing;
+
+  if (autohidebar <= 0)
+    return;
+  /* mouse left the bar — restart countdown if there are clients */
+  for (m = mons; m; m = m->next) {
+    if (ev->window == m->barwin && m->clients) {
+      barhide_at = time(NULL) + autohidebar;
+      return;
+    }
+  }
 }
 
 void expose(XEvent *e) {
@@ -3475,7 +3497,7 @@ void updatebars(void) {
   Monitor *m;
   XSetWindowAttributes wa = {.override_redirect = True,
                              .background_pixmap = ParentRelative,
-                              .event_mask = ButtonPressMask|ExposureMask|PointerMotionMask};
+                              .event_mask = ButtonPressMask|ExposureMask|PointerMotionMask|EnterWindowMask|LeaveWindowMask};
 
   XClassHint ch = {"dwm", "dwm"};
   for (m = mons; m; m = m->next) {

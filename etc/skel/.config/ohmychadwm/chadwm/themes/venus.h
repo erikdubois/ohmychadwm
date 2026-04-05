@@ -3,6 +3,8 @@
 #define THEME_GAPS   2
 #define THEME_AUTOHIDE 3
 #define THEME_SHOWSYSTRAY 1
+#define THEME_BORDER 1
+#define THEME_SMARTGAPS 0
 static const char col_borderbar[]      = "#c4a69d";
 
 static const char SchemeNormfg[]       = "#a38b7b";

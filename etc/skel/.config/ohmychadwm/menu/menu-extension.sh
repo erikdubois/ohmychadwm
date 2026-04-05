@@ -15,7 +15,7 @@
 # Override the System menu to add a Relaunch ohmychadwm option
 # ---------------------------------------------------------------------------
 show_system_menu() {
-    local options=" Lock\n Suspend\n Relaunch ohmychadwm\n Restart\n Shutdown"
+    local options=" Lock\n Suspend\n Logout\n Restart\n Shutdown"
 
     # if swapon --show | grep -q partition 2>/dev/null || \
     #    swapon --show | grep -q file      2>/dev/null; then
@@ -26,15 +26,15 @@ show_system_menu() {
         *Lock*)      _lock_screen ;;
         *Suspend*)   systemctl suspend ;;
         *Hibernate*) systemctl hibernate ;;
-        *"Relaunch"*) _relaunch_chadwm ;;
+        *Logout*)    _logout_chadwm ;;
         *Restart*)   systemctl reboot ;;
         *Shutdown*)  systemctl poweroff ;;
         *)           return 1 ;;
     esac
 }
 
-_relaunch_chadwm() {
-    # Sends ohmychadwm a restart signal — adjust if your setup differs
-    pkill -USR1 ohmychadwm 2>/dev/null || \
-        notify-send -u critical "ohmychadwm" "Could not signal ohmychadwm to restart"
+_logout_chadwm() {
+    # run.sh loop breaks when ohmychadwm exits with failure (quitting=1)
+    # shutdown_ohmychadwm.sh sends SIGTERM which triggers the clean quit path
+    bash "${HOME}/.config/ohmychadwm/scripts/shutdown_ohmychadwm.sh"
 }

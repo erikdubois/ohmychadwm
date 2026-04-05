@@ -17,18 +17,43 @@ ok()     { echo -e "${G}✔ $*${NC}"; }
 err()    { echo -e "${R}✘ $*${NC}" >&2; }
 
 # ── detect current wallpaper ─────────────────────────────────────────────────
+WALLPAPERS_DIR="$HOME/.config/ohmychadwm/wallpapers"
+
 detect_wallpaper() {
     local wp=""
-    # variety stores current wallpaper in ~/.config/variety/wallpaper/
+
+    # 1. variety
     if [[ -f "$HOME/.config/variety/wallpaper/wallpaper.jpg" ]]; then
         wp="$HOME/.config/variety/wallpaper/wallpaper.jpg"
-    elif [[ -f "$HOME/.fehbg" ]]; then
+    fi
+
+    # 2. .fehbg (covers feh-set wallpapers including ohmychadwm/wallpapers/)
+    if [[ -z "$wp" && -f "$HOME/.fehbg" ]]; then
         wp=$(grep -oP "(?<='|\")/[^'\"]+(?='|\")" "$HOME/.fehbg" | head -1)
     fi
 
+    # 3. pick from ohmychadwm wallpapers folder
     if [[ -z "$wp" || ! -f "$wp" ]]; then
-        ask "Could not detect wallpaper automatically."
-        read -rp "Enter wallpaper path: " wp
+        local wp_dir="$HOME/.config/ohmychadwm/wallpapers"
+        if [[ -d "$wp_dir" ]]; then
+            mapfile -t images < <(find "$wp_dir" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) | sort)
+            if [[ ${#images[@]} -gt 0 ]]; then
+                ask "Could not detect current wallpaper. Pick from ohmychadwm wallpapers:"
+                for i in "${!images[@]}"; do
+                    printf "  %2d) %s\n" $((i+1)) "$(basename "${images[$i]}")"
+                done
+                read -rp "> " pick
+                if [[ "$pick" =~ ^[0-9]+$ ]] && (( pick >= 1 && pick <= ${#images[@]} )); then
+                    wp="${images[$((pick-1))]}"
+                fi
+            fi
+        fi
+    fi
+
+    # 4. manual fallback
+    if [[ -z "$wp" || ! -f "$wp" ]]; then
+        ask "Could not detect wallpaper automatically. Enter path:"
+        read -rp "> " wp
     fi
 
     if [[ ! -f "$wp" ]]; then
@@ -196,21 +221,21 @@ ask_questions() {
     done
 
     # bar position
-    ask "Bar position — (t)op or (b)ottom? [t/B]:"
+    ask "Bar position — (t)op or (b)ottom? [T/b]:"
     read -rp "> " ans
-    if [[ "$ans" =~ ^[Tt]$ ]]; then
-        THEME_TOPBAR=1
-    else
+    if [[ "$ans" =~ ^[Bb]$ ]]; then
         THEME_TOPBAR=0
+    else
+        THEME_TOPBAR=1
     fi
 
     # gaps
-    ask "Gap size between windows in pixels? [0-20, default 0]:"
+    ask "Gap size between windows in pixels? [0-20, default 5]:"
     read -rp "> " ans
     if [[ "$ans" =~ ^[0-9]+$ ]] && (( ans <= 20 )); then
         THEME_GAPS=$ans
     else
-        THEME_GAPS=0
+        THEME_GAPS=5
     fi
 
     # autohide
@@ -230,6 +255,24 @@ ask_questions() {
     else
         THEME_SHOWSYSTRAY=1
     fi
+
+    # border
+    ask "Border width in pixels? [default 2]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[0-9]+$ ]]; then
+        THEME_BORDER=$ans
+    else
+        THEME_BORDER=2
+    fi
+
+    # smartgaps
+    ask "Remove gaps when only one window is open? [y/N]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+        THEME_SMARTGAPS=1
+    else
+        THEME_SMARTGAPS=0
+    fi
 }
 
 # ── write theme file ──────────────────────────────────────────────────────────
@@ -246,6 +289,8 @@ write_theme() {
 #define THEME_GAPS     $THEME_GAPS
 #define THEME_AUTOHIDE    $THEME_AUTOHIDE
 #define THEME_SHOWSYSTRAY $THEME_SHOWSYSTRAY
+#define THEME_BORDER      $THEME_BORDER
+#define THEME_SMARTGAPS   $THEME_SMARTGAPS
 
 static const char col_borderbar[]      = "$BG";
 
@@ -367,6 +412,12 @@ static const char SchemeMenubr[]       = "$BG";
 EOF
 
     ok "Theme written to $file"
+
+    # save wallpaper alongside the theme so it can be restored when activated
+    local wp_dir="$HOME/.config/ohmychadwm/wallpapers"
+    mkdir -p "$wp_dir"
+    cp "$WALLPAPER" "$wp_dir/${THEME_NAME}.jpg"
+    ok "Wallpaper saved to $wp_dir/${THEME_NAME}.jpg"
 }
 
 # ── update config.def.h ───────────────────────────────────────────────────────
@@ -384,7 +435,7 @@ update_config() {
 
     # add or uncomment this theme's include line, then activate it
     if ! grep -q "themes/${THEME_NAME}.h" "$CONFIG"; then
-        sed -i "/^$section/a $active_line" "$CONFIG"
+        sed -i "/^\/\/ custom themes/a $active_line" "$CONFIG"
     else
         sed -i "s|^//\(#include \"themes/${THEME_NAME}.h\"\)|\1|" "$CONFIG"
     fi
@@ -421,14 +472,31 @@ main() {
     write_theme
     update_config
 
+    # ── fix wallpaper ─────────────────────────────────────────────────────────
+    ask "Fix this wallpaper to the theme? [Y/n]:"
+    read -rp "> " fix_wp
+    if [[ ! "$fix_wp" =~ ^[Nn]$ ]]; then
+        local ext="${WALLPAPER##*.}"
+        local wp_dest="$WALLPAPERS_DIR/${THEME_NAME}.${ext}"
+        if [[ "$WALLPAPER" != "$wp_dest" ]]; then
+            cp "$WALLPAPER" "$wp_dest"
+            ok "Wallpaper saved to $(basename "$wp_dest")"
+        fi
+        if feh --bg-fill "$wp_dest" 2>/dev/null; then
+            ok "Wallpaper set with feh"
+        else
+            err "feh could not set wallpaper — set manually: $wp_dest"
+        fi
+    fi
+
     echo
     header "Done!"
     echo -e "  Theme file : ${W}$THEMES_DIR/$THEME_NAME.h${NC}"
     echo -e "  config     : ${W}$CONFIG${NC}"
     echo
-    ask "Run ./rebuild.sh now? [y/N]:"
+    ask "Run ./rebuild.sh now? [Y/n]:"
     read -rp "> " do_rebuild
-    if [[ "$do_rebuild" =~ ^[Yy]$ ]]; then
+    if [[ ! "$do_rebuild" =~ ^[Nn]$ ]]; then
         cd "$HOME/.config/ohmychadwm/chadwm" && ./rebuild.sh
     else
         echo -e "  Rebuild manually: ${W}cd ~/.config/ohmychadwm/chadwm && ./rebuild.sh${NC}"
