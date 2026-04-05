@@ -27,8 +27,12 @@ run "fastcompmgr -c"
 run "numlockx on"
 run "volctl"
 sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
-# restore last wallpaper (feh writes ~/.fehbg on every bg change)
-[ -f "$HOME/.fehbg" ] && sh "$HOME/.fehbg" &
+# restore last wallpaper (feh writes ~/.fehbg on every bg change), fall back to default
+if [ -f "$HOME/.fehbg" ]; then
+    sh "$HOME/.fehbg" &
+else
+    feh --bg-scale ~/.config/ohmychadwm/wallpapers/hummingbird.png &
+fi
 run "insync start"
 run "slstatus"
 

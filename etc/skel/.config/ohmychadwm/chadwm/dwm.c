@@ -147,6 +147,7 @@ enum {
   NetDesktopViewport,
   NetNumberOfDesktops,
   NetCurrentDesktop,
+  NetWMWindowOpacity,
   NetLast
 };                                           /* EWMH atoms */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
@@ -203,6 +204,7 @@ struct Client {
   int oldx, oldy, oldw, oldh;
   int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
   int bw, oldbw;
+  double opacity;
   unsigned int tags;
   int isfixed, iscentered, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
  	unsigned int icw, ich; Picture icon;
@@ -318,7 +320,10 @@ static void resizebarwin(Monitor *m);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizemouse(const Arg *arg);
 static void resizerequest(XEvent *e);
+static void changeopacity(const Arg *arg);
+static void opacity(Client *c, double opacity);
 static void restack(Monitor *m);
+static void rotatestack(const Arg *arg);
 static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2,
@@ -472,6 +477,8 @@ struct Monitor {
 #include "vanitygaps.c"
 #include "movestack.c"
 #include "shiftview.c"
+#include "rotatestack.c"
+#include "clientopacity.c"
 
 struct Pertag {
 	unsigned int curtag, prevtag; /* current and previous tag */
@@ -3109,6 +3116,7 @@ void setup(void) {
   netatom[NetWMWindowTypeDialog] =
       XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
   netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+  netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
   xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
   xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
   xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
