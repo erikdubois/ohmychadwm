@@ -13,9 +13,10 @@
 # run() — start a program only if it is not already running.
 # Prevents duplicate processes when ohmychadwm restarts itself (Super+Shift+Q).
 run() {
-    if ! pgrep -x "$1" > /dev/null 2>&1; then
-        "$@" &
-    fi
+ if ! pgrep $1 ;
+  then
+    $@&
+  fi
 }
 
 # ── Monitor layout ────────────────────────────────────────────────────────────
