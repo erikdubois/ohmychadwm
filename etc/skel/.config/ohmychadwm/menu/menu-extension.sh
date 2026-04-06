@@ -36,5 +36,10 @@ show_system_menu() {
 _logout_chadwm() {
     # run.sh loop breaks when ohmychadwm exits with failure (quitting=1)
     # shutdown_ohmychadwm.sh sends SIGTERM which triggers the clean quit path
-    bash "${HOME}/.config/ohmychadwm/scripts/shutdown_ohmychadwm.sh"
+    local script="${HOME}/.config/ohmychadwm/scripts/shutdown_ohmychadwm.sh"
+    if [[ ! -f "$script" ]]; then
+        notify-send -u critical "ohmychadwm" "shutdown script not found: $script"
+        return 1
+    fi
+    bash "$script"
 }

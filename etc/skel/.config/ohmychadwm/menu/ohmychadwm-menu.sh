@@ -310,7 +310,7 @@ _toggle_picom() {
     else
         if pgrep -x fastcompmgr &>/dev/null; then
             pkill fastcompmgr 2>/dev/null
-            while pgrep -x fastcompmgr &>/dev/null; do sleep 0.1; done
+            local _i=0; while pgrep -x fastcompmgr &>/dev/null && (( _i++ < 30 )); do sleep 0.1; done
         fi
         setsid picom --config "${HOME}/.config/ohmychadwm/picom/picom.conf" -b &>/dev/null &
         disown
@@ -324,7 +324,7 @@ _toggle_fastcompmgr() {
     else
         if pgrep -x picom &>/dev/null; then
             pkill picom 2>/dev/null
-            while pgrep -x picom &>/dev/null; do sleep 0.1; done
+            local _i=0; while pgrep -x picom &>/dev/null && (( _i++ < 30 )); do sleep 0.1; done
         fi
         setsid fastcompmgr -c &>/dev/null &
         disown
@@ -782,8 +782,10 @@ _sync_rasi_accent() {
     [[ -f "$rasi" ]] || return
     local color
     color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
-    [[ -z "$color" ]] && return
-    sed -i "s|ac:.*\/\* selected item text.*|ac:     ${color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
+    [[ -z "$color" ]] || return
+    # Escape & so sed doesn't interpret it as "matched string"
+    local safe_color="${color//&/\\&}"
+    sed -i "s|ac:.*\/\* selected item text.*|ac:     ${safe_color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
 }
 
 _apply_theme() {

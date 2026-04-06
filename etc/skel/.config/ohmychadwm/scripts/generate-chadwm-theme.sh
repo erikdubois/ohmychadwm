@@ -552,7 +552,8 @@ update_config() {
         local color
         color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
         if [[ -n "$color" ]]; then
-            sed -i "s|ac:.*\/\* selected item text.*|ac:     ${color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
+            local safe_color="${color//&/\\&}"
+            sed -i "s|ac:.*\/\* selected item text.*|ac:     ${safe_color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
             ok "Menu accent color synced to SchemeMenufg: $color"
         fi
     fi
