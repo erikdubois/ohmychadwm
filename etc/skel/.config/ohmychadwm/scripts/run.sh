@@ -1,39 +1,77 @@
 #!/bin/sh
+# =============================================================================
+# run.sh — ohmychadwm session startup script
+#
+# This file is executed by your display manager or startx to launch the
+# full ohmychadwm desktop session. It starts all background services,
+# then enters the window manager loop at the bottom.
+#
+# To autostart your own apps, add:  run "your-app"
+# To stop an autostart entry, comment it out with #
+# =============================================================================
 
+# run() — start a program only if it is not already running.
+# Prevents duplicate processes when ohmychadwm restarts itself (Super+Shift+Q).
 run() {
- if ! pgrep $1 ;
-  then
-    $@&
-  fi
+    if ! pgrep $1 ; then
+        $@ &
+    fi
 }
 
-#for virtualbox
+# ── Monitor layout ────────────────────────────────────────────────────────────
+# Apply a saved arandr/xrandr screen layout named after the current user.
+# Generate your layout with arandr, save it to ~/.screenlayout/<username>.sh
+# Uncomment the xrandr line below if you are running inside VirtualBox.
 #run xrandr --output Virtual-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal
 # screen layout generated with arandr
 [ -f "$HOME/.screenlayout/$(whoami).sh" ] && sh "$HOME/.screenlayout/$(whoami).sh"
 
-run "signal-in-tray"
-run "nm-applet"
-run "pamac-tray"
-#run "variety"
-run "flameshot"
-run "xfce4-power-manager"
-run "xfce4-clipman"
-run "blueberry-tray"
-run "/usr/lib/xfce4/notifyd/xfce4-notifyd"
-run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+# ── System tray applets ───────────────────────────────────────────────────────
+run "signal-in-tray"                                  # Signal Desktop tray icon
+run "nm-applet"                                       # NetworkManager wifi/eth tray
+run "pamac-tray"                                      # Manjaro/Arch package manager tray
+#run "variety"                                         # Wallpaper rotator (optional)
+run "flameshot"                                       # Screenshot tool (tray + daemon)
+run "xfce4-power-manager"                             # Battery / display power management
+run "xfce4-clipman"                                   # Clipboard manager
+run "blueberry-tray"                                  # Bluetooth manager tray
+run "/usr/lib/xfce4/notifyd/xfce4-notifyd"           # Desktop notification daemon
+run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"  # Polkit auth popups (sudo GUI)
+
+# ── Compositor ────────────────────────────────────────────────────────────────
+# Provides transparency, shadows and smooth window rendering.
+# Switch between fastcompmgr (lightweight) and picom (feature-rich) here.
+# Only one compositor should run at a time.
 run "fastcompmgr -c"
 #run "picom -b  --config ~/.config/ohmychadwm/picom/picom.conf &"
-run "numlockx on"
-run "volctl"
+
+# ── Keyboard ──────────────────────────────────────────────────────────────────
+run "numlockx on"                                     # Enable numlock on login
+# sxhkd reads keybindings from sxhkdrc and executes them independently of dwm.
+# Edit ~/.config/ohmychadwm/sxhkd/sxhkdrc to add or change keybindings.
 sxhkd -c ~/.config/ohmychadwm/sxhkd/sxhkdrc &
-# restore last wallpaper (feh writes ~/.fehbg on every bg change), fall back to default
+
+# ── Volume control ────────────────────────────────────────────────────────────
+run "volctl"                                          # PipeWire/PulseAudio volume tray
+
+# ── Wallpaper ─────────────────────────────────────────────────────────────────
+# Restore the last wallpaper set by feh (saved to ~/.fehbg automatically).
+# Falls back to the default ohmychadwm wallpaper if no history exists yet.
 if [ -f "$HOME/.fehbg" ]; then
     sh "$HOME/.fehbg" &
 else
     feh --bg-scale ~/.config/ohmychadwm/wallpapers/hummingbird.png &
 fi
-run "insync start"
+
+# ── Cloud sync ────────────────────────────────────────────────────────────────
+run "insync start"                                    # Google Drive sync (optional)
+
+# ── Status bar ────────────────────────────────────────────────────────────────
+# slstatus writes system info (time, CPU, RAM, …) to the dwm bar via XSetRoot.
+# Configure what is shown in ~/.config/ohmychadwm/slstatus/config.def.h
 run "slstatus"
 
+# ── Window manager loop ───────────────────────────────────────────────────────
+# Keeps restarting ohmychadwm as long as it exits with code 0 (Super+Shift+R).
+# Exits the session when ohmychadwm exits with a non-zero code (Super+Shift+Q).
 while type ohmychadwm >/dev/null; do ohmychadwm && continue || break; done

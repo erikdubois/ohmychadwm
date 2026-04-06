@@ -64,20 +64,40 @@ static const char unknown_str[] = "n/a";
  * wifi_essid          WiFi ESSID                      interface name (wlan0)
  * wifi_perc           WiFi signal in percent          interface name (wlan0)
  */
+/*
+ * Each active entry below adds one block to the bar (right side, left to right).
+ *
+ * Format:  { function, fmt_with_icon, argument }
+ *
+ *   fmt_with_icon  — the icon/prefix shown before the value (%s = value).
+ *                    Use Nerd Font glyphs here (copy from nerdfonts.com/cheat-sheet).
+ *   argument       — passed to the function (e.g. interface name, mountpoint, format).
+ *
+ * To enable a block: remove the leading //
+ * To disable a block: add    //
+ * After any change run:  cd ~/.config/ohmychadwm/slstatus && ./rebuild.sh
+ */
 static const struct arg args[] = {
-	{ datetime,      " %s",   "%y-%m-%d %H:%M" },
-	//{ ram_free,      " %s  |",   " %s"               },
-	//{ uptime,        " %s  |",   " %s"               },
-	//{ cpu_perc,      " %s  |",   " %s%%"             },
-	//{ disk_free,     " %s  |",   " %s"               },
-	//{ disk_used,     " %s  |",   " %s"               },
-	//{ hostname,      " %s  |",   " %s"               },
-	//{ kernel_release," %s  |",   " %s"               },
-	//{ load_avg,      " %s  |",   " %s"               },
-	//{ netspeed_rx,   " %s  |",   " %s"               },
-	//{ netspeed_tx,   " %s  |",   " %s"               },
-	//{ ram_perc,      " %s  |",   " %s%%"             },
-	//{ ram_used,      " %s  |",   " %s"               },
-	//{ swap_free,     " %s  |",   " %s"               },
-	//{ swap_perc,     " %s",      " %s%%"             },
+    /* function          fmt (icon + value)     argument               */
+
+    /* Network */
+    //{ netspeed_rx,   "  %s  ",   "enp3s0"            },  /* download speed  */
+    //{ netspeed_tx,   "  %s  ",   "enp3s0"            },  /* upload speed    */
+
+    /* CPU & memory */
+    //{ cpu_perc,      "  %s%%  ", NULL                },  /* CPU usage       */
+    //{ ram_used,      "  %s  ",   NULL                },  /* RAM used (GB)   */
+    //{ ram_perc,      "  %s%%  ", NULL                },  /* RAM %           */
+
+    /* Disk */
+    //{ disk_free,     "  %s  ",   "/"                 },  /* free on /       */
+    //{ disk_used,     "  %s  ",   "/"                 },  /* used on /       */
+
+    /* System */
+    //{ load_avg,      "  %s  ",   NULL                },  /* load average    */
+    //{ uptime,        "  %s  ",   NULL                },  /* uptime          */
+    //{ kernel_release,"  %s  ",   NULL                },  /* kernel version  */
+
+    /* Date & time — always shown last (rightmost) */
+    { datetime,         "  %s",    "%y-%m-%d %H:%M"   },
 };
