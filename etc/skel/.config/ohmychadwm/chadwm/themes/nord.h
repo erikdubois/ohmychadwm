@@ -122,6 +122,7 @@ static const char SchemeLayoutVVbr[]   = "#1e2122";
 static const char SchemeLayoutOPfg[]   = "#ec6b64";
 static const char SchemeLayoutOPbg[]   = "#1e2122";
 static const char SchemeLayoutOPbr[]   = "#1e2122";
+
 static const char SchemeMenufg[]       = "#d1b171";
 static const char SchemeMenubg[]       = "#1e2122";
 static const char SchemeMenubr[]       = "#1e2122";
