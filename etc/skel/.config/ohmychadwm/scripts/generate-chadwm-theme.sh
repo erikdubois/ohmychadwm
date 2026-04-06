@@ -544,6 +544,18 @@ update_config() {
     fi
 
     ok "config.def.h updated — theme activated"
+
+    # Sync SchemeMenufg → rofi menu accent color
+    local rasi="$HOME/.config/ohmychadwm/menu/ohmychadwm-menu.rasi"
+    local theme_file="$THEMES_DIR/$THEME_NAME.h"
+    if [[ -f "$rasi" && -f "$theme_file" ]]; then
+        local color
+        color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
+        if [[ -n "$color" ]]; then
+            sed -i "s|ac:.*\/\* selected item text.*|ac:     ${color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
+            ok "Menu accent color synced to SchemeMenufg: $color"
+        fi
+    fi
 }
 
 # ── main ──────────────────────────────────────────────────────────────────────

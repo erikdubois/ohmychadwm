@@ -369,16 +369,18 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom.conf \n Slstatus\n Wallpaper") in
-            *Ohmychadwm*)    show_chadwm_menu      || continue; return 0 ;;
-            *Alacritty*) show_alacritty_menu   || continue; return 0 ;;
-            *Picom*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
-            *Wallpaper*) show_wallpaper_menu   || continue; return 0 ;;
-            *Slstatus*)  show_slstatus_menu    || continue; return 0 ;;
-            *)           return 1 ;;
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom.conf \n Slstatus\n Wallpaper\n Menu theme") in
+            *Ohmychadwm*)    show_chadwm_menu        || continue; return 0 ;;
+            *Alacritty*)     show_alacritty_menu     || continue; return 0 ;;
+            *Picom*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+            *Wallpaper*)     show_wallpaper_menu     || continue; return 0 ;;
+            *Slstatus*)      show_slstatus_menu      || continue; return 0 ;;
+            *"Menu theme"*)  present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
+            *)               return 1 ;;
         esac
     done
 }
+
 
 show_slstatus_menu() {
     local config="${OHMYCHADWM_CONFIG}/slstatus/config.def.h"
@@ -772,6 +774,18 @@ show_theme_menu() {
     _apply_theme "$chosen"
 }
 
+_sync_rasi_accent() {
+    # Extract SchemeMenufg from a theme .h file and write it into the menu .rasi ac: token
+    local theme_file="$1"
+    local rasi="${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"
+    [[ -f "$theme_file" ]] || return
+    [[ -f "$rasi" ]] || return
+    local color
+    color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
+    [[ -z "$color" ]] && return
+    sed -i "s|ac:.*\/\* selected item text.*|ac:     ${color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
+}
+
 _apply_theme() {
     local theme="$1"
     local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
@@ -783,6 +797,8 @@ _apply_theme() {
     sed -i "s|^#include \"themes/\(.*\)\.h\"|//#include \"themes/\1.h\"|" "$config"
     # Uncomment the chosen theme
     sed -i "s|^//#include \"themes/${theme}\.h\"|#include \"themes/${theme}.h\"|" "$config"
+    # Sync SchemeMenufg → rofi menu accent color
+    _sync_rasi_accent "${OHMYCHADWM_CONFIG}/chadwm/themes/${theme}.h"
     # Apply Xresources if present
     local xres="${OHMYCHADWM_CONFIG}/chadwm/themes/${theme}.Xresources"
     [[ -f "$xres" ]] && xrdb -merge "$xres"
