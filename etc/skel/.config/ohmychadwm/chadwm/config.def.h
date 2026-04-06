@@ -166,7 +166,7 @@ static char *tags[] = { "", "", "", "", "", "", "", "", 
 //Chinese numbers
 //static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
 //Purposemenu
-static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
+//static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
 
 static const char* ohmychadwm_menu[] = { "/bin/sh", "-c", "/home/erik/.config/ohmychadwm/menu/ohmychadwm-menu.sh", NULL };
 static const char* firefox[] = { "firefox", NULL };
