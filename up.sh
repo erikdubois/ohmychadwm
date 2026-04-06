@@ -33,6 +33,8 @@
 # stash or commit
 # git reset --hard
 
+cp etc/skel/.config/ohmychadwm/README.md .
+
 git add --all .
 
 input="update"
