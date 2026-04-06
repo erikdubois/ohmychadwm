@@ -92,9 +92,17 @@ saturation() {
     local g=$((16#${hex:2:2}))
     local b=$((16#${hex:4:2}))
     local max min
-    max=$r; [[ $g -gt $max ]] && max=$g; [[ $b -gt $max ]] && max=$b
-    min=$r; [[ $g -lt $min ]] && min=$g; [[ $b -lt $min ]] && min=$b
-    [[ $max -eq 0 ]] && echo 0 || echo $(( (max - min) * 255 / max ))
+    max=$r
+    if [[ $g -gt $max ]]; then max=$g; fi
+    if [[ $b -gt $max ]]; then max=$b; fi
+    min=$r
+    if [[ $g -lt $min ]]; then min=$g; fi
+    if [[ $b -lt $min ]]; then min=$b; fi
+    if [[ $max -eq 0 ]]; then
+        echo 0
+    else
+        echo $(( (max - min) * 255 / max ))
+    fi
 }
 
 # darken a hex color by a fixed amount (clamps to 0)
@@ -129,7 +137,7 @@ ensure_min_contrast() {
         lum_fg=$(luminance "$fg")
         diff=$(( lum_fg - lum_bg ))
         # stop if we've hit pure white
-        [[ "$fg" == "#ffffff" ]] && break
+        if [[ "$fg" == "#ffffff" ]]; then break; fi
     done
     echo "$fg"
 }
@@ -165,7 +173,7 @@ build_palette() {
 
     # dim foreground: near-darkest, for empty tags and inactive window text
     local dim_idx=$(( n / 8 ))
-    [[ $dim_idx -lt 1 ]] && dim_idx=1
+    if [[ $dim_idx -lt 1 ]]; then dim_idx=1; fi
     DIM_FG="${sorted[$dim_idx]}"
 
     # muted normal foreground: ~1/4 from darkest
@@ -174,7 +182,7 @@ build_palette() {
 
     # bright foreground / title: ~90% from darkest
     local bright_idx=$(( n * 9 / 10 ))
-    [[ $bright_idx -ge $n ]] && bright_idx=$(( n - 1 ))
+    if [[ $bright_idx -ge $n ]]; then bright_idx=$(( n - 1 )); fi
     BRIGHT="${sorted[$bright_idx]}"
 
     # accent / selection: most saturated of the mid-range colors
@@ -193,7 +201,7 @@ build_palette() {
     TAG=()
     for i in {0..9}; do
         local pick=$(( i * rc / 10 ))
-        [[ $pick -ge $rc ]] && pick=$(( rc - 1 ))
+        if [[ $pick -ge $rc ]]; then pick=$(( rc - 1 )); fi
         TAG+=("${range_colors[$pick]}")
     done
 
@@ -207,6 +215,22 @@ build_palette() {
         new_tags+=("$(ensure_min_contrast "$t" "$BG")")
     done
     TAG=("${new_tags[@]}")
+
+    # ── SchemeMenu fg: must be brighter than every tag color ─────────────────
+    # find the highest luminance among all tag colors
+    local max_tag_lum=0
+    for t in "${TAG[@]}"; do
+        local lum; lum=$(luminance "$t")
+        if [[ $lum -gt $max_tag_lum ]]; then
+            max_tag_lum=$lum
+        fi
+    done
+    # start from BRIGHT and keep lightening until it exceeds all tags
+    MENU_FG="$BRIGHT"
+    while [[ $(luminance "$MENU_FG") -le $max_tag_lum ]]; do
+        MENU_FG=$(lighten "$MENU_FG" 8)
+        if [[ "$MENU_FG" == "#ffffff" ]]; then break; fi
+    done
 }
 
 # ── interactive questions ─────────────────────────────────────────────────────
@@ -236,7 +260,7 @@ ask_questions() {
         fi
         local is_default=0
         for d in "${DEFAULT_NAMES[@]}"; do
-            [[ "$THEME_NAME" == "$d" ]] && is_default=1 && break
+            if [[ "$THEME_NAME" == "$d" ]]; then is_default=1; break; fi
         done
         if [[ $is_default -eq 1 ]]; then
             err "'$THEME_NAME' is a built-in theme and cannot be overwritten. Choose another name."
@@ -245,7 +269,7 @@ ask_questions() {
         if [[ -f "$THEMES_DIR/$THEME_NAME.h" ]]; then
             ask "Theme '$THEME_NAME' already exists. Overwrite? [y/N]:"
             read -rp "> " ow
-            [[ "$ow" =~ ^[Yy]$ ]] && break || continue
+            if [[ "$ow" =~ ^[Yy]$ ]]; then break; else continue; fi
         fi
         break
     done
@@ -324,22 +348,28 @@ ask_questions() {
 
     # font
     echo
-    ask "Select bar font (type to filter, Enter to confirm, Esc = keep default):"
-    local picked
-    picked=$(fc-list : family | sort -u | fzf \
-        --prompt="Font > " \
-        --height=40% \
-        --layout=reverse \
-        --border \
---preview="echo 'Size suffix :style:bold:size=13 will be appended'" \
-        --preview-window=up:1 \
-        2>/dev/null)
-    if [[ -n "$picked" ]]; then
-        THEME_FONT="${picked}:style:bold:size=13"
-        ok "Font: $THEME_FONT"
-    else
+    ask "Bar font — press Enter for default (JetBrainsMono Nerd Font Mono), or any key to browse:"
+    read -rp "> " ans
+    if [[ -z "$ans" ]]; then
         THEME_FONT="JetBrainsMono Nerd Font Mono:style:bold:size=13"
         ok "Font: $THEME_FONT (default)"
+    else
+        local picked
+        picked=$(fc-list : family | sort -u | fzf \
+            --prompt="Font > " \
+            --height=40% \
+            --layout=reverse \
+            --border \
+            --preview="echo 'Suffix :style:bold:size=13 will be appended'" \
+            --preview-window=up:1 \
+            2>/dev/null) || true
+        if [[ -n "$picked" ]]; then
+            THEME_FONT="${picked}:style:bold:size=13"
+            ok "Font: $THEME_FONT"
+        else
+            THEME_FONT="JetBrainsMono Nerd Font Mono:style:bold:size=13"
+            ok "Font: $THEME_FONT (default)"
+        fi
     fi
 }
 
@@ -477,7 +507,7 @@ static const char SchemeLayoutOPfg[]   = "$t1";
 static const char SchemeLayoutOPbg[]   = "$BG";
 static const char SchemeLayoutOPbr[]   = "$BG";
 
-static const char SchemeMenufg[]       = "$ACCENT";
+static const char SchemeMenufg[]       = "$MENU_FG";
 static const char SchemeMenubg[]       = "$BG";
 static const char SchemeMenubr[]       = "$BG";
 EOF

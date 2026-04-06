@@ -38,6 +38,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+#include "themes/doors.h"
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
 //#include "themes/goodnight.h"

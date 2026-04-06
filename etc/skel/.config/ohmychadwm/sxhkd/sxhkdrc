@@ -96,7 +96,7 @@ super + r
 
 #Alacritty
 super + t
-    kitty
+    alacritty
 
 #Pavucontrol
 super + v
