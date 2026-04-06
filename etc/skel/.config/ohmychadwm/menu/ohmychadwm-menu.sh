@@ -422,7 +422,7 @@ show_slstatus_menu() {
         if [[ "$chosen" == *"Apply"* ]]; then
             selected_row=$(( ${#names[@]} ))
             (cd "${OHMYCHADWM_CONFIG}/slstatus" && alacritty -e bash -c './rebuild.sh; exec bash')
-            notify-send "ohmychadwm" "slstatus updated — press Super+Shift+R to reload"
+            notify-send "ohmychadwm" "slstatus updated"
             return 0
         fi
 
