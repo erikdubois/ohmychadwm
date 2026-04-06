@@ -4,7 +4,7 @@
 
 // default themes
 //#include "themes/catppuccin.h"
-#include "themes/dracula.h"
+//#include "themes/dracula.h"
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
 //#include "themes/nord.h"
@@ -38,6 +38,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+#include "themes/starwars.h"
 //#include "themes/doors.h"
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
