@@ -61,6 +61,15 @@
 #ifndef THEME_SMARTGAPS
 #define THEME_SMARTGAPS 0
 #endif
+#ifndef THEME_MFACT
+#define THEME_MFACT 0.50
+#endif
+#ifndef THEME_NMASTER
+#define THEME_NMASTER 1
+#endif
+#ifndef THEME_FONT
+#define THEME_FONT "JetBrainsMono Nerd Font Mono:style:bold:size=13"
+#endif
 
 /* appearance */
 static const unsigned int borderpx  = THEME_BORDER; /* border pixel of windows */
@@ -100,7 +109,7 @@ static const int new_window_attach_on_end = 0; /*  1 means the new window will a
 #define ICONSIZE 19   /* icon size */
 #define ICONSPACING 8 /* space between icon and title */
 
-static const char *fonts[] = {"JetBrainsMono Nerd Font Mono:style:bold:size=13"};
+static const char *fonts[] = {THEME_FONT};
 
 static const char *colors[][3] = {
     /*                     fg                bg                border */
@@ -157,7 +166,7 @@ static char *tags[] = { "", "", "", "", "", "", "", "", 
 //Chinese numbers
 //static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
 //Purposemenu
-//static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
+static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
 
 static const char* ohmychadwm_menu[] = { "/bin/sh", "-c", "/home/erik/.config/ohmychadwm/menu/ohmychadwm-menu.sh", NULL };
 static const char* firefox[] = { "firefox", NULL };
@@ -206,8 +215,8 @@ static const Rule rules[] = {
 };
 
 /* layout(s) */
-static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
-static const int nmaster     = 1;    /* number of clients in master area */
+static const float mfact     = THEME_MFACT;   /* factor of master area size [0.05..0.95] */
+static const int nmaster     = THEME_NMASTER; /* number of clients in master area */
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
 

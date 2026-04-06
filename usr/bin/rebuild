@@ -9,11 +9,4 @@ fi
 
 cd "$CHADWM_DIR" || exit 1
 
-read -rp "Do you want to edit config.def.h before rebuilding? [y/N] " answer
-case "$answer" in
-    [yY]|[yY][eE][sS])
-        nano config.def.h
-        ;;
-esac
-
 ./rebuild.sh

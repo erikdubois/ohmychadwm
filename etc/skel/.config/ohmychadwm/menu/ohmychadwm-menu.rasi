@@ -28,7 +28,7 @@
 
     /* Accent  — tweak this one colour to match your theme */
     ac:     #7E9CD8;     /* selected item text   (Kanagawa blue by default)  */
-    sa:     #1a1a2eCC;   /* selected item bg     (dark navy, semi-opaque)    */
+    sa:     rgba(0, 0, 0, 0.32);   /* selected item bg     (dark navy, semi-opaque)    */
 
     /* Rofi resets */
     background-color: @al;

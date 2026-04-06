@@ -150,7 +150,7 @@ super + shift + KP_Enter
 
 #dmenu
 super + shift + d
-	dmenu_run -i -nb '#191919' -nf '#fea63c' -sb '#fea63c' -sf '#191919' -fn 'NotoMonoRegular:bold:pixelsize=14'
+	dmenu_run -i -nb '#191919' -nf '#7E9CD8' -sb '#7E9CD8' -sf '#191919' -fn 'NotoMonoRegular:bold:pixelsize=14'
 
 #rofi large
 super + d

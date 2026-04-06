@@ -191,12 +191,13 @@ remove_pkg() {
 # Learn
 # ---------------------------------------------------------------------------
 show_learn_menu() {
-    case $(menu "Learn" " Keybindings\n Arch Wiki\n Chadwm source\n Bash\n Man pages") in
+    case $(menu "Learn" " Keybindings\n Arch Wiki\n Chadwm source\n Bash\n Fish shell\n Man pages") in
         *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh ;;
         *"Arch Wiki"*)  setsid "$BROWSER" "https://wiki.archlinux.org" >/dev/null 2>&1 & disown ;;
         *Chadwm*)       setsid "$BROWSER" "https://github.com/erikdubois/ohmychadwm" >/dev/null 2>&1 & disown ;;
         *Bash*)         setsid "$BROWSER" "https://devhints.io/bash" >/dev/null 2>&1 & disown ;;
-        *"Man pages"*)  present_terminal "man -k . | fzf --preview 'man {1}' | awk '{print \$1}' | xargs -r man" ;;
+        *Fish*)         setsid "$BROWSER" "https://fishshell.com/" >/dev/null 2>&1 & disown ;;
+        *"Man pages"*)  present_terminal "man -k . &>/dev/null || { echo 'Building man database (first run)...'; sudo mandb; }; man -k . | fzf --preview 'man {1}' | awk '{print \$1}' | xargs -r man" ;;
         *)              return 1 ;;
     esac
 }
@@ -807,9 +808,17 @@ show_font_menu() {
 _apply_font() {
     local font="$1"
     local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
-    # Update fonts[] in config.def.h
-    sed -i "s|static const char \*fonts\[\].*|static const char *fonts[] = {\"${font}:style:bold:size=13\"};|" "$config"
-    # Rebuild chadwm
+    # Update THEME_FONT in the active theme .h file
+    local active_theme
+    active_theme=$(grep -oP '(?<=#include "themes/)[^"]+(?=\.h")' "$config" | head -1)
+    if [[ -n "$active_theme" ]]; then
+        local theme_file="${OHMYCHADWM_CONFIG}/chadwm/themes/${active_theme}.h"
+        if [[ -f "$theme_file" ]]; then
+            sed -i "s|#define THEME_FONT.*|#define THEME_FONT    \"${font}\"|" "$theme_file"
+        fi
+    fi
+    # Also update the fallback in config.def.h
+    sed -i "s|#define THEME_FONT.*|#define THEME_FONT \"${font}\"|" "$config"
     (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
     notify-send "ohmychadwm" "Font set to '${font}'"
 }
@@ -855,7 +864,7 @@ show_setup_menu() {
 
         case $(menu "Setup" "$options") in
             *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
-            *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf" && _restart_picom; return 0 ;;
+            *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
             *"Lan/Wifi"*)   show_lanwifi_menu || continue; return 0 ;;

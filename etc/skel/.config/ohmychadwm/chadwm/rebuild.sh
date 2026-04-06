@@ -6,7 +6,7 @@ sudo make install
 make clean
 
 echo
-read -rp "Do you want to reboot? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
+read -rp "Do you want to reboot? [Y/n] " answer
+if [[ "${answer:-Y}" =~ ^[Yy]$ ]]; then
     systemctl reboot
 fi

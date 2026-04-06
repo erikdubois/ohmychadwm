@@ -115,6 +115,25 @@ lighten() {
     printf '#%02x%02x%02x' $r $g $b
 }
 
+# ensure a foreground color is at least 10% (26 lum units) brighter than bg.
+# lightens in steps of 8 until the threshold is met, capping at white.
+ensure_min_contrast() {
+    local fg="$1" bg="$2"
+    local threshold=26   # 10% of 255
+    local lum_fg lum_bg diff
+    lum_bg=$(luminance "$bg")
+    lum_fg=$(luminance "$fg")
+    diff=$(( lum_fg - lum_bg ))
+    while [[ $diff -lt $threshold ]]; do
+        fg=$(lighten "$fg" 8)
+        lum_fg=$(luminance "$fg")
+        diff=$(( lum_fg - lum_bg ))
+        # stop if we've hit pure white
+        [[ "$fg" == "#ffffff" ]] && break
+    done
+    echo "$fg"
+}
+
 # sort colors by luminance (darkest first), output one per line
 sort_by_luminance() {
     local colors=("$@")
@@ -177,6 +196,17 @@ build_palette() {
         [[ $pick -ge $rc ]] && pick=$(( rc - 1 ))
         TAG+=("${range_colors[$pick]}")
     done
+
+    # ── enforce minimum contrast: every fg must be ≥10% brighter than BG ────
+    DIM_FG=$(ensure_min_contrast "$DIM_FG" "$BG")
+    NORM_FG=$(ensure_min_contrast "$NORM_FG" "$BG")
+    BRIGHT=$(ensure_min_contrast "$BRIGHT" "$BG")
+    ACCENT=$(ensure_min_contrast "$ACCENT" "$BG")
+    local new_tags=()
+    for t in "${TAG[@]}"; do
+        new_tags+=("$(ensure_min_contrast "$t" "$BG")")
+    done
+    TAG=("${new_tags[@]}")
 }
 
 # ── interactive questions ─────────────────────────────────────────────────────
@@ -273,6 +303,44 @@ ask_questions() {
     else
         THEME_SMARTGAPS=0
     fi
+
+    # mfact
+    ask "Master area size? [0.10-0.90, default 0.50]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^0\.[0-9]+$ ]] && awk "BEGIN{exit !($ans >= 0.10 && $ans <= 0.90)}"; then
+        THEME_MFACT=$ans
+    else
+        THEME_MFACT=0.50
+    fi
+
+    # nmaster
+    ask "Number of windows in master area? [1-4, default 1]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[1-4]$ ]]; then
+        THEME_NMASTER=$ans
+    else
+        THEME_NMASTER=1
+    fi
+
+    # font
+    echo
+    ask "Select bar font (type to filter, Enter to confirm, Esc = keep default):"
+    local picked
+    picked=$(fc-list : family | sort -u | fzf \
+        --prompt="Font > " \
+        --height=40% \
+        --layout=reverse \
+        --border \
+--preview="echo 'Size suffix :style:bold:size=13 will be appended'" \
+        --preview-window=up:1 \
+        2>/dev/null)
+    if [[ -n "$picked" ]]; then
+        THEME_FONT="${picked}:style:bold:size=13"
+        ok "Font: $THEME_FONT"
+    else
+        THEME_FONT="JetBrainsMono Nerd Font Mono:style:bold:size=13"
+        ok "Font: $THEME_FONT (default)"
+    fi
 }
 
 # ── write theme file ──────────────────────────────────────────────────────────
@@ -291,6 +359,9 @@ write_theme() {
 #define THEME_SHOWSYSTRAY $THEME_SHOWSYSTRAY
 #define THEME_BORDER      $THEME_BORDER
 #define THEME_SMARTGAPS   $THEME_SMARTGAPS
+#define THEME_MFACT       $THEME_MFACT
+#define THEME_NMASTER     $THEME_NMASTER
+#define THEME_FONT        "$THEME_FONT"
 
 static const char col_borderbar[]      = "$BG";
 

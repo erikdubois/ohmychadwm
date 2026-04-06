@@ -4,7 +4,10 @@
 #define THEME_AUTOHIDE    0
 #define THEME_SHOWSYSTRAY 1
 #define THEME_BORDER      2
-#define THEME_SMARTGAPS   0
+#define THEME_SMARTGAPS 
+#define THEME_MFACT   0.50
+#define THEME_NMASTER 1
+#define THEME_FONT    "JetBrainsMono Nerd Font Mono:style:bold:size=13"  0
 
 static const char col_borderbar[]      = "#4C3C87";
 
