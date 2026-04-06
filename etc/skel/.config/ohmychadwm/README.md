@@ -1,26 +1,29 @@
 # ohmychadwm
 
-A fully configured, keyboard-driven X11 desktop built on top of **dwm** (Dynamic Window Manager).
+A fully configured, keyboard-driven X11 desktop built on top of [Chadwm](https://github.com/siduck/chadwm), a fork from **dwm** (Dynamic Window Manager). We started with the code from ArcoLinux - arcolinux-chadwm package and we let us inspire by Omarchy.
+
 Inspired by [omarchy](https://github.com/basecamp/omarchy) (Wayland/Hyprland) — ported to X11.
+
+Even [Dusk](https://github.com/bakkeby/dusk) was at some point an inspiration to include extra functionalities.
 
 ---
 
-## What is this?
+## What is OMYCHADWM?
 
-`ohmychadwm` is a complete desktop environment configuration, not just a window manager.
-
-We install it on the KIRO ISO to be found on Sourceforge.
+`ohmychadwm` is a complete desktop environment configuration, not just a window manager built for and on Kiro.
+Kiro can be downloaded on [Sourceforge](https://sourceforge.net/projects/kiro/files/).
 
 It combines:
 
 | Component | Role |
 | --- | --- |
-| **ohmychadwm** (patched dwm) | Tiling window manager — manages windows |
+| **ohmychadwm** (patched chadwm) | Tiling window manager — manages windows |
 | **slstatus** | Status bar — shows time, CPU, RAM, network etc. |
 | **sxhkd** | Keybinding daemon — Super/Ctrl/Alt shortcuts |
 | **rofi** | App launcher + hierarchical system menu |
 | **picom / fastcompmgr** | Compositor — transparency, shadows |
 | **feh** | Wallpaper manager |
+| **variety** | Wallpaper fetcher/manager |
 | **alacritty** | Terminal emulator |
 
 ---
@@ -45,31 +48,23 @@ sudo pacman -S redshift xautolock numlockx volctl flameshot \
 
 ## Install & Start
 
-```bash
-git clone https://github.com/erikdubois/ohmychadwm ~/.config/ohmychadwm
-cd ~/.config/ohmychadwm/chadwm
-sudo make install
-```
+### 1. Add the Nemesis repository
 
-### With startx
-
-```bash
-startx ~/.config/ohmychadwm/scripts/run.sh
-```
-
-### With a display manager (SDDM, LightDM, GDM)
-
-Create `/usr/share/xsessions/ohmychadwm.desktop`:
+Add the following to `/etc/pacman.conf` (before the `[core]` section or at the end):
 
 ```ini
-[Desktop Entry]
-Name=ohmychadwm
-Comment=dwm made beautiful
-Exec=/home/YOUR_USER/.config/ohmychadwm/scripts/run.sh
-Type=Application
+[nemesis_repo]
+SigLevel = Never
+Server = https://erikdubois.github.io/$repo/$arch
 ```
 
-Replace `YOUR_USER` with your username.
+### 2. Update and install
+
+```bash
+sudo pacman -Syu
+sudo pacman -S ohmychadwm-git
+```
+Logout and log into ohmychadwm with sddm or other display managers.
 
 ---
 
@@ -81,6 +76,8 @@ Any change to `chadwm/config.def.h` or a theme file requires a recompile:
 cd ~/.config/ohmychadwm/chadwm
 ./rebuild.sh
 ```
+
+or just type "rebuild" in a terminal
 
 The rebuild script copies `config.def.h` → `config.h`, compiles, installs, and restarts the WM.
 
@@ -106,6 +103,8 @@ Full keybinding list: open the menu → Learn → Keybindings.
 
 Themes are `.h` files in `chadwm/themes/`. Activating one requires a rebuild.
 
+We have over 32+ themes or create one more on the fly with our theme generator.
+
 ### Switch theme via menu
 
 `Style → ohmychadwm → Theme`
@@ -129,6 +128,8 @@ Then run `./rebuild.sh`.
 ```
 
 The script extracts colors from your current wallpaper and generates a complete `.h` theme file.
+
+Or run it from the menu in Style/Chadwm
 
 ### Theme parameters
 
