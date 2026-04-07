@@ -7,7 +7,7 @@ configuration {
 }
 
 * {
-    font: "Noto Sans Mono Bold 13";
+    font: "Noto Sans Mono Regular 13";
     foreground:                 #f8f8f2;
     background-color:           #282a36b3;
     selected-foreground:        #bd93f9;
@@ -56,7 +56,7 @@ configuration {
 }
 
 #element-text {
-    font: "Noto Sans Mono Bold 13";
+    font: "Noto Sans Mono Regular 13";
     background-color: @transparent;
     text-color:       inherit;
 }

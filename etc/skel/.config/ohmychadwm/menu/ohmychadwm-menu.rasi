@@ -89,7 +89,7 @@ element-text {
     text-color:       inherit;
     vertical-align:   0.5;
     horizontal-align: 0.0;
-    font:             "Noto Sans Mono Bold 13";
+    font:             "Noto Sans Mono Regular 13";
 }
 
 /* No icons in dmenu mode — element-icon kept minimal */
