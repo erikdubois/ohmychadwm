@@ -916,6 +916,21 @@ main() {
     tweak_palette
 
     ask_questions
+
+    # ── font availability check ───────────────────────────────────────────────
+    if ! fc-list : family | grep -qi "^${THEME_FONT}$\|, ${THEME_FONT}$\|^${THEME_FONT},\|, ${THEME_FONT},"; then
+        err "Font not installed: $THEME_FONT"
+        ask "The theme will be written but the bar will fall back to a system font."
+        ask "Install '$THEME_FONT' first for correct rendering. Continue? [Y/n]:"
+        read -rp "> " ans
+        if [[ "$ans" =~ ^[Nn]$ ]]; then
+            echo "Aborted."
+            exit 0
+        fi
+    else
+        ok "Font found: $THEME_FONT"
+    fi
+
     write_theme
     update_config
 

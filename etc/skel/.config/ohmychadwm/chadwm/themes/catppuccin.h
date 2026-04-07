@@ -8,9 +8,9 @@
 #define THEME_MFACT   0.50
 #define THEME_NMASTER 1
 #define THEME_FONT    "JetBrainsMono Nerd Font Mono"
-#define THEME_FONTSTYLE "Bold"
-#define THEME_FONTSIZE 13
-#define THEME_ICONSIZE    18
+#define THEME_FONTSTYLE   "Bold"
+#define THEME_FONTSIZE    13
+#define THEME_ICONSIZE    18   18
 
 static const char col_borderbar[]      = "#1E1D2D";
 

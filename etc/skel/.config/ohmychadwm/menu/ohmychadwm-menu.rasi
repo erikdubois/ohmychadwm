@@ -27,7 +27,7 @@
     fg-dim: #888888;     /* placeholder / dim text                            */
 
     /* Accent  — tweak this one colour to match your theme */
-    ac:     #cdf2ff;   /* selected item text   (synced from SchemeMenufg)  */
+    ac:     #9b6dbd;   /* selected item text   (synced from SchemeMenufg)  */
     sa:     rgba(0, 0, 0, 0.32);   /* selected item bg     (dark navy, semi-opaque)    */
 
     /* Rofi resets */
@@ -89,7 +89,7 @@ element-text {
     text-color:       inherit;
     vertical-align:   0.5;
     horizontal-align: 0.0;
-    font:             "Noto Sans Mono Regular 13";
+    font:             "DejaVu Sans Mono Bold 13";
 }
 
 /* No icons in dmenu mode — element-icon kept minimal */

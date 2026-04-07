@@ -33,12 +33,12 @@
 // african themes (bottom bar, zero gaps)
 //#include "themes/elephant.h"
 //#include "themes/giraffe.h"
-//#include "themes/hippo.h"
+#include "themes/hippo.h"
 //#include "themes/rhino.h"
 //#include "themes/buffalo.h"
 
 // custom themes
-#include "themes/spiderwoman.h"
+//#include "themes/spiderwoman.h"
 //#include "themes/test.h"
 //#include "themes/drwho.h"
 //#include "themes/faraway.h"
@@ -74,16 +74,16 @@
 #define THEME_NMASTER 1
 #endif
 #ifndef THEME_FONT
-#define THEME_FONT "JetBrainsMono Nerd Font Mono"
+#define THEME_FONT    "DejaVu Sans Mono"
 #endif
 #ifndef THEME_FONTSTYLE
-#define THEME_FONTSTYLE "Bold"
+#define THEME_FONTSTYLE   "Bold"
 #endif
 #ifndef THEME_FONTSIZE
-#define THEME_FONTSIZE 13
+#define THEME_FONTSIZE    13
 #endif
 #ifndef THEME_ICONSIZE
-#define THEME_ICONSIZE 18
+#define THEME_ICONSIZE    18
 #endif
 
 /* stringify helper — combines THEME_FONT + THEME_FONTSIZE at compile time */

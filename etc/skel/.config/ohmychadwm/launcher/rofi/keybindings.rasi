@@ -4,7 +4,7 @@
  */
 
 configuration {
-    font: "Noto Sans Mono Regular 13";
+    font: "DejaVu Sans Mono Bold 13";
     show-icons: false;
     disable-history: true;
     fullscreen: false;

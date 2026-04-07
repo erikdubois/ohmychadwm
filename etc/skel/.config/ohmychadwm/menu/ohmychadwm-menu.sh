@@ -934,6 +934,19 @@ show_theme_menu() {
             2>/dev/null) || exit 0
         [[ -z \"\$chosen\" ]] && exit 0
 
+        # ── font availability check ───────────────────────────────────────────
+        theme_font=\$(grep -oP \"#define THEME_FONT\\s+\\\"\\K[^\\\"]+\" \"$themes_dir/\${chosen}.h\" | head -1)
+        if [[ -n \"\$theme_font\" ]]; then
+            if ! fc-list : family | grep -qi \"\$theme_font\"; then
+                echo \"\"
+                echo \"  ⚠  Font not installed: \$theme_font\"
+                echo \"  Install it first, or the bar will fall back to a system font.\"
+                echo \"\"
+                read -rp \"  Apply theme anyway? [y/N] \" _fc
+                [[ \"\$_fc\" =~ ^[Yy]\$ ]] || exit 0
+            fi
+        fi
+
         # deactivate all, activate chosen
         sed -i \"s|^#include \\\"themes/\(.*\)\\.h\\\"|//#include \\\"themes/\1.h\\\"|\" \"$config\"
         sed -i \"s|^//#include \\\"themes/\${chosen}\\.h\\\"|#include \\\"themes/\${chosen}.h\\\"|\" \"$config\"
