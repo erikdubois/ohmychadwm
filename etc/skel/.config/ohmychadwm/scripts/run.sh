@@ -19,6 +19,9 @@ run() {
   fi
 }
 
+# ── Backup original app configs (one-time, before ohmychadwm first modifies them)
+bash "$HOME/.config/ohmychadwm/scripts/backup-originals.sh"
+
 # ── Monitor layout ────────────────────────────────────────────────────────────
 # Apply a saved arandr/xrandr screen layout named after the current user.
 # Generate your layout with arandr, save it to ~/.screenlayout/<username>.sh

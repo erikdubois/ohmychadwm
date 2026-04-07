@@ -7,7 +7,7 @@ configuration {
 }
 
 * {
-    font: "Noto Sans Mono Bold 13";
+    font: "JetBrainsMono Nerd Font Mono Bold 13";
     foreground:                 #f8f8f2;
     background-color:           #282a36b3;
     selected-foreground:        #bd93f9;

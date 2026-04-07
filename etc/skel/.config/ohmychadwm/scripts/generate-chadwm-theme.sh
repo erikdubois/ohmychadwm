@@ -570,6 +570,7 @@ ask_questions() {
 # ── apply font to other applications ─────────────────────────────────────────
 apply_font_globally() {
     header "Apply font to other applications"
+    bash "${HOME}/.config/ohmychadwm/scripts/backup-originals.sh"
 
     # rofi font format: "Family Style Size"  (e.g. "JetBrainsMono Nerd Font Mono Bold 13")
     local rofi_font="${THEME_FONT} ${THEME_FONTSTYLE} ${THEME_FONTSIZE}"

@@ -15,6 +15,9 @@ ask()    { echo -e "${Y}$*${NC}"; }
 ok()     { echo -e "${G}✔ $*${NC}"; }
 err()    { echo -e "${R}✘ $*${NC}" >&2; }
 
+# ── backup originals before first modification ───────────────────────────────
+bash "${HOME}/.config/ohmychadwm/scripts/backup-originals.sh"
+
 # ── font questions ────────────────────────────────────────────────────────────
 ask_font() {
     header "── Apply font globally ─────────────────────────────────"

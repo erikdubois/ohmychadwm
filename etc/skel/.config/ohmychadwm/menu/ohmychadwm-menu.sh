@@ -369,7 +369,7 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Edit Menu theme\n Apply font globally") in
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Edit Menu theme\n Apply font globally\n Hard Reset") in
             *Ohmychadwm*)           show_chadwm_menu        || continue; return 0 ;;
             *Alacritty*)            show_alacritty_menu     || continue; return 0 ;;
             *"Edit Picom"*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
@@ -377,6 +377,7 @@ show_style_menu() {
             *Slstatus*)             show_slstatus_menu      || continue; return 0 ;;
             *"Edit Menu theme"*)    present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *"Apply font globally"*) present_terminal "bash ${OHMYCHADWM_CONFIG}/scripts/apply-font-globally.sh"; return 0 ;;
+            *"Hard Reset"*)          present_terminal "bash ${OHMYCHADWM_CONFIG}/scripts/backup-originals.sh --restore"; return 0 ;;
             *)                      return 1 ;;
         esac
     done
@@ -456,23 +457,44 @@ show_chadwm_menu() {
 
 _customise_reset_defaults() {
     local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
-    # Restore THEME_* macros for values that have a theme counterpart
-    sed -i "s/\(static const unsigned int borderpx\s*=\s*\)[^;]*/\1THEME_BORDER /"  "$config"
-    sed -i "s/\(static const unsigned int gappih\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
-    sed -i "s/\(static const unsigned int gappiv\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
-    sed -i "s/\(static const unsigned int gappoh\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
-    sed -i "s/\(static const unsigned int gappov\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
-    sed -i "s/\(static const int smartgaps\s*=\s*\)[^;]*/\1THEME_SMARTGAPS /"       "$config"
-    sed -i "s/\(static const int showsystray\s*=\s*\)[^;]*/\1THEME_SHOWSYSTRAY /"   "$config"
-    sed -i "s/\(static const int topbar\s*=\s*\)[^;]*/\1THEME_TOPBAR /"             "$config"
-    sed -i "s/\(static const float mfact\s*=\s*\)[^;]*/\1THEME_MFACT   /"           "$config"
-    sed -i "s/\(static const int nmaster\s*=\s*\)[^;]*/\1THEME_NMASTER /"           "$config"
-    # Hardcoded defaults (no THEME_* equivalent)
-    sed -i "s/\(static const int horizpadbar\s*=\s*\)[^;]*/\15 /"                   "$config"
-    sed -i "s/\(static const int vertpadbar\s*=\s*\)[^;]*/\111 /"                   "$config"
-    sed -i "s/\(new_window_attach_on_end\s*=\s*\)[^;]*/\10 /"                       "$config"
-    notify-send "ohmychadwm" "Customise reset to theme defaults — rebuilding..."
-    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+    local default="${OHMYCHADWM_CONFIG}/chadwm/config.def.h.default"
+    present_terminal "bash -c '
+        config=\"${config}\"
+        default=\"${default}\"
+
+        if [[ ! -f \"\$default\" ]]; then
+            echo \"ERROR: \$default not found.\"
+            exit 1
+        fi
+
+        echo \"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\"
+        echo \"  Reset chadwm config to default\"
+        echo \"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\"
+        echo \"\"
+        echo \"  This will overwrite:\"
+        echo \"    \$config\"
+        echo \"  with:\"
+        echo \"    \$default\"
+        echo \"\"
+        echo \"  Only the chadwm config is reset.\"
+        echo \"  Themes, wallpapers and other settings are untouched.\"
+        echo \"\"
+        echo \"  A backup will be saved as:\"
+        ts=\$(date +%Y%m%d-%H%M%S)
+        backup=\"\${config}.\${ts}\"
+        echo \"    \$backup\"
+        echo \"\"
+        read -rp \"  Continue? [y/N] \" ans
+        [[ \"\$ans\" =~ ^[Yy]\$ ]] || { echo \"Cancelled.\"; exit 0; }
+
+        cp \"\$config\" \"\$backup\"
+        echo \"\"
+        echo \"  Backup created.\"
+        cp \"\$default\" \"\$config\"
+        echo \"  config.def.h restored.\"
+        echo \"\"
+        cd \"${OHMYCHADWM_CONFIG}/chadwm\" && bash rebuild.sh
+    '"
 }
 
 show_customise_menu() {
@@ -932,10 +954,10 @@ show_theme_menu() {
 
         # ── optional font sync ────────────────────────────────────────────────
         theme_file=\"${OHMYCHADWM_CONFIG}/chadwm/themes/\${chosen}.h\"
-        t_font=\$(grep -oP '#define THEME_FONT\s+\"\K[^\"]+' \"\$theme_file\" | head -1)
+        t_font=\$(grep -oP \"#define THEME_FONT\\s+\\\"\\K[^\\\"]+\" \"\$theme_file\" | head -1)
         if [[ -n \"\$t_font\" ]]; then
-            t_style=\$(grep -oP '#define THEME_FONTSTYLE\s+\"\K[^\"]+' \"\$theme_file\" | head -1)
-            t_size=\$(grep -oP '#define THEME_FONTSIZE\s+\K[0-9]+' \"\$theme_file\" | head -1)
+            t_style=\$(grep -oP \"#define THEME_FONTSTYLE\\s+\\\"\\K[^\\\"]+\" \"\$theme_file\" | head -1)
+            t_size=\$(grep -oP \"#define THEME_FONTSIZE\\s+\\K[0-9]+\" \"\$theme_file\" | head -1)
             [[ -z \"\$t_style\" ]] && t_style=\"Bold\"
             [[ -z \"\$t_size\"  ]] && t_size=\"13\"
             rofi_font=\"\$t_font \$t_style \$t_size\"

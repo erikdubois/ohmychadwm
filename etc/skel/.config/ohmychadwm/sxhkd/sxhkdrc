@@ -208,6 +208,10 @@ ctrl + alt + ,
 ctrl + alt + u
      pavucontrol
 
+#Rofi theme selector
+ctrl + alt + r
+  rofi-theme-selector
+
 #Spotify
 ctrl + alt + s
    spotify
