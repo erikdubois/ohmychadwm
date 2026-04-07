@@ -38,11 +38,12 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+#include "themes/drwho.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
 //#include "themes/doors.h"
 //#include "themes/summit.h"
-#include "themes/clonewar.h"
+//#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
 
 /* fallback layout settings for themes that don't define them */

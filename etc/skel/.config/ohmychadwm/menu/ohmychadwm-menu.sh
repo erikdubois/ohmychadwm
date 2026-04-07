@@ -444,9 +444,10 @@ show_slstatus_menu() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Theme\n Create your own theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Edit Colours (Xresources)") in
-            *Theme*)            show_theme_menu      || continue; return 0 ;;
-            *"Create your own theme"*) setsid alacritty -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
+        case $(menu "chadwm" " Theme\n Create your own theme\n Delete theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Edit Colours (Xresources)") in
+            *Theme*)            show_theme_menu        || continue; return 0 ;;
+            *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
+            *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Tags*)             show_tags_menu       || continue; return 0 ;;
             *Border*)           show_border_menu     || continue; return 0 ;;
             *Gaps*)             show_gaps_menu       || continue; return 0 ;;
@@ -756,23 +757,114 @@ show_launchers_menu() {
     done
 }
 
+show_delete_theme_menu() {
+    local themes_dir="${OHMYCHADWM_CONFIG}/chadwm/themes"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+
+    # built-in themes that cannot be deleted
+    local -a BUILTIN=(
+        saturn pluto uranus jupiter venus mercury mars neptune
+        catppuccin dracula everforest gruvchad kanagawa material
+        monokai nord onedark prime rosepine solarized tokyonight tundra
+        elephant giraffe hippo rhino buffalo
+    )
+
+    # build list of custom (user-created) themes only
+    local custom_list=""
+    for f in "$themes_dir"/*.h; do
+        local name; name=$(basename "$f" .h)
+        local is_builtin=0
+        for b in "${BUILTIN[@]}"; do
+            [[ "$name" == "$b" ]] && is_builtin=1 && break
+        done
+        if [[ $is_builtin -eq 0 ]]; then
+            custom_list+="$name\n"
+        fi
+    done
+    custom_list="${custom_list%\\n}"
+
+    if [[ -z "$custom_list" ]]; then
+        notify-send "ohmychadwm" "No custom themes to delete"
+        return 1
+    fi
+
+    local chosen
+    chosen=$(menu "Delete theme" "$custom_list") || return 1
+
+    # confirm
+    local confirm
+    confirm=$(menu "Delete '$chosen'?" " Yes, delete it\n Cancel") || return 1
+    [[ "$confirm" == *"Cancel"* ]] && return 1
+
+    # check if this theme is currently active
+    local active
+    active=$(grep -oP '(?<=#include "themes/)[^"]+(?=\.h")' "$config" | head -1)
+
+    # remove include line from config.def.h entirely
+    sed -i "/[#/]*#\?include \"themes\/${chosen}\.h\"/d" "$config"
+
+    # delete the theme file
+    rm -f "${themes_dir}/${chosen}.h"
+
+    # delete associated wallpaper if present
+    for ext in jpg jpeg png webp; do
+        rm -f "${OHMYCHADWM_CONFIG}/wallpapers/${chosen}.${ext}"
+    done
+
+    # if deleted theme was active, fall back to kanagawa
+    if [[ "$active" == "$chosen" ]]; then
+        notify-send "ohmychadwm" "Active theme deleted — switching to kanagawa"
+        _apply_theme "kanagawa"
+    else
+        notify-send "ohmychadwm" "Theme '$chosen' deleted"
+    fi
+}
+
 show_theme_menu() {
     local themes_dir="${OHMYCHADWM_CONFIG}/chadwm/themes"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local preview_script="${OHMYCHADWM_CONFIG}/scripts/preview-theme.sh"
+
     if [[ ! -d "$themes_dir" ]]; then
         notify-send "ohmychadwm" "No themes directory found at ${themes_dir}"
         return 1
     fi
-    local theme_list
-    theme_list=$(ls -1 "$themes_dir"/*.h 2>/dev/null | xargs -n1 basename | sed 's/\.h$//')
-    if [[ -z "$theme_list" ]]; then
-        notify-send "ohmychadwm" "No themes found in ${themes_dir}"
-        return 1
-    fi
-    local count
-    count=$(echo "$theme_list" | wc -l)
-    local chosen
-    chosen=$(menu "Theme  ($count total — ↑↓ scroll)" "$theme_list" "-lines 8") || return 1
-    _apply_theme "$chosen"
+
+    present_terminal "bash -c '
+        chosen=\$(ls -1 \"$themes_dir\"/*.h 2>/dev/null \
+            | xargs -n1 basename \
+            | sed \"s/\\.h\$//\" \
+            | fzf \
+                --prompt=\"Theme > \" \
+                --layout=reverse \
+                --border \
+                --ansi \
+                --preview=\"bash \\\"$preview_script\\\" {}\" \
+                --preview-window=right:45%:wrap \
+            2>/dev/null) || exit 0
+        [[ -z \"\$chosen\" ]] && exit 0
+
+        # deactivate all, activate chosen
+        sed -i \"s|^#include \\\"themes/\(.*\)\\.h\\\"|//#include \\\"themes/\1.h\\\"|\" \"$config\"
+        sed -i \"s|^//#include \\\"themes/\${chosen}\\.h\\\"|#include \\\"themes/\${chosen}.h\\\"|\" \"$config\"
+
+        # sync rasi accent color
+        color=\$(grep -oP \"SchemeMenufg\[\]\s*=\s*\\\"\K[^\\\"]+\" \"$themes_dir/\${chosen}.h\" | head -1)
+        if [[ -n \"\$color\" ]]; then
+            safe=\"\${color//&/\\\\&}\"
+            sed -i \"s|ac:.*\\/\\* selected item text.*|ac:     \${safe};   /* selected item text   (synced from SchemeMenufg)  */|\" \
+                \"${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi\"
+        fi
+
+        # restore wallpaper if one exists for this theme
+        for ext in jpg jpeg png webp; do
+            wp=\"${OHMYCHADWM_CONFIG}/wallpapers/\${chosen}.\${ext}\"
+            if [[ -f \"\$wp\" ]]; then feh --bg-fill \"\$wp\" 2>/dev/null; break; fi
+        done
+
+        notify-send \"ohmychadwm\" \"Theme \${chosen} applied — rebuilding...\"
+        cd \"${OHMYCHADWM_CONFIG}/chadwm\" && bash rebuild.sh
+    '"
 }
 
 _sync_rasi_accent() {
@@ -823,16 +915,49 @@ show_font_menu() {
     local theme_file="${OHMYCHADWM_CONFIG}/chadwm/themes/${active_theme}.h"
 
     present_terminal "bash -c '
-        chosen=\$(fc-list : family \
+        # ── font family ──────────────────────────────────────────────────────
+        family=\$(fc-list : family \
             | sed \"s/,.*//\" \
             | sed \"s/^[[:space:]]*//;s/[[:space:]]*\$//\" \
             | grep -v \"^\\.\" \
             | sort -uf \
-            | fzf --prompt=\"Font > \" --height=40% --layout=reverse --border 2>/dev/null) || exit 0
-        [[ -z \"\$chosen\" ]] && exit 0
-        sed -i \"s|#define THEME_FONT \\\"[^\\\"]*\\\"|#define THEME_FONT    \\\"\$chosen\\\"|\" \"${theme_file}\"
-        sed -i \"s|#define THEME_FONT \\\"[^\\\"]*\\\"|#define THEME_FONT \\\"\$chosen\\\"|\" \"${config}\"
-        notify-send \"ohmychadwm\" \"Font set to \$chosen — rebuilding...\"
+            | fzf --prompt=\"Font family > \" --height=40% --layout=reverse --border 2>/dev/null) || exit 0
+        [[ -z \"\$family\" ]] && exit 0
+
+        # ── font style — real styles for chosen family ───────────────────────
+        styles=\$(fc-list \":family=\$family\" style 2>/dev/null \
+            | grep -oP \"(?<=style=)[^\n]+\" \
+            | tr \",\" \"\n\" \
+            | sed \"s/^[[:space:]]*//;s/[[:space:]]*\$//\" \
+            | sort -u)
+        style_count=\$(echo \"\$styles\" | grep -c .)
+        if [[ \$style_count -le 1 ]]; then
+            style=\$(echo \"\$styles\" | head -1)
+            [[ -z \"\$style\" ]] && style=\"Bold\"
+        else
+            style=\$(echo \"\$styles\" | fzf --prompt=\"Font style > \" --height=40% --layout=reverse --border 2>/dev/null) || style=\"Bold\"
+            [[ -z \"\$style\" ]] && style=\"Bold\"
+        fi
+
+        # ── font size ────────────────────────────────────────────────────────
+        echo -e \"\nFont size? [default 13]:\"
+        read -rp \"> \" size
+        [[ \"\$size\" =~ ^[0-9]+\$ ]] && (( size >= 6 && size <= 72 )) || size=13
+
+        # ── icon size ────────────────────────────────────────────────────────
+        echo \"Bar icon size? [default 18]:\"
+        read -rp \"> \" iconsize
+        [[ \"\$iconsize\" =~ ^[0-9]+\$ ]] && (( iconsize >= 8 && iconsize <= 72 )) || iconsize=18
+
+        # ── apply to active theme + config.def.h ─────────────────────────────
+        for f in \"${theme_file}\" \"${config}\"; do
+            sed -i \"s|#define THEME_FONT \\\"[^\\\"]*\\\"|#define THEME_FONT    \\\"\$family\\\"|\" \"\$f\"
+            sed -i \"s|#define THEME_FONTSTYLE \\\"[^\\\"]*\\\"|#define THEME_FONTSTYLE   \\\"\$style\\\"|\" \"\$f\"
+            sed -i \"s|#define THEME_FONTSIZE [0-9]*|#define THEME_FONTSIZE    \$size|\" \"\$f\"
+            sed -i \"s|#define THEME_ICONSIZE [0-9]*|#define THEME_ICONSIZE    \$iconsize|\" \"\$f\"
+        done
+
+        notify-send \"ohmychadwm\" \"Font: \$family \$style \$size — rebuilding...\"
         cd \"${OHMYCHADWM_CONFIG}/chadwm\" && bash rebuild.sh
     '"
 }

@@ -38,14 +38,16 @@ detect_wallpaper() {
         if [[ -d "$wp_dir" ]]; then
             mapfile -t images < <(find "$wp_dir" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) | sort)
             if [[ ${#images[@]} -gt 0 ]]; then
-                ask "Could not detect current wallpaper. Pick from ohmychadwm wallpapers:"
-                for i in "${!images[@]}"; do
-                    printf "  %2d) %s\n" $((i+1)) "$(basename "${images[$i]}")"
-                done
-                read -rp "> " pick
-                if [[ "$pick" =~ ^[0-9]+$ ]] && (( pick >= 1 && pick <= ${#images[@]} )); then
-                    wp="${images[$((pick-1))]}"
-                fi
+                ask "Could not detect current wallpaper. Pick one:"
+                local picked_wp
+                picked_wp=$(printf '%s\n' "${images[@]}" \
+                    | fzf --prompt="Wallpaper > " \
+                          --height=40% \
+                          --layout=reverse \
+                          --border \
+                          --preview="file {}" \
+                          2>/dev/null) || true
+                [[ -n "$picked_wp" ]] && wp="$picked_wp"
             fi
         fi
     fi
@@ -216,6 +218,26 @@ build_palette() {
     done
     TAG=("${new_tags[@]}")
 
+    # ── enforce minimum luminance step between adjacent tags ─────────────────
+    # tags are ordered dark→light; each must be ≥8 lum units above the previous
+    local min_tag_step=8
+    local distinct_tags=("${TAG[0]}")
+    local prev_lum
+    prev_lum=$(luminance "${TAG[0]}")
+    for i in {1..9}; do
+        local t="${TAG[$i]}"
+        local curr_lum
+        curr_lum=$(luminance "$t")
+        while (( curr_lum - prev_lum < min_tag_step )); do
+            t=$(lighten "$t" 8)
+            curr_lum=$(luminance "$t")
+            if [[ "$t" == "#ffffff" ]]; then break; fi
+        done
+        distinct_tags+=("$t")
+        prev_lum=$curr_lum
+    done
+    TAG=("${distinct_tags[@]}")
+
     # ── SchemeMenu fg: must be brighter than every tag color ─────────────────
     # find the highest luminance among all tag colors
     local max_tag_lum=0
@@ -231,6 +253,35 @@ build_palette() {
         MENU_FG=$(lighten "$MENU_FG" 8)
         if [[ "$MENU_FG" == "#ffffff" ]]; then break; fi
     done
+}
+
+# ── truecolor palette preview ─────────────────────────────────────────────────
+_color_block() {
+    local hex="${1#'#'}"
+    [[ ${#hex} -eq 6 ]] || return
+    local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
+    printf '\e[48;2;%d;%d;%dm    \e[0m \e[38;2;%d;%d;%dm%s\e[0m  %s\n' \
+        "$r" "$g" "$b" "$r" "$g" "$b" "#${hex}" "$2"
+}
+
+show_palette_preview() {
+    echo
+    echo -e "${W}── Theme palette ────────────────────────────────────${NC}"
+    _color_block "${BG}"     "background"
+    _color_block "${BR}"     "border"
+    _color_block "${DIM_FG}" "inactive"
+    _color_block "${ACCENT}" "selection"
+    _color_block "${BRIGHT}" "title"
+    _color_block "${MENU_FG}" "menu fg"
+    printf '  tags  '
+    for t in "${TAG[@]}"; do
+        local h="${t#'#'}"
+        [[ ${#h} -eq 6 ]] || continue
+        local r=$((16#${h:0:2})) g=$((16#${h:2:2})) b=$((16#${h:4:2}))
+        printf '\e[48;2;%d;%d;%dm  \e[0m' "$r" "$g" "$b"
+    done
+    echo
+    echo
 }
 
 # ── interactive questions ─────────────────────────────────────────────────────
@@ -699,10 +750,12 @@ EOF
     # save wallpaper alongside the theme so it can be restored when activated
     local wp_dir="$HOME/.config/ohmychadwm/wallpapers"
     mkdir -p "$wp_dir"
-    if [[ "$WALLPAPER" != "$wp_dir/${THEME_NAME}.jpg" ]]; then
-        cp -f "$WALLPAPER" "$wp_dir/${THEME_NAME}.jpg"
+    local wp_ext="${WALLPAPER##*.}"
+    local wp_dest="$wp_dir/${THEME_NAME}.${wp_ext}"
+    if [[ "$WALLPAPER" != "$wp_dest" ]]; then
+        cp -f "$WALLPAPER" "$wp_dest"
     fi
-    ok "Wallpaper saved to $wp_dir/${THEME_NAME}.jpg"
+    ok "Wallpaper saved to $wp_dest"
 }
 
 # ── update config.def.h ───────────────────────────────────────────────────────
@@ -743,6 +796,18 @@ update_config() {
 
 # ── main ──────────────────────────────────────────────────────────────────────
 main() {
+    # dependency checks
+    local missing=0
+    if ! command -v magick &>/dev/null; then
+        err "ImageMagick not found — install it first: sudo pacman -S imagemagick"
+        missing=1
+    fi
+    if ! command -v fzf &>/dev/null; then
+        err "fzf not found — install it first: sudo pacman -S fzf"
+        missing=1
+    fi
+    if [[ $missing -eq 1 ]]; then exit 1; fi
+
     header "Detecting wallpaper..."
     WALLPAPER=$(detect_wallpaper)
     ok "Wallpaper: $WALLPAPER"
@@ -758,14 +823,6 @@ main() {
     mapfile -t SORTED < <(sort_by_luminance "${COLORS[@]}")
     build_palette "${SORTED[@]}"
 
-    echo -e "\n${W}Color palette:${NC}"
-    printf "  BG      %s  (bar/window background)\n"    "$BG"
-    printf "  Dim     %s  (empty tags, inactive text)\n" "$DIM_FG"
-    printf "  Muted   %s  (normal foreground)\n"        "$NORM_FG"
-    printf "  Accent  %s  (active window / selection)\n" "$ACCENT"
-    printf "  Bright  %s  (focused title text)\n"       "$BRIGHT"
-    printf "  Tags    %s\n" "${TAG[*]}"
-
     ask_questions
     write_theme
     update_config
@@ -773,6 +830,8 @@ main() {
     if [[ "${FONT_CHADWM_ONLY:-1}" -eq 0 ]]; then
         apply_font_globally
     fi
+
+    show_palette_preview
 
     # ── fix wallpaper ─────────────────────────────────────────────────────────
     ask "Fix this wallpaper to the theme? [Y/n]:"
