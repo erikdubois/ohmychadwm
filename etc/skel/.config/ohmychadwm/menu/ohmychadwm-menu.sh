@@ -951,9 +951,15 @@ show_theme_menu() {
         sed -i \"s|^#include \\\"themes/\(.*\)\\.h\\\"|//#include \\\"themes/\1.h\\\"|\" \"$config\"
         sed -i \"s|^//#include \\\"themes/\${chosen}\\.h\\\"|#include \\\"themes/\${chosen}.h\\\"|\" \"$config\"
 
-        # sync rasi accent color
+        # sync rasi accent color — enforce contrast against dark bg (#101010, lum≈16)
         color=\$(grep -oP \"SchemeMenufg\[\]\s*=\s*\\\"\K[^\\\"]+\" \"$themes_dir/\${chosen}.h\" | head -1)
         if [[ -n \"\$color\" ]]; then
+            _lum() { local h=\"\${1#'#'}\"; echo \$(( (299*16#\${h:0:2} + 587*16#\${h:2:2} + 114*16#\${h:4:2}) / 1000 )); }
+            _lighten() { local h=\"\${1#'#'}\" a=\"\${2:-10}\"; local r=\$(( 16#\${h:0:2}+a )); local g=\$(( 16#\${h:2:2}+a )); local b=\$(( 16#\${h:4:2}+a )); printf '#%02x%02x%02x' \$(( r>255?255:r )) \$(( g>255?255:g )) \$(( b>255?255:b )); }
+            while (( \$(_lum \"\$color\") - 16 < 80 )); do
+                color=\$(_lighten \"\$color\" 10)
+                [[ \"\$color\" == \"#ffffff\" ]] && break
+            done
             safe=\"\${color//&/\\\\&}\"
             sed -i \"s|ac:.*\\/\\* selected item text.*|ac:     \${safe};   /* selected item text   (synced from SchemeMenufg)  */|\" \
                 \"${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi\"

@@ -869,6 +869,14 @@ update_config() {
         local color
         color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
         if [[ -n "$color" ]]; then
+            # ensure color is visible on the rasi dark background (#101010, lum≈16)
+            local rasi_bg_lum=16
+            local clum; clum=$(luminance "$color")
+            while (( clum - rasi_bg_lum < 80 )); do
+                color=$(lighten "$color" 10)
+                clum=$(luminance "$color")
+                [[ "$color" == "#ffffff" ]] && break
+            done
             local safe_color="${color//&/\\&}"
             sed -i "s|ac:.*\/\* selected item text.*|ac:     ${safe_color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
             ok "Menu accent color synced to SchemeMenufg: $color"

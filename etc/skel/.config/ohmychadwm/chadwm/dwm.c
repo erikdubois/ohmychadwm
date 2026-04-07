@@ -1562,7 +1562,14 @@ void drawbar(Monitor *m) {
     }
 
     w = TEXTW(launchers[i].name);
-    drw_text(drw, x, 0, w, bh, lrpad / 2, launchers[i].name, urg & 1 << i);
+    if (launchers[i].command == ohmychadwm_menu) {
+        /* draw SchemeMenubr border, then icon inset by 1px */
+        XSetForeground(drw->dpy, drw->gc, scheme[SchemeMenu][ColBorder].pixel);
+        XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, 0, w, bh);
+        drw_text(drw, x + 1, 1, w - 2, bh - 2, lrpad / 2, launchers[i].name, urg & 1 << i);
+    } else {
+        drw_text(drw, x, 0, w, bh, lrpad / 2, launchers[i].name, urg & 1 << i);
+    }
     x += w;
 }
 
