@@ -4,7 +4,7 @@
  */
 
 configuration {
-    font: "JetBrainsMono Nerd Font Mono Bold 13";
+    font: "Noto Sans Mono Bold 13";
     show-icons: false;
     disable-history: true;
     fullscreen: false;

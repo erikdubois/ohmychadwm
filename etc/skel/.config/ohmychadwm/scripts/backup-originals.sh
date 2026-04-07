@@ -16,6 +16,7 @@ declare -A FILES=(
     ["gtk-3.0-settings.ini"]="${HOME}/.config/gtk-3.0/settings.ini"
     ["gtk-4.0-settings.ini"]="${HOME}/.config/gtk-4.0/settings.ini"
     ["rofi-config.rasi"]="${HOME}/.config/rofi/config.rasi"
+    ["xfce4-xsettings.xml"]="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
 )
 
 backup() {
