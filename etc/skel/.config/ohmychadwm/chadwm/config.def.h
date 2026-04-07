@@ -31,23 +31,22 @@
 //#include "themes/solarized.h"
 
 // african themes (bottom bar, zero gaps)
-//#include "themes/tiger.h"
-//#include "themes/lookinto.h"
+//#include "themes/elephant.h"
+//#include "themes/giraffe.h"
 //#include "themes/hippo.h"
 //#include "themes/rhino.h"
 //#include "themes/buffalo.h"
 
 // custom themes
-//#include "themes/lookinto.h"
+#include "themes/spiderwoman.h"
 //#include "themes/test.h"
 //#include "themes/drwho.h"
-//#include "themes/dragon.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
 //#include "themes/doors.h"
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
-#include "themes/goodnight.h"
+//#include "themes/goodnight.h"
 
 /* fallback layout settings for themes that don't define them */
 #ifndef THEME_TOPBAR
