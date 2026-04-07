@@ -284,6 +284,87 @@ show_palette_preview() {
     echo
 }
 
+# ── tweak individual palette colors ──────────────────────────────────────────
+_tweak_line() {
+    local label="$1" hex="$2" desc="$3"
+    local h="${hex#'#'}"
+    if [[ ${#h} -eq 6 ]]; then
+        local r=$((16#${h:0:2})) g=$((16#${h:2:2})) b=$((16#${h:4:2}))
+        printf '\e[48;2;%d;%d;%dm  \e[0m %-9s %s  %s' "$r" "$g" "$b" "$label" "$hex" "$desc"
+    else
+        printf '     %-9s %s  %s' "$label" "$hex" "$desc"
+    fi
+}
+
+tweak_palette() {
+    while true; do
+        local choice
+        choice=$(printf '%s\n' \
+            "$(_tweak_line BG      "$BG"       "background")" \
+            "$(_tweak_line Border  "$BR"       "border")" \
+            "$(_tweak_line Dim     "$DIM_FG"   "inactive / empty tags")" \
+            "$(_tweak_line Normal  "$NORM_FG"  "normal foreground")" \
+            "$(_tweak_line Accent  "$ACCENT"   "selection / active window")" \
+            "$(_tweak_line Bright  "$BRIGHT"   "title text")" \
+            "$(_tweak_line MenuFG  "$MENU_FG"  "menu foreground")" \
+            "$(_tweak_line Tag1    "${TAG[0]}"  "")" \
+            "$(_tweak_line Tag2    "${TAG[1]}"  "")" \
+            "$(_tweak_line Tag3    "${TAG[2]}"  "")" \
+            "$(_tweak_line Tag4    "${TAG[3]}"  "")" \
+            "$(_tweak_line Tag5    "${TAG[4]}"  "")" \
+            "$(_tweak_line Tag6    "${TAG[5]}"  "")" \
+            "$(_tweak_line Tag7    "${TAG[6]}"  "")" \
+            "$(_tweak_line Tag8    "${TAG[7]}"  "")" \
+            "$(_tweak_line Tag9    "${TAG[8]}"  "")" \
+            "$(_tweak_line Tag10   "${TAG[9]}"  "")" \
+            "  ✔  Done — continue" \
+            | fzf --ansi \
+                  --prompt="Tweak color > " \
+                  --height=60% \
+                  --layout=reverse \
+                  --border \
+                  2>/dev/null) || break
+
+        [[ "$choice" == *"Done"* ]] && break
+
+        # extract label (second token after the swatch)
+        local label
+        label=$(echo "$choice" | awk '{print $1}')
+
+        ask "New hex for $label (e.g. #a1b2c3), Enter to cancel:"
+        read -rp "> " new_hex
+        [[ -z "$new_hex" ]] && continue
+        new_hex="#${new_hex#'#'}"
+        if ! [[ "$new_hex" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+            err "Invalid hex: $new_hex"
+            continue
+        fi
+
+        case "$label" in
+            BG)     BG="$new_hex" ;;
+            Border) BR="$new_hex" ;;
+            Dim)    DIM_FG="$new_hex" ;;
+            Normal) NORM_FG="$new_hex" ;;
+            Accent) ACCENT="$new_hex" ;;
+            Bright) BRIGHT="$new_hex" ;;
+            MenuFG) MENU_FG="$new_hex" ;;
+            Tag1)   TAG[0]="$new_hex" ;;
+            Tag2)   TAG[1]="$new_hex" ;;
+            Tag3)   TAG[2]="$new_hex" ;;
+            Tag4)   TAG[3]="$new_hex" ;;
+            Tag5)   TAG[4]="$new_hex" ;;
+            Tag6)   TAG[5]="$new_hex" ;;
+            Tag7)   TAG[6]="$new_hex" ;;
+            Tag8)   TAG[7]="$new_hex" ;;
+            Tag9)   TAG[8]="$new_hex" ;;
+            Tag10)  TAG[9]="$new_hex" ;;
+        esac
+
+        ok "$label → $new_hex"
+        show_palette_preview
+    done
+}
+
 # ── interactive questions ─────────────────────────────────────────────────────
 ask_questions() {
     header "── chadwm theme generator ──────────────────────────────"
@@ -822,6 +903,16 @@ main() {
 
     mapfile -t SORTED < <(sort_by_luminance "${COLORS[@]}")
     build_palette "${SORTED[@]}"
+
+    show_palette_preview
+    ask "Continue with these colors? [Y/n]:"
+    read -rp "> " ans
+    if [[ "$ans" =~ ^[Nn]$ ]]; then
+        echo "Aborted."
+        exit 0
+    fi
+
+    tweak_palette
 
     ask_questions
     write_theme

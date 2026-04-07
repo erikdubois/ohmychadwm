@@ -862,6 +862,48 @@ show_theme_menu() {
             if [[ -f \"\$wp\" ]]; then feh --bg-fill \"\$wp\" 2>/dev/null; break; fi
         done
 
+        # ── optional font sync ────────────────────────────────────────────────
+        theme_file=\"${OHMYCHADWM_CONFIG}/chadwm/themes/\${chosen}.h\"
+        t_font=\$(grep -oP '#define THEME_FONT\s+\"\K[^\"]+' \"\$theme_file\" | head -1)
+        if [[ -n \"\$t_font\" ]]; then
+            t_style=\$(grep -oP '#define THEME_FONTSTYLE\s+\"\K[^\"]+' \"\$theme_file\" | head -1)
+            t_size=\$(grep -oP '#define THEME_FONTSIZE\s+\K[0-9]+' \"\$theme_file\" | head -1)
+            [[ -z \"\$t_style\" ]] && t_style=\"Bold\"
+            [[ -z \"\$t_size\"  ]] && t_size=\"13\"
+            rofi_font=\"\$t_font \$t_style \$t_size\"
+            echo \"\"
+            echo \"Theme font: \$rofi_font\"
+            echo \"Apply to other apps? (alacritty, kitty, GTK, rofi) [y/N]:\"
+            read -rp \"> \" _af
+            if [[ \"\$_af\" =~ ^[Yy]\$ ]]; then
+                _ala=\"\${HOME}/.config/alacritty/alacritty.toml\"
+                if [[ -f \"\$_ala\" ]]; then
+                    sed -i \"s|^\(family = \)\\\"[^\\\"]*\\\"|\1\\\"\$t_font\\\"|\" \"\$_ala\"
+                    sed -i \"s|^\(size = \)[0-9.]*|\1\${t_size}.0|\" \"\$_ala\"
+                fi
+                if command -v kitty &>/dev/null; then
+                    _kit=\"\${HOME}/.config/kitty/kitty.conf\"
+                    if [[ -f \"\$_kit\" ]]; then
+                        sed -i \"s|^font_family.*|font_family      \$t_font|\" \"\$_kit\"
+                        sed -i \"s|^font_size.*|font_size        \${t_size}.0|\" \"\$_kit\"
+                    fi
+                fi
+                for _gtk in \"\${HOME}/.config/gtk-3.0/settings.ini\" \"\${HOME}/.config/gtk-4.0/settings.ini\"; do
+                    [[ -f \"\$_gtk\" ]] && sed -i \"s|^gtk-font-name=.*|gtk-font-name=\$rofi_font|\" \"\$_gtk\"
+                done
+                command -v xfconf-query &>/dev/null && \
+                    xfconf-query -c xsettings -p /Gtk/FontName -s \"\$rofi_font\" 2>/dev/null || true
+                for _rasi in \
+                    \"${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi\" \
+                    \"${OHMYCHADWM_CONFIG}/rofi/config.rasi\" \
+                    \"${OHMYCHADWM_CONFIG}/rofi/launcher2.rasi\" \
+                    \"\${HOME}/.config/rofi/config.rasi\"; do
+                    [[ -f \"\$_rasi\" ]] && sed -i \"s|\(\s*font:\s*\)\\\"[^\\\"]*\\\"|\1\\\"\$rofi_font\\\"|g\" \"\$_rasi\"
+                done
+                echo \"Fonts applied.\"
+            fi
+        fi
+
         notify-send \"ohmychadwm\" \"Theme \${chosen} applied — rebuilding...\"
         cd \"${OHMYCHADWM_CONFIG}/chadwm\" && bash rebuild.sh
     '"

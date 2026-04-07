@@ -38,6 +38,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+//#include "themes/test.h"
 #include "themes/drwho.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
