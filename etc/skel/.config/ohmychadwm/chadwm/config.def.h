@@ -38,7 +38,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
-#include "themes/lookintoo.h"
+//#include "themes/lookinto.h"
 //#include "themes/test.h"
 //#include "themes/drwho.h"
 //#include "themes/dragon.h"
@@ -47,7 +47,7 @@
 //#include "themes/doors.h"
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
-//#include "themes/goodnight.h"
+#include "themes/goodnight.h"
 
 /* fallback layout settings for themes that don't define them */
 #ifndef THEME_TOPBAR

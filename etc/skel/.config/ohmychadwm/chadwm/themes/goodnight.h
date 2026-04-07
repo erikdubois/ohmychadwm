@@ -14,13 +14,13 @@
 
 static const char col_borderbar[]      = "#100E1D";
 
-static const char SchemeNormfg[]       = "#1F1E2E";
+static const char SchemeNormfg[]       = "#CDD6F5";
 static const char SchemeNormbg[]       = "#100E1D";
-static const char SchemeNormbr[]       = "#1c1a29";
+static const char SchemeNormbr[]       = "#242434";
 
 static const char SchemeSelfg[]        = "#100E1D";
 static const char SchemeSelbg[]        = "#242434";
-static const char SchemeSelbr[]        = "#242434";
+static const char SchemeSelbr[]        = "#CDD6F5";
 
 static const char SchemeTitlefg[]      = "#CDD6F5";
 static const char SchemeTitlebg[]      = "#100E1D";
@@ -126,6 +126,6 @@ static const char SchemeLayoutOPfg[]   = "#525468";
 static const char SchemeLayoutOPbg[]   = "#100E1D";
 static const char SchemeLayoutOPbr[]   = "#100E1D";
 
-static const char SchemeMenufg[]       = "#242434";
+static const char SchemeMenufg[]       = "#7D8299";
 static const char SchemeMenubg[]       = "#100E1D";
 static const char SchemeMenubr[]       = "#100E1D";
