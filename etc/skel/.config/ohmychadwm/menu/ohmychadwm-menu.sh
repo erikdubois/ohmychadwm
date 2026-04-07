@@ -444,21 +444,52 @@ show_slstatus_menu() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Theme\n Create your own theme\n Delete theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Edit Colours (Xresources)") in
-            *Theme*)            show_theme_menu        || continue; return 0 ;;
+        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Customise") in
+            *Choose*)           show_theme_menu        || continue; return 0 ;;
             *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
             *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
-            *Tags*)             show_tags_menu       || continue; return 0 ;;
-            *Border*)           show_border_menu     || continue; return 0 ;;
-            *Gaps*)             show_gaps_menu       || continue; return 0 ;;
-            *"Bar position"*)   show_bar_menu        || continue; return 0 ;;
-            *"Smart gaps"*)     show_smartgaps_menu  || continue; return 0 ;;
-            *"Hide systray"*)   show_systray_menu    || continue; return 0 ;;
-            *"New window"*)     show_newwindow_menu  || continue; return 0 ;;
-            *"Launcher icons"*) show_launchers_menu  || continue; return 0 ;;
-            *"Master area"*)    show_mfact_menu      || continue; return 0 ;;
-            *Font*)             show_font_menu       || continue; return 0 ;;
-            *"Edit Colours"*)   edit_in_editor "${HOME}/.Xresources"; return 0 ;;
+            *Customise*)        show_customise_menu    || continue; return 0 ;;
+            *)                  return 1 ;;
+        esac
+    done
+}
+
+_customise_reset_defaults() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    # Restore THEME_* macros for values that have a theme counterpart
+    sed -i "s/\(static const unsigned int borderpx\s*=\s*\)[^;]*/\1THEME_BORDER /"  "$config"
+    sed -i "s/\(static const unsigned int gappih\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
+    sed -i "s/\(static const unsigned int gappiv\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
+    sed -i "s/\(static const unsigned int gappoh\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
+    sed -i "s/\(static const unsigned int gappov\s*=\s*\)[^;]*/\1THEME_GAPS /"      "$config"
+    sed -i "s/\(static const int smartgaps\s*=\s*\)[^;]*/\1THEME_SMARTGAPS /"       "$config"
+    sed -i "s/\(static const int showsystray\s*=\s*\)[^;]*/\1THEME_SHOWSYSTRAY /"   "$config"
+    sed -i "s/\(static const int topbar\s*=\s*\)[^;]*/\1THEME_TOPBAR /"             "$config"
+    sed -i "s/\(static const float mfact\s*=\s*\)[^;]*/\1THEME_MFACT   /"           "$config"
+    sed -i "s/\(static const int nmaster\s*=\s*\)[^;]*/\1THEME_NMASTER /"           "$config"
+    # Hardcoded defaults (no THEME_* equivalent)
+    sed -i "s/\(static const int horizpadbar\s*=\s*\)[^;]*/\15 /"                   "$config"
+    sed -i "s/\(static const int vertpadbar\s*=\s*\)[^;]*/\111 /"                   "$config"
+    sed -i "s/\(new_window_attach_on_end\s*=\s*\)[^;]*/\10 /"                       "$config"
+    notify-send "ohmychadwm" "Customise reset to theme defaults — rebuilding..."
+    (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+}
+
+show_customise_menu() {
+    while true; do
+        case $(menu "Customise" " Tags\n Border\n Gaps\n Bar padding\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Back to default") in
+            *Tags*)             show_tags_menu         || continue; return 0 ;;
+            *Border*)           show_border_menu       || continue; return 0 ;;
+            *Gaps*)             show_gaps_menu         || continue; return 0 ;;
+            *"Bar padding"*)    show_barpad_menu       || continue; return 0 ;;
+            *"Bar position"*)   show_bar_menu          || continue; return 0 ;;
+            *"Smart gaps"*)     show_smartgaps_menu    || continue; return 0 ;;
+            *"Hide systray"*)   show_systray_menu      || continue; return 0 ;;
+            *"New window"*)     show_newwindow_menu    || continue; return 0 ;;
+            *"Launcher icons"*) show_launchers_menu    || continue; return 0 ;;
+            *"Master area"*)    show_mfact_menu        || continue; return 0 ;;
+            *Font*)             show_font_menu         || continue; return 0 ;;
+            *"Back to default"*) _customise_reset_defaults; return 0 ;;
             *)                  return 1 ;;
         esac
     done
@@ -540,6 +571,43 @@ _apply_gaps() {
     sed -i "s/\(gappov\s*=\s*\)[0-9]\+/\1${px}/" "$config"
     (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
     notify-send "ohmychadwm" "Gaps set to ${px}px"
+}
+
+show_barpad_menu() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    while true; do
+        local cv ch
+        cv=$(grep -oP 'vertpadbar\s*=\s*\K[0-9]+' "$config")
+        ch=$(grep -oP 'horizpadbar\s*=\s*\K[0-9]+' "$config")
+        case $(menu "Bar padding  vert:${cv}  horiz:${ch}" " Vertical padding\n Horizontal padding\n Back to default") in
+            *Vertical*)
+                local v
+                v=$(menu "Bar vertical padding (current: ${cv})" \
+                    "0\n2\n4\n6\n8\n10\n11\n12\n14\n16\n18\n20") || continue
+                sed -i "s/\(static const int vertpadbar\s*=\s*\)[0-9]\+/\1${v}/" "$config"
+                notify-send "ohmychadwm" "vertpadbar → ${v} — rebuilding..."
+                (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+                return 0
+                ;;
+            *Horizontal*)
+                local h
+                h=$(menu "Bar horizontal padding (current: ${ch})" \
+                    "0\n2\n4\n5\n6\n8\n10\n12\n14\n16\n18\n20") || continue
+                sed -i "s/\(static const int horizpadbar\s*=\s*\)[0-9]\+/\1${h}/" "$config"
+                notify-send "ohmychadwm" "horizpadbar → ${h} — rebuilding..."
+                (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+                return 0
+                ;;
+            *"Back to default"*)
+                sed -i "s/\(static const int vertpadbar\s*=\s*\)[0-9]\+/\111/" "$config"
+                sed -i "s/\(static const int horizpadbar\s*=\s*\)[0-9]\+/\15/" "$config"
+                notify-send "ohmychadwm" "Bar padding reset to defaults — rebuilding..."
+                (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
+                return 0
+                ;;
+            *) return 1 ;;
+        esac
+    done
 }
 
 show_bar_menu() {
@@ -1056,7 +1124,7 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Lan/Wifi\n Defaults"
+        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Display\n Lan/Wifi\n Defaults"
 
         # Show Xresources option only if the file exists
         [[ -f "${HOME}/.Xresources" ]] && options+="\n Xresources"
@@ -1066,11 +1134,118 @@ show_setup_menu() {
             *"Edit Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *"Edit Rofi"*)      edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *"Edit Alacritty"*) edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
-            *"Lan/Wifi"*)   show_lanwifi_menu || continue; return 0 ;;
+            *Display*)      show_display_menu  || continue; return 0 ;;
+            *"Lan/Wifi"*)   show_lanwifi_menu  || continue; return 0 ;;
             *Defaults*)     show_defaults_menu || continue; return 0 ;;
             *)              return 1 ;;
         esac
     done
+}
+
+# ---------------------------------------------------------------------------
+# Display management
+# ---------------------------------------------------------------------------
+show_display_menu() {
+    while true; do
+        # detect connected outputs at menu-open time
+        local -a outputs
+        mapfile -t outputs < <(xrandr | awk '/ connected/{print $1}')
+        local out_count=${#outputs[@]}
+        local primary="${outputs[0]:-}"
+        local secondary="${outputs[1]:-}"
+
+        local options=" arandr (GUI)\n Auto-detect\n Rotate display"
+        if (( out_count >= 2 )); then
+            options=" arandr (GUI)\n Auto-detect\n Mirror displays\n Extend right\n Extend left\n Extend above\n Extend below\n Primary only\n Secondary only\n Rotate display"
+        fi
+
+        case $(menu "Display (${out_count} connected)" "$options") in
+            *arandr*)
+                if ! command -v arandr &>/dev/null; then
+                    notify-send "ohmychadwm" "Installing arandr..."
+                    sudo pacman -S --needed --noconfirm arandr
+                fi
+                setsid arandr &>/dev/null &
+                disown
+                return 0
+                ;;
+            *"Auto-detect"*)
+                xrandr --auto
+                notify-send "ohmychadwm" "Display auto-detected"
+                return 0
+                ;;
+            *"Mirror"*)
+                xrandr --output "$primary" --auto \
+                       --output "$secondary" --same-as "$primary" --auto
+                notify-send "ohmychadwm" "Mirroring ${primary} → ${secondary}"
+                return 0
+                ;;
+            *"Extend right"*)
+                xrandr --output "$primary" --auto \
+                       --output "$secondary" --auto --right-of "$primary"
+                notify-send "ohmychadwm" "${secondary} right of ${primary}"
+                return 0
+                ;;
+            *"Extend left"*)
+                xrandr --output "$primary" --auto \
+                       --output "$secondary" --auto --left-of "$primary"
+                notify-send "ohmychadwm" "${secondary} left of ${primary}"
+                return 0
+                ;;
+            *"Extend above"*)
+                xrandr --output "$primary" --auto \
+                       --output "$secondary" --auto --above "$primary"
+                notify-send "ohmychadwm" "${secondary} above ${primary}"
+                return 0
+                ;;
+            *"Extend below"*)
+                xrandr --output "$primary" --auto \
+                       --output "$secondary" --auto --below "$primary"
+                notify-send "ohmychadwm" "${secondary} below ${primary}"
+                return 0
+                ;;
+            *"Primary only"*)
+                xrandr --output "$primary" --auto
+                for _o in "${outputs[@]:1}"; do xrandr --output "$_o" --off; done
+                notify-send "ohmychadwm" "Primary only: ${primary}"
+                return 0
+                ;;
+            *"Secondary only"*)
+                xrandr --output "$secondary" --auto
+                xrandr --output "$primary" --off
+                notify-send "ohmychadwm" "Secondary only: ${secondary}"
+                return 0
+                ;;
+            *Rotate*)
+                show_rotate_menu "${outputs[@]}" || continue
+                return 0
+                ;;
+            *) return 1 ;;
+        esac
+    done
+}
+
+show_rotate_menu() {
+    local -a outputs=("$@")
+
+    # if more than one display, ask which one to rotate
+    local target
+    if (( ${#outputs[@]} == 1 )); then
+        target="${outputs[0]}"
+    else
+        target=$(printf '%s\n' "${outputs[@]}" | \
+            rofi -dmenu -p "Rotate which display?" -width "$MENU_WIDTH" 2>/dev/null) || return 1
+    fi
+    [[ -z "$target" ]] && return 1
+
+    case $(menu "Rotate ${target}" " Normal\n Left (90°)\n Right (270°)\n Inverted (180°)") in
+        *Normal*)   xrandr --output "$target" --rotate normal   ;;
+        *Left*)     xrandr --output "$target" --rotate left     ;;
+        *Right*)    xrandr --output "$target" --rotate right    ;;
+        *Inverted*) xrandr --output "$target" --rotate inverted ;;
+        *) return 1 ;;
+    esac
+    notify-send "ohmychadwm" "${target} rotated"
 }
 
 show_lanwifi_menu() {
@@ -1432,12 +1607,12 @@ _lock_screen() {
 # ---------------------------------------------------------------------------
 show_info_menu() {
     while true; do
-        local options=" System\n Processes\n Disk overview\n Disk explorer\n Temperatures\n Logs"
+        local options=" System\n Btop\n Disk overview\n Disk explorer\n Temperatures\n Logs"
         upower -e 2>/dev/null | grep -qi bat && options+=" \n Battery"
 
         case $(menu "Info" "$options") in
-            *System*)      present_terminal "inxi -Fxxx"; return 0 ;;
-            *Processes*)   command -v btop &>/dev/null || install "btop" "btop"; present_terminal "btop"; return 0 ;;
+            *System*)  present_terminal "inxi -Fxxx"; return 0 ;;
+            *Btop*)    command -v btop &>/dev/null || install "btop" "btop"; present_terminal "btop"; return 0 ;;
             *"Disk overview"*) present_terminal "df -h | (read -r header; echo \"\$header\"; sort)"; return 0 ;;
             *"Disk explorer"*) command -v ncdu &>/dev/null || install "ncdu" "ncdu"; present_terminal "ncdu ${HOME}"; return 0 ;;
             *Temp*)        present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
