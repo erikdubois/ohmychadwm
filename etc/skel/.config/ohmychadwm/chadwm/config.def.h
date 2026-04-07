@@ -38,10 +38,11 @@
 //#include "themes/buffalo.h"
 
 // custom themes
-#include "themes/starwars.h"
+//#include "themes/faraway.h"
+//#include "themes/starwars.h"
 //#include "themes/doors.h"
 //#include "themes/summit.h"
-//#include "themes/clonewar.h"
+#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
 
 /* fallback layout settings for themes that don't define them */
@@ -70,7 +71,22 @@
 #define THEME_NMASTER 1
 #endif
 #ifndef THEME_FONT
-#define THEME_FONT "JetBrainsMono Nerd Font Mono:style:bold:size=13"
+#define THEME_FONT "Ubuntu Mono"
+#endif
+#ifndef THEME_FONTSTYLE
+#define THEME_FONTSTYLE "Bold"
+#endif
+#ifndef THEME_FONTSIZE
+#define THEME_FONTSIZE 13
+#endif
+#ifndef THEME_ICONSIZE
+#define THEME_ICONSIZE 18
+#endif
+
+/* stringify helper — combines THEME_FONT + THEME_FONTSIZE at compile time */
+#ifndef _STR
+#define _STRINGIFY(x) #x
+#define _STR(x) _STRINGIFY(x)
 #endif
 
 /* appearance */
@@ -111,7 +127,11 @@ static const int new_window_attach_on_end = 0; /*  1 means the new window will a
 #define ICONSIZE 19   /* icon size */
 #define ICONSPACING 8 /* space between icon and title */
 
-static const char *fonts[] = {THEME_FONT};
+/* primary font + Nerd Font fallback for bar icons (always rendered at THEME_ICONSIZE) */
+static const char *fonts[] = {
+    THEME_FONT ":style=" THEME_FONTSTYLE ":size=" _STR(THEME_FONTSIZE),
+    "JetBrainsMono Nerd Font Mono:style=Bold:size=" _STR(THEME_ICONSIZE),
+};
 
 static const char *colors[][3] = {
     /*                     fg                bg                border */
@@ -148,7 +168,7 @@ static const char *colors[][3] = {
 
 /* tagging */
 //default tags
-static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+static char *tags[] = { "", "", "", "", "", "󰋉", "", "", "", "" };
 //Arabic numbers
 //static char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
 //Roman numbers

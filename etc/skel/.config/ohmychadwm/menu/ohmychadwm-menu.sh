@@ -369,14 +369,15 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Picom.conf \n Slstatus\n Wallpaper\n Menu theme") in
-            *Ohmychadwm*)    show_chadwm_menu        || continue; return 0 ;;
-            *Alacritty*)     show_alacritty_menu     || continue; return 0 ;;
-            *Picom*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
-            *Wallpaper*)     show_wallpaper_menu     || continue; return 0 ;;
-            *Slstatus*)      show_slstatus_menu      || continue; return 0 ;;
-            *"Menu theme"*)  present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
-            *)               return 1 ;;
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Edit Menu theme\n Apply font globally") in
+            *Ohmychadwm*)           show_chadwm_menu        || continue; return 0 ;;
+            *Alacritty*)            show_alacritty_menu     || continue; return 0 ;;
+            *"Edit Picom"*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+            *Wallpaper*)            show_wallpaper_menu     || continue; return 0 ;;
+            *Slstatus*)             show_slstatus_menu      || continue; return 0 ;;
+            *"Edit Menu theme"*)    present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
+            *"Apply font globally"*) present_terminal "bash ${OHMYCHADWM_CONFIG}/scripts/apply-font-globally.sh"; return 0 ;;
+            *)                      return 1 ;;
         esac
     done
 }
@@ -443,7 +444,7 @@ show_slstatus_menu() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Theme\n Create your own theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Colours (Xresources)") in
+        case $(menu "chadwm" " Theme\n Create your own theme\n Tags\n Border\n Gaps\n Bar position\n Smart gaps\n Hide systray\n New window\n Launcher icons\n Master area\n Font\n Edit Colours (Xresources)") in
             *Theme*)            show_theme_menu      || continue; return 0 ;;
             *"Create your own theme"*) setsid alacritty -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Tags*)             show_tags_menu       || continue; return 0 ;;
@@ -456,7 +457,7 @@ show_chadwm_menu() {
             *"Launcher icons"*) show_launchers_menu  || continue; return 0 ;;
             *"Master area"*)    show_mfact_menu      || continue; return 0 ;;
             *Font*)             show_font_menu       || continue; return 0 ;;
-            *"Colours"*)        edit_in_editor "${HOME}/.Xresources"; return 0 ;;
+            *"Edit Colours"*)   edit_in_editor "${HOME}/.Xresources"; return 0 ;;
             *)                  return 1 ;;
         esac
     done
@@ -816,11 +817,24 @@ _apply_theme() {
 }
 
 show_font_menu() {
-    local font_list
-    font_list=$(fc-list : family | sort -u)
-    local chosen
-    chosen=$(echo "$font_list" | rofi -dmenu -p "Font…" -width "$MENU_WIDTH" -lines 20 2>/dev/null) || return 1
-    _apply_font "$chosen"
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local active_theme
+    active_theme=$(grep -oP '(?<=#include "themes/)[^"]+(?=\.h")' "$config" | head -1)
+    local theme_file="${OHMYCHADWM_CONFIG}/chadwm/themes/${active_theme}.h"
+
+    present_terminal "bash -c '
+        chosen=\$(fc-list : family \
+            | sed \"s/,.*//\" \
+            | sed \"s/^[[:space:]]*//;s/[[:space:]]*\$//\" \
+            | grep -v \"^\\.\" \
+            | sort -uf \
+            | fzf --prompt=\"Font > \" --height=40% --layout=reverse --border 2>/dev/null) || exit 0
+        [[ -z \"\$chosen\" ]] && exit 0
+        sed -i \"s|#define THEME_FONT \\\"[^\\\"]*\\\"|#define THEME_FONT    \\\"\$chosen\\\"|\" \"${theme_file}\"
+        sed -i \"s|#define THEME_FONT \\\"[^\\\"]*\\\"|#define THEME_FONT \\\"\$chosen\\\"|\" \"${config}\"
+        notify-send \"ohmychadwm\" \"Font set to \$chosen — rebuilding...\"
+        cd \"${OHMYCHADWM_CONFIG}/chadwm\" && bash rebuild.sh
+    '"
 }
 
 _apply_font() {
@@ -832,11 +846,11 @@ _apply_font() {
     if [[ -n "$active_theme" ]]; then
         local theme_file="${OHMYCHADWM_CONFIG}/chadwm/themes/${active_theme}.h"
         if [[ -f "$theme_file" ]]; then
-            sed -i "s|#define THEME_FONT.*|#define THEME_FONT    \"${font}\"|" "$theme_file"
+            sed -i "s|#define THEME_FONT \"[^\"]*\"|#define THEME_FONT    \"${font}\"|" "$theme_file"
         fi
     fi
     # Also update the fallback in config.def.h
-    sed -i "s|#define THEME_FONT.*|#define THEME_FONT \"${font}\"|" "$config"
+    sed -i "s|#define THEME_FONT \"[^\"]*\"|#define THEME_FONT \"${font}\"|" "$config"
     (cd "${OHMYCHADWM_CONFIG}/chadwm" && alacritty -e bash -c './rebuild.sh; exec bash')
     notify-send "ohmychadwm" "Font set to '${font}'"
 }
@@ -875,16 +889,16 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Autostart\n Alacritty\n Picom\n Rofi\n Lan/Wifi\n Defaults"
+        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Lan/Wifi\n Defaults"
 
         # Show Xresources option only if the file exists
         [[ -f "${HOME}/.Xresources" ]] && options+="\n Xresources"
 
         case $(menu "Setup" "$options") in
-            *Autostart*)    edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
-            *Picom*)        edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
-            *Rofi*)         edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
-            *Alacritty*)    edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
+            *"Edit Autostart"*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
+            *"Edit Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
+            *"Edit Rofi"*)      edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
+            *"Edit Alacritty"*) edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
             *"Lan/Wifi"*)   show_lanwifi_menu || continue; return 0 ;;
             *Defaults*)     show_defaults_menu || continue; return 0 ;;
             *)              return 1 ;;
@@ -1122,10 +1136,10 @@ show_install_extras_menu() {
 # ---------------------------------------------------------------------------
 show_remove_menu() {
     while true; do
-        case $(menu "Remove" " Autostart entry\n Dev environment\n Package") in
-            *Package*)   present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns'; return 0 ;;
-            *"Dev"*)     show_remove_dev_menu   || continue; return 0 ;;
-            *Autostart*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
+        case $(menu "Remove" " Edit Autostart entry\n Dev environment\n Package") in
+            *Package*)          present_terminal 'pacman -Qq | fzf --multi --preview "pacman -Qi {}" | xargs -ro sudo pacman -Rns'; return 0 ;;
+            *"Dev"*)            show_remove_dev_menu   || continue; return 0 ;;
+            *"Edit Autostart"*) edit_in_editor "${OHMYCHADWM_CONFIG}/scripts/run.sh"; return 0 ;;
             *)           return 1 ;;
         esac
     done

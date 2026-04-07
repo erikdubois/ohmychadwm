@@ -6,7 +6,7 @@
  */
 
 configuration {
-	font:							"Noto sans 12";
+	font:							"Noto Sans Mono Bold 13";
     show-icons:                     true;
 	icon-theme: 					"";
     display-drun: 					"";

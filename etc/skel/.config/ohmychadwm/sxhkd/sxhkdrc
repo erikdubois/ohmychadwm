@@ -90,9 +90,9 @@ alt + shift + x
 alt + x
     ~/.config/ohmychadwm/menu/ohmychadwm-menu.sh system
 
-#Rofi theme selector
+#Rofi launcher
 super + r
-    rofi -show drun
+    rofi -no-config -no-lazy-grab -show drun -modi drun -theme ~/.config/ohmychadwm/rofi/launcher2.rasi
 
 #Alacritty
 super + t
@@ -207,10 +207,6 @@ ctrl + alt + ,
 #Pulse Audio Control
 ctrl + alt + u
      pavucontrol
-
-#Rofi theme selector
-ctrl + alt + r
-  rofi-theme-selector
 
 #Spotify
 ctrl + alt + s
