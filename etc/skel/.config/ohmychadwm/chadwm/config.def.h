@@ -31,7 +31,7 @@
 //#include "themes/solarized.h"
 
 // african themes (bottom bar, zero gaps)
-//#include "themes/elephant.h"
+#include "themes/tiger.h"
 //#include "themes/giraffe.h"
 //#include "themes/hippo.h"
 //#include "themes/rhino.h"
@@ -40,6 +40,7 @@
 // custom themes
 //#include "themes/test.h"
 //#include "themes/drwho.h"
+//#include "themes/dragon.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
 //#include "themes/doors.h"

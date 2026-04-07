@@ -378,7 +378,7 @@ ask_questions() {
         saturn pluto uranus jupiter venus mercury mars neptune
         catppuccin dracula everforest gruvchad kanagawa material
         monokai nord onedark prime rosepine solarized tokyonight tundra
-        elephant giraffe hippo rhino buffalo
+        tiger giraffe hippo rhino buffalo
     )
 
     while true; do

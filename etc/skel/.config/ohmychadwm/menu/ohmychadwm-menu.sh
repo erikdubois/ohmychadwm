@@ -856,7 +856,7 @@ show_delete_theme_menu() {
         saturn pluto uranus jupiter venus mercury mars neptune
         catppuccin dracula everforest gruvchad kanagawa material
         monokai nord onedark prime rosepine solarized tokyonight tundra
-        elephant giraffe hippo rhino buffalo
+        tiger giraffe hippo rhino buffalo
     )
 
     # build list of custom (user-created) themes only
