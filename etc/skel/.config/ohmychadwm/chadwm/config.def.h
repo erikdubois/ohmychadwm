@@ -4,7 +4,7 @@
 
 // default themes
 //#include "themes/catppuccin.h"
-#include "themes/dracula.h"
+//#include "themes/dracula.h"
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
 //#include "themes/nord.h"
@@ -31,13 +31,14 @@
 //#include "themes/solarized.h"
 
 // african themes (bottom bar, zero gaps)
-#include "themes/tiger.h"
-//#include "themes/giraffe.h"
+//#include "themes/tiger.h"
+//#include "themes/lookinto.h"
 //#include "themes/hippo.h"
 //#include "themes/rhino.h"
 //#include "themes/buffalo.h"
 
 // custom themes
+#include "themes/lookintoo.h"
 //#include "themes/test.h"
 //#include "themes/drwho.h"
 //#include "themes/dragon.h"
