@@ -56,7 +56,7 @@ configuration {
 }
 
 #element-text {
-    font: "Noto Sans Mono Bold 13";
+    font: "JetBrainsMono Nerd Font Mono Bold 13";
     background-color: @transparent;
     text-color:       inherit;
 }
