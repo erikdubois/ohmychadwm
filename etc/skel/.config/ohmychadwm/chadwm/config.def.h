@@ -20,7 +20,7 @@
 //#include "themes/venus.h"
 //#include "themes/mercury.h"
 //#include "themes/neptune.h"
-//#include "themes/uranus.h"
+#include "themes/uranus.h"
 //#include "themes/pluto.h"
 
 // other themes
@@ -40,7 +40,7 @@
 // custom themes
 //#include "themes/spiderwoman.h"
 //#include "themes/test.h"
-#include "themes/bright.h"
+//#include "themes/bright.h"
 //#include "themes/drwho.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
