@@ -13,7 +13,7 @@
 #   xdotool       — window control (pacman -S xdotool) [optional]
 #   xdg-open      — open URLs / files
 #   pacman / yay  — package management
-#   fzf           — fuzzy finder   (pacman -S fzf)
+#   fzf           — edit  finder   (pacman -S fzf)
 #   redshift      — night light    (pacman -S redshift) [optional]
 #   xautolock     — idle lock      (pacman -S xautolock) [optional]
 #   slock / i3lock — screen locker [optional]
@@ -33,7 +33,7 @@ set -uo pipefail
 # User-tuneable settings — override in ~/.config/ohmychadwm/menu.conf if present
 # ---------------------------------------------------------------------------
 TERMINAL="${TERMINAL:-alacritty}"
-EDITOR="${EDITOR:-nvim}"
+EDITOR="${EDITOR:-nano}"
 # Detect installed browser — use $BROWSER if already set, otherwise find first available
 if [[ -z "${BROWSER:-}" ]]; then
     for _b in firefox chromium brave-browser qutebrowser epiphany midori; do
@@ -369,13 +369,13 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Edit Menu theme\n Apply font globally\n Hard Reset") in
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Apply font globally\n Hard Reset") in
             *Ohmychadwm*)           show_chadwm_menu        || continue; return 0 ;;
             *Alacritty*)            show_alacritty_menu     || continue; return 0 ;;
             *"Edit Picom"*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *Wallpaper*)            show_wallpaper_menu     || continue; return 0 ;;
             *Slstatus*)             show_slstatus_menu      || continue; return 0 ;;
-            *"Edit Menu theme"*)    present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
+
             *"Apply font globally"*) present_terminal "bash ${OHMYCHADWM_CONFIG}/scripts/apply-font-globally.sh"; return 0 ;;
             *"Hard Reset"*)          present_terminal "bash ${OHMYCHADWM_CONFIG}/scripts/backup-originals.sh --restore"; return 0 ;;
             *)                      return 1 ;;
@@ -445,11 +445,12 @@ show_slstatus_menu() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Customise") in
+        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise") in
             *Choose*)           show_theme_menu        || continue; return 0 ;;
             *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
             *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Customise*)        show_customise_menu    || continue; return 0 ;;
+            *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *)                  return 1 ;;
         esac
     done
@@ -954,12 +955,17 @@ show_theme_menu() {
         # sync rasi accent color — enforce contrast against dark bg (#101010, lum≈16)
         color=\$(grep -oP \"SchemeMenufg\[\]\s*=\s*\\\"\K[^\\\"]+\" \"$themes_dir/\${chosen}.h\" | head -1)
         if [[ -n \"\$color\" ]]; then
-            _lum() { local h=\"\${1#'#'}\"; echo \$(( (299*16#\${h:0:2} + 587*16#\${h:2:2} + 114*16#\${h:4:2}) / 1000 )); }
-            _lighten() { local h=\"\${1#'#'}\" a=\"\${2:-10}\"; local r=\$(( 16#\${h:0:2}+a )); local g=\$(( 16#\${h:2:2}+a )); local b=\$(( 16#\${h:4:2}+a )); printf '#%02x%02x%02x' \$(( r>255?255:r )) \$(( g>255?255:g )) \$(( b>255?255:b )); }
-            while (( \$(_lum \"\$color\") - 16 < 80 )); do
-                color=\$(_lighten \"\$color\" 10)
-                [[ \"\$color\" == \"#ffffff\" ]] && break
+            _h=\"\${color#\\#}\"
+            _r=\$((16#\${_h:0:2})) _g=\$((16#\${_h:2:2})) _b=\$((16#\${_h:4:2}))
+            _lum=\$(( (299*_r + 587*_g + 114*_b) / 1000 ))
+            while (( _lum < 120 )); do
+                _r=\$(( _r+20 < 255 ? _r+20 : 255 ))
+                _g=\$(( _g+20 < 255 ? _g+20 : 255 ))
+                _b=\$(( _b+20 < 255 ? _b+20 : 255 ))
+                _lum=\$(( (299*_r + 587*_g + 114*_b) / 1000 ))
+                (( _r==255 && _g==255 && _b==255 )) && break
             done
+            color=\$(printf \"#%02x%02x%02x\" \$_r \$_g \$_b)
             safe=\"\${color//&/\\\\&}\"
             sed -i \"s|ac:.*\\/\\* selected item text.*|ac:     \${safe};   /* selected item text   (synced from SchemeMenufg)  */|\" \
                 \"${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi\"
@@ -1018,6 +1024,23 @@ show_theme_menu() {
     '"
 }
 
+_rasi_readable_color() {
+    # Ensure a hex color is readable on the dark menu background (#101010).
+    # Lightens the color in steps until luminance >= 120, returns the result.
+    local color="$1"
+    local hex="${color#'#'}"
+    local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
+    local lum=$(( (299*r + 587*g + 114*b) / 1000 ))
+    while (( lum < 120 )); do
+        r=$(( r + 20 < 255 ? r + 20 : 255 ))
+        g=$(( g + 20 < 255 ? g + 20 : 255 ))
+        b=$(( b + 20 < 255 ? b + 20 : 255 ))
+        lum=$(( (299*r + 587*g + 114*b) / 1000 ))
+        (( r == 255 && g == 255 && b == 255 )) && break
+    done
+    printf '#%02x%02x%02x' $r $g $b
+}
+
 _sync_rasi_accent() {
     # Extract SchemeMenufg from a theme .h file and write it into the menu .rasi ac: token
     local theme_file="$1"
@@ -1026,8 +1049,8 @@ _sync_rasi_accent() {
     [[ -f "$rasi" ]] || return
     local color
     color=$(grep -oP 'SchemeMenufg\[\]\s*=\s*"\K[^"]+' "$theme_file" | head -1)
-    [[ -z "$color" ]] || return
-    # Escape & so sed doesn't interpret it as "matched string"
+    [[ -z "$color" ]] && return
+    color=$(_rasi_readable_color "$color")
     local safe_color="${color//&/\\&}"
     sed -i "s|ac:.*\/\* selected item text.*|ac:     ${safe_color};   /* selected item text   (synced from SchemeMenufg)  */|" "$rasi"
 }
