@@ -853,13 +853,9 @@ show_delete_theme_menu() {
     local themes_dir="${OHMYCHADWM_CONFIG}/chadwm/themes"
     local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
 
-    # built-in themes that cannot be deleted
-    local -a BUILTIN=(
-        saturn pluto uranus jupiter venus mercury mars neptune
-        catppuccin dracula everforest gruvchad kanagawa material
-        monokai nord onedark prime rosepine solarized tokyonight tundra
-        elephant giraffe hippo rhino buffalo
-    )
+    # built-in themes: any theme registered in config.def.h (commented or not)
+    local -a BUILTIN
+    mapfile -t BUILTIN < <(grep -oP '(?<=themes/)[^"]+(?=\.h")' "$config")
 
     # build list of custom (user-created) themes only
     local custom_list=""

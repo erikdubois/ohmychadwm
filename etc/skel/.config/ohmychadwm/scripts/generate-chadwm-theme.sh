@@ -373,13 +373,9 @@ ask_questions() {
     echo
 
     # name
-    # names that ship with ohmychadwm and must not be overwritten
-    local -a DEFAULT_NAMES=(
-        saturn pluto uranus jupiter venus mercury mars neptune
-        catppuccin dracula everforest gruvchad kanagawa material
-        monokai nord onedark prime rosepine solarized tokyonight tundra
-        elephant giraffe hippo rhino buffalo
-    )
+    # names registered in config.def.h must not be overwritten
+    local -a DEFAULT_NAMES
+    mapfile -t DEFAULT_NAMES < <(grep -oP '(?<=themes/)[^"]+(?=\.h")' "$CONFIG")
 
     while true; do
         ask "Theme name (lowercase, no spaces, e.g. 'savannah'):"
