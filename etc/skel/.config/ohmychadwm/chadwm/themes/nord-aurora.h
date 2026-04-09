@@ -20,115 +20,115 @@ static const char col_borderbar[]      = "#d08770";
 
 static const char SchemeNormfg[]       = "#d08770";
 static const char SchemeNormbg[]       = "#2e3440";
-static const char SchemeNormbr[]       = "#3b4252";
+static const char SchemeNormbr[]       = "#d08770";
 
 static const char SchemeSelfg[]        = "#2e3440";
 static const char SchemeSelbg[]        = "#ebcb8b";
-static const char SchemeSelbr[]        = "#ebcb8b";
+static const char SchemeSelbr[]        = "#d08770";
 
 static const char SchemeTitlefg[]      = "#ebcb8b";
 static const char SchemeTitlebg[]      = "#2e3440";
-static const char SchemeTitlebr[]      = "#2e3440";
+static const char SchemeTitlebr[]      = "#d08770";
 
 static const char TabSelfg[]           = "#ebcb8b";
 static const char TabSelbg[]           = "#3b4252";
-static const char TabSelbr[]           = "#2e3440";
+static const char TabSelbr[]           = "#d08770";
 
 static const char TabNormfg[]          = "#d08770";
 static const char TabNormbg[]          = "#2e3440";
-static const char TabNormbr[]          = "#2e3440";
+static const char TabNormbr[]          = "#d08770";
 
 static const char SchemeTagfg[]        = "#d08770";
 static const char SchemeTagbg[]        = "#2e3440";
-static const char SchemeTagbr[]        = "#2e3440";
+static const char SchemeTagbr[]        = "#d08770";
 
 static const char SchemeTag1fg[]       = "#ebcb8b";
 static const char SchemeTag1bg[]       = "#2e3440";
-static const char SchemeTag1br[]       = "#2e3440";
+static const char SchemeTag1br[]       = "#d08770";
 
 static const char SchemeTag2fg[]       = "#bf616a";
 static const char SchemeTag2bg[]       = "#2e3440";
-static const char SchemeTag2br[]       = "#2e3440";
+static const char SchemeTag2br[]       = "#d08770";
 
 static const char SchemeTag3fg[]       = "#d08770";
 static const char SchemeTag3bg[]       = "#2e3440";
-static const char SchemeTag3br[]       = "#2e3440";
+static const char SchemeTag3br[]       = "#d08770";
 
 static const char SchemeTag4fg[]       = "#a3be8c";
 static const char SchemeTag4bg[]       = "#2e3440";
-static const char SchemeTag4br[]       = "#2e3440";
+static const char SchemeTag4br[]       = "#d08770";
 
 static const char SchemeTag5fg[]       = "#b48ead";
 static const char SchemeTag5bg[]       = "#2e3440";
-static const char SchemeTag5br[]       = "#2e3440";
+static const char SchemeTag5br[]       = "#d08770";
 
 static const char SchemeTag6fg[]       = "#ebcb8b";
 static const char SchemeTag6bg[]       = "#2e3440";
-static const char SchemeTag6br[]       = "#2e3440";
+static const char SchemeTag6br[]       = "#d08770";
 
 static const char SchemeTag7fg[]       = "#bf616a";
 static const char SchemeTag7bg[]       = "#2e3440";
-static const char SchemeTag7br[]       = "#2e3440";
+static const char SchemeTag7br[]       = "#d08770";
 
 static const char SchemeTag8fg[]       = "#a3be8c";
 static const char SchemeTag8bg[]       = "#2e3440";
-static const char SchemeTag8br[]       = "#2e3440";
+static const char SchemeTag8br[]       = "#d08770";
 
 static const char SchemeTag9fg[]       = "#b48ead";
 static const char SchemeTag9bg[]       = "#2e3440";
-static const char SchemeTag9br[]       = "#2e3440";
+static const char SchemeTag9br[]       = "#d08770";
 
 static const char SchemeTag10fg[]      = "#d08770";
 static const char SchemeTag10bg[]      = "#2e3440";
-static const char SchemeTag10br[]      = "#2e3440";
+static const char SchemeTag10br[]      = "#d08770";
 
 static const char SchemeLayoutfg[]     = "#a3be8c";
 static const char SchemeLayoutbg[]     = "#2e3440";
-static const char SchemeLayoutbr[]     = "#2e3440";
+static const char SchemeLayoutbr[]     = "#d08770";
 
 static const char SchemeBtnPrevfg[]    = "#a3be8c";
 static const char SchemeBtnPrevbg[]    = "#2e3440";
-static const char SchemeBtnPrevbr[]    = "#2e3440";
+static const char SchemeBtnPrevbr[]    = "#d08770";
 
 static const char SchemeBtnNextfg[]    = "#ebcb8b";
 static const char SchemeBtnNextbg[]    = "#2e3440";
-static const char SchemeBtnNextbr[]    = "#2e3440";
+static const char SchemeBtnNextbr[]    = "#d08770";
 
 static const char SchemeBtnClosefg[]   = "#bf616a";
 static const char SchemeBtnClosebg[]   = "#2e3440";
-static const char SchemeBtnClosebr[]   = "#2e3440";
+static const char SchemeBtnClosebr[]   = "#d08770";
 
 static const char SchemeLayoutFFfg[]   = "#ebcb8b";
 static const char SchemeLayoutFFbg[]   = "#2e3440";
-static const char SchemeLayoutFFbr[]   = "#2e3440";
+static const char SchemeLayoutFFbr[]   = "#d08770";
 
 static const char SchemeLayoutEWfg[]   = "#d08770";
 static const char SchemeLayoutEWbg[]   = "#2e3440";
-static const char SchemeLayoutEWbr[]   = "#2e3440";
+static const char SchemeLayoutEWbr[]   = "#d08770";
 
 static const char SchemeLayoutDSfg[]   = "#bf616a";
 static const char SchemeLayoutDSbg[]   = "#2e3440";
-static const char SchemeLayoutDSbr[]   = "#2e3440";
+static const char SchemeLayoutDSbr[]   = "#d08770";
 
 static const char SchemeLayoutTGfg[]   = "#a3be8c";
 static const char SchemeLayoutTGbg[]   = "#2e3440";
-static const char SchemeLayoutTGbr[]   = "#2e3440";
+static const char SchemeLayoutTGbr[]   = "#d08770";
 
 static const char SchemeLayoutMSfg[]   = "#b48ead";
 static const char SchemeLayoutMSbg[]   = "#2e3440";
-static const char SchemeLayoutMSbr[]   = "#2e3440";
+static const char SchemeLayoutMSbr[]   = "#d08770";
 
 static const char SchemeLayoutPCfg[]   = "#ebcb8b";
 static const char SchemeLayoutPCbg[]   = "#2e3440";
-static const char SchemeLayoutPCbr[]   = "#2e3440";
+static const char SchemeLayoutPCbr[]   = "#d08770";
 
 static const char SchemeLayoutVVfg[]   = "#d08770";
 static const char SchemeLayoutVVbg[]   = "#2e3440";
-static const char SchemeLayoutVVbr[]   = "#2e3440";
+static const char SchemeLayoutVVbr[]   = "#d08770";
 
 static const char SchemeLayoutOPfg[]   = "#d08770";
 static const char SchemeLayoutOPbg[]   = "#2e3440";
-static const char SchemeLayoutOPbr[]   = "#2e3440";
+static const char SchemeLayoutOPbr[]   = "#d08770";
 
 static const char SchemeMenufg[]       = "#ebcb8b";
 static const char SchemeMenubg[]       = "#2e3440";
