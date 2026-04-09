@@ -27,7 +27,7 @@
     fg-dim: #888888;     /* placeholder / dim text                            */
 
     /* Accent  — tweak this one colour to match your theme */
-    ac:     #bd93f9;   /* selected item text   (synced from SchemeMenufg)  */
+    ac:     #f7f6f7;   /* selected item text   (synced from SchemeMenufg)  */
     sa:     rgba(0, 0, 0, 0.32);   /* selected item bg     (dark navy, semi-opaque)    */
 
     /* Rofi resets */

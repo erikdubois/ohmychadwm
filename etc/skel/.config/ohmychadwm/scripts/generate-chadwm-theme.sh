@@ -941,14 +941,12 @@ main() {
     build_palette "${SORTED[@]}"
 
     show_palette_preview
-    ask "Continue with these colors? [Y/n]:"
+    ask "Continue with these colors? [y=keep / a=adapt / n=cancel]:"
     read -rp "> " ans
-    if [[ "$ans" =~ ^[Nn]$ ]]; then
-        echo "Aborted."
-        exit 0
-    fi
-
-    tweak_palette
+    case "$ans" in
+        [Nn]) echo "Aborted."; exit 0 ;;
+        [Aa]) tweak_palette ;;
+    esac
 
     ask_questions
 
