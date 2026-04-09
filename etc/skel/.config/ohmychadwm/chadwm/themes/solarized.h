@@ -12,7 +12,7 @@
 #define THEME_FONTSIZE 13
 #define THEME_ICONSIZE    18
 
-static const char col_borderbar[]      = "#002b36";
+static const char col_borderbar[]      = "#231f20";
 
 static const char SchemeNormfg[]       = "#586e75";
 static const char SchemeNormbg[]       = "#002b36";
