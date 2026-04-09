@@ -5,9 +5,14 @@
 // default themes
 //#include "themes/catppuccin.h"
 #include "themes/dracula.h"
+//#include "themes/dracul.h"
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
 //#include "themes/nord.h"
+//#include "themes/nord-polarnight.h"
+//#include "themes/nord-snowstorm.h"
+//#include "themes/nord-frost.h"
+//#include "themes/nord-aurora.h"
 //#include "themes/onedark.h"
 //#include "themes/prime.h"
 //#include "themes/tokyonight.h"
@@ -26,7 +31,7 @@
 // other themes
 //#include "themes/kanagawa.h"
 //#include "themes/monokai.h"
-//#include "themes/rose-pine.h"
+//#include "themes/rosepine.h"
 //#include "themes/material.h"
 //#include "themes/solarized.h"
 
@@ -38,7 +43,9 @@
 //#include "themes/buffalo.h"
 
 // custom themes
+//#include "themes/spiderwoman.h"
 //#include "themes/test.h"
+//#include "themes/bright.h"
 //#include "themes/drwho.h"
 //#include "themes/faraway.h"
 //#include "themes/starwars.h"
@@ -46,6 +53,9 @@
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
+//#include "themes/tiger.h"
+//#include "themes/dragon.h"
+//#include "themes/lookinto.h"
 
 /* fallback layout settings for themes that don't define them */
 #ifndef THEME_TOPBAR
@@ -456,6 +466,7 @@ static const Button buttons[] = {
     //{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
     { ClkClientWin,         MODKEY,			Button3,        dragmfact,      {0} },
     //{ ClkClientWin,         MODKEY,    	Button3,        dragcfact,      {0} },
+    { ClkRootWin,           0,              Button3,        spawn,          {.v = ohmychadwm_menu} },
     { ClkTagBar,            0,              Button1,        view,           {0} },
     { ClkTagBar,            0,              Button3,        toggleview,     {0} },
     { ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
