@@ -1566,7 +1566,7 @@ void drawbar(Monitor *m) {
         /* draw SchemeMenubr border, then icon inset by 1px */
         XSetForeground(drw->dpy, drw->gc, scheme[SchemeMenu][ColBorder].pixel);
         XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, 0, w, bh);
-        drw_text(drw, x + 1, 1, w - 2, bh - 2, lrpad / 2, launchers[i].name, urg & 1 << i);
+        drw_text(drw, x + borderpx, borderpx, w - 2 * borderpx, bh - 2 * borderpx, lrpad / 2, launchers[i].name, urg & 1 << i);
     } else {
         drw_text(drw, x, 0, w, bh, lrpad / 2, launchers[i].name, urg & 1 << i);
     }
