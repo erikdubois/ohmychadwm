@@ -17,7 +17,7 @@
 /* frost:       nord7=#8fbcbb  nord8=#88c0d0  nord9=#81a1c1  nord10=#5e81ac */
 /* aurora:      nord11=#bf616a  nord12=#d08770  nord13=#ebcb8b  nord14=#a3be8c  nord15=#b48ead */
 
-static const char col_borderbar[]      = "#88c0d0";
+static const char col_borderbar[]      = "#2e3440";
 
 static const char SchemeNormfg[]       = "#d8dee9";
 static const char SchemeNormbg[]       = "#2e3440";
