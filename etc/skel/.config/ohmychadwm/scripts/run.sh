@@ -46,8 +46,8 @@ run "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"  # Polkit auth p
 # Provides transparency, shadows and smooth window rendering.
 # Switch between fastcompmgr (lightweight) and picom (feature-rich) here.
 # Only one compositor should run at a time.
-#run fastcompmgr -c
-run picom --config ~/.config/ohmychadwm/picom/picom.conf
+run fastcompmgr -c
+#run picom --config ~/.config/ohmychadwm/picom/picom.conf
 
 # ── Keyboard ──────────────────────────────────────────────────────────────────
 run "numlockx on"                                     # Enable numlock on login
