@@ -456,6 +456,36 @@ ask_questions() {
         THEME_SMARTGAPS=0
     fi
 
+    # tag style
+    echo
+    ask "Tag style? [default: nerd]"
+    echo "  0) nerd      — nerd font icons (default)"
+    echo "  1) arabic    — 1 2 3 4 5 6 7 8 9 10"
+    echo "  2) roman     — I II III IV V VI VII VIII IX X"
+    echo "  3) powerline — powerline glyphs"
+    echo "  4) webdings  — Web Chat Edit Meld Vb Mail Video Image Files Music"
+    echo "  5) japanese  — 一 二 三 四 五 六 七 八 九 十"
+    echo "  6) alpha     — A B C D E F G H I J"
+    echo "  7) emoji     — 👨‍💻 🌐 🖥️ 📟 📜 👋 📺 ✉️ 💬 🎮"
+    echo "  8) geometric — ● ■ ▲ ◆ ◇ ★ ✗ ✓ + ○"
+    echo "  9) chinese   — 壹 贰 叁 肆 伍 陆 柒 捌 玖 拾"
+    echo " 10) purpose   — home chat surf media game remote code mail files misc"
+    read -rp "> " ans
+    case "$ans" in
+        1|arabic)    THEME_TAGS="TAGS_ARABIC"    ;;
+        2|roman)     THEME_TAGS="TAGS_ROMAN"     ;;
+        3|powerline) THEME_TAGS="TAGS_POWERLINE" ;;
+        4|webdings)  THEME_TAGS="TAGS_WEBDINGS"  ;;
+        5|japanese)  THEME_TAGS="TAGS_JAPANESE"  ;;
+        6|alpha)     THEME_TAGS="TAGS_ALPHA"     ;;
+        7|emoji)     THEME_TAGS="TAGS_EMOJI"     ;;
+        8|geometric) THEME_TAGS="TAGS_GEOMETRIC" ;;
+        9|chinese)   THEME_TAGS="TAGS_CHINESE"   ;;
+        10|purpose)  THEME_TAGS="TAGS_PURPOSE"   ;;
+        *)           THEME_TAGS="TAGS_NERD"      ;;
+    esac
+    ok "Tag style: $THEME_TAGS"
+
     # mfact
     ask "Master area size? [0.10-0.90, default 0.50]:"
     read -rp "> " ans
@@ -692,6 +722,7 @@ write_theme() {
     cat > "$file" <<EOF
 /* ${THEME_NAME^} — generated from wallpaper */
 #define THEME_TOPBAR   $THEME_TOPBAR
+#define THEME_TAGS     $THEME_TAGS
 #define THEME_GAPS     $THEME_GAPS
 #define THEME_AUTOHIDE    $THEME_AUTOHIDE
 #define THEME_SHOWSYSTRAY $THEME_SHOWSYSTRAY

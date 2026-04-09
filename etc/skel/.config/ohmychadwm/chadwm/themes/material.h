@@ -1,5 +1,6 @@
 /* Material — deep teal, ocean blue, slate grey */
 #define THEME_TOPBAR 0
+#define THEME_TAGS TAGS_NERD
 #define THEME_GAPS   0
 #define THEME_AUTOHIDE 3
 #define THEME_SHOWSYSTRAY 1

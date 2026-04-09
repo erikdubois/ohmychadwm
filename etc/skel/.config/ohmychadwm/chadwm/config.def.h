@@ -2,6 +2,19 @@
 
 #include <X11/XF86keysym.h>
 
+/* tag style constants — reference these in THEME_TAGS inside any theme file */
+#define TAGS_NERD      0   /* nerd font icons (default)                        */
+#define TAGS_ARABIC    1   /* 1 2 3 4 5 6 7 8 9 10                             */
+#define TAGS_ROMAN     2   /* I II III IV V VI VII VIII IX X                   */
+#define TAGS_POWERLINE 3   /* powerline glyphs                                 */
+#define TAGS_WEBDINGS  4   /* Web Chat Edit Meld Vb Mail Video Image Files Music */
+#define TAGS_JAPANESE  5   /* 一 二 三 四 五 六 七 八 九 十                      */
+#define TAGS_ALPHA     6   /* A B C D E F G H I J                              */
+#define TAGS_EMOJI     7   /* emoji faces/objects                               */
+#define TAGS_GEOMETRIC 8   /* ● ■ ▲ ◆ ◇ ★ ✗ ✓ + ○                            */
+#define TAGS_CHINESE   9   /* 壹 贰 叁 肆 伍 陆 柒 捌 玖 拾                     */
+#define TAGS_PURPOSE   10  /* home chat surf media game remote code mail files misc */
+
 // default themes
 //#include "themes/catppuccin.h"
 #include "themes/dracula.h"
@@ -94,6 +107,9 @@
 #ifndef THEME_ICONSIZE
 #define THEME_ICONSIZE 18
 #endif
+#ifndef THEME_TAGS
+#define THEME_TAGS TAGS_NERD
+#endif
 
 /* stringify helper — combines THEME_FONT + THEME_FONTSIZE at compile time */
 #ifndef _STR
@@ -178,29 +194,30 @@ static const char *colors[][3] = {
     [SchemeMenu]       = { SchemeMenufg,     SchemeMenubg,     SchemeMenubr },
 };
 
-/* tagging */
-//default tags
+/* tagging — style selected via THEME_TAGS in the active theme file */
+#if   THEME_TAGS == TAGS_ARABIC
+static char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+#elif THEME_TAGS == TAGS_ROMAN
+static char *tags[] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+#elif THEME_TAGS == TAGS_POWERLINE
+static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
+#elif THEME_TAGS == TAGS_WEBDINGS
+static char *tags[] = { "Web", "Chat", "Edit", "Meld", "Vb", "Mail", "Video", "Image", "Files", "Music" };
+#elif THEME_TAGS == TAGS_JAPANESE
+static char *tags[] = { "一", "二", "三", "四", "五", "六", "七", "八", "九", "十" };
+#elif THEME_TAGS == TAGS_ALPHA
+static char *tags[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+#elif THEME_TAGS == TAGS_EMOJI
+static char *tags[] = { "👨‍💻", "🌐", "🖥️", "📟", "📜", "👋", "📺", "✉️", "💬", "🎮" };
+#elif THEME_TAGS == TAGS_GEOMETRIC
+static char *tags[] = { "●", "■", "▲", "◆", "◇", "★", "✗", "✓", "+", "○" };
+#elif THEME_TAGS == TAGS_CHINESE
+static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
+#elif THEME_TAGS == TAGS_PURPOSE
+static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
+#else
 static char *tags[] = { "", "", "", "", "", "󰋉", "", "", "", "" };
-//Arabic numbers
-//static char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-//Roman numbers
-//static char *tags[] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
-//Powerline
-//static char *tags[] = { "", "", "", "", "", "", "", "", "", "" };
-//Webdings
-//static char *tags[] = { "Web", "Chat", "Edit", "Meld", "Vb", "Mail", "Video", "Image", "Files", "Music" };
-//Japanese numbers
-//static char *tags[] = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
-//Alphabetic
-//static char *tags[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
-//Emoji
-//static char *tags[] = { "👨‍💻", "🌐", "🖥️", "📟", "📜", "👋", "📺", "✉️", "💬", "🎮" };
-//Geometric shapes
-//static char *tags[] = { "●", "■", "▲", "◆", "◇", "★", "✗", "✓", "+", "○" };
-//Chinese numbers
-//static char *tags[] = { "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾" };
-//Purposemenu
-//static char *tags[] = { "home", "chat", "surf", "media", "game", "remote", "code", "mail", "files", "misc" };
+#endif
 
 static const char* ohmychadwm_menu[] = { "/bin/sh", "-c", "/home/erik/.config/ohmychadwm/menu/ohmychadwm-menu.sh", NULL };
 static const char* firefox[] = { "firefox", NULL };
