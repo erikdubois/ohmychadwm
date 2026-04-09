@@ -8,6 +8,7 @@
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
 //#include "themes/nord.h"
+//#include "themes/nord-polarnight.h"
 //#include "themes/onedark.h"
 //#include "themes/prime.h"
 //#include "themes/tokyonight.h"
