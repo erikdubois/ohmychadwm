@@ -20,7 +20,7 @@ static const char SchemeNormbr[]       = "#24283b";
 
 static const char SchemeSelfg[]        = "#a9b1d6";
 static const char SchemeSelbg[]        = "#e0af68";
-static const char SchemeSelbr[]        = "#e0af68";
+static const char SchemeSelbr[]        = "#d94829";
 
 static const char SchemeTitlefg[]      = "#a9b1d6";
 static const char SchemeTitlebg[]      = "#1a1b26";
@@ -126,6 +126,6 @@ static const char SchemeLayoutOPfg[]   = "#f7768e";
 static const char SchemeLayoutOPbg[]   = "#1a1b26";
 static const char SchemeLayoutOPbr[]   = "#1a1b26";
 
-static const char SchemeMenufg[]       = "#e0af68";
+static const char SchemeMenufg[]       = "#d94829";
 static const char SchemeMenubg[]       = "#1a1b26";
 static const char SchemeMenubr[]       = "#1a1b26";

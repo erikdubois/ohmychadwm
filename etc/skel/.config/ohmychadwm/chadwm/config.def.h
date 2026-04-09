@@ -20,13 +20,13 @@
 //#include "themes/venus.h"
 //#include "themes/mercury.h"
 //#include "themes/neptune.h"
-#include "themes/uranus.h"
+//#include "themes/uranus.h"
 //#include "themes/pluto.h"
 
 // other themes
 //#include "themes/kanagawa.h"
 //#include "themes/monokai.h"
-//#include "themes/rose-pine.h"
+//#include "themes/rosepine.h"
 //#include "themes/material.h"
 //#include "themes/solarized.h"
 
@@ -48,6 +48,9 @@
 //#include "themes/summit.h"
 //#include "themes/clonewar.h"
 //#include "themes/goodnight.h"
+//#include "themes/tiger.h"
+//#include "themes/dragon.h"
+//#include "themes/lookinto.h"
 
 /* fallback layout settings for themes that don't define them */
 #ifndef THEME_TOPBAR
