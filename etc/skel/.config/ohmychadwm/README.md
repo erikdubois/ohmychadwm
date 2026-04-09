@@ -101,9 +101,73 @@ Full keybinding list: open the menu → Learn → Keybindings.
 
 ## Themes
 
-Themes are `.h` files in `chadwm/themes/`. Activating one requires a rebuild.
+Themes are `.h` files in `chadwm/themes/`. Switch via the menu (rebuilds automatically) or manually edit `config.def.h` and run `./rebuild.sh`.
 
-We have over 32+ themes or create one more on the fly with our theme generator.
+We have 42 themes or create one more on the fly with our theme generator.
+
+### Preview gallery
+
+#### Default
+
+| | | |
+| :---: | :---: | :---: |
+| ![catppuccin](previews/catppuccin.png) | ![dracula](previews/dracula.png) | ![dracul](previews/dracul.png) |
+| **catppuccin** | **dracula** | **dracul** |
+| ![everforest](previews/everforest.png) | ![gruvchad](previews/gruvchad.png) | ![onedark](previews/onedark.png) |
+| **everforest** | **gruvchad** | **onedark** |
+| ![prime](previews/prime.png) | ![tokyonight](previews/tokyonight.png) | ![tundra](previews/tundra.png) |
+| **prime** | **tokyonight** | **tundra** |
+
+#### Nord family
+
+| | | |
+| :---: | :---: | :---: |
+| ![nord](previews/nord.png) | ![nord-polarnight](previews/nord-polarnight.png) | ![nord-snowstorm](previews/nord-snowstorm.png) |
+| **nord** | **nord-polarnight** | **nord-snowstorm** |
+| ![nord-frost](previews/nord-frost.png) | ![nord-aurora](previews/nord-aurora.png) | |
+| **nord-frost** | **nord-aurora** | |
+
+#### Other dark themes
+
+| | | |
+| :---: | :---: | :---: |
+| ![kanagawa](previews/kanagawa.png) | ![monokai](previews/monokai.png) | ![rosepine](previews/rosepine.png) |
+| **kanagawa** | **monokai** | **rosepine** |
+| ![material](previews/material.png) | ![solarized](previews/solarized.png) | |
+| **material** | **solarized** | |
+
+#### Stellar
+
+| | | |
+| :---: | :---: | :---: |
+| ![jupiter](previews/jupiter.png) | ![saturn](previews/saturn.png) | ![mars](previews/mars.png) |
+| **jupiter** | **saturn** | **mars** |
+| ![venus](previews/venus.png) | ![mercury](previews/mercury.png) | ![neptune](previews/neptune.png) |
+| **venus** | **mercury** | **neptune** |
+| ![uranus](previews/uranus.png) | ![pluto](previews/pluto.png) | |
+| **uranus** | **pluto** | |
+
+#### African (bottom bar, zero gaps)
+
+| | | |
+| :---: | :---: | :---: |
+| ![buffalo](previews/buffalo.png) | ![hippo](previews/hippo.png) | ![rhino](previews/rhino.png) |
+| **buffalo** | **hippo** | **rhino** |
+
+#### Custom
+
+| | | |
+| :---: | :---: | :---: |
+| ![bright](previews/bright.png) | ![clonewar](previews/clonewar.png) | ![doors](previews/doors.png) |
+| **bright** | **clonewar** | **doors** |
+| ![dragon](previews/dragon.png) | ![drwho](previews/drwho.png) | ![faraway](previews/faraway.png) |
+| **dragon** | **drwho** | **faraway** |
+| ![goodnight](previews/goodnight.png) | ![lookinto](previews/lookinto.png) | ![spiderwoman](previews/spiderwoman.png) |
+| **goodnight** | **lookinto** | **spiderwoman** |
+| ![starwars](previews/starwars.png) | ![summit](previews/summit.png) | ![tiger](previews/tiger.png) |
+| **starwars** | **summit** | **tiger** |
+
+---
 
 ### Switch theme via menu
 
@@ -168,20 +232,21 @@ ohmychadwm
 ├── Learn         — keybindings, Arch Wiki, Fish, Bash, man pages
 ├── Trigger
 │   ├── Capture     — screenshot, region, screen record, color picker
-│   ├── Share       — LocalSend file/folder/clipboard sharing
-│   └── Toggle      — night light, auto-lock
+│   ├── Toggle      — night light, auto-lock, picom, fastcompmgr
+│   └── Keybindings — browse all dwm + sxhkd keybindings
 ├── Setup         — sxhkd, slstatus config
 ├── Install       — apps, browser, dev tools, AI tools, fonts, gaming
 ├── Remove        — packages, dev environments
 ├── Update        — system, AUR, full update, keyboard layout, time sync
 ├── Info
 │   ├── System      — inxi full hardware info
-│   ├── Processes   — btop process manager
+│   ├── Btop        — process manager
 │   ├── Disk overview — df sorted
 │   ├── Disk explorer — ncdu interactive
 │   ├── Temperatures  — lm_sensors
 │   ├── Battery     — upower battery info (laptops)
-│   └── Logs        — journalctl / dmesg viewer
+│   ├── Logs        — journalctl / dmesg viewer
+│   └── Keybindings — browse all dwm + sxhkd keybindings
 └── System        — lock, suspend, restart, shutdown
 ```
 
@@ -243,9 +308,11 @@ run "your-application"
 │   ├── rebuild.sh        # Recompile + reinstall + restart
 │   └── dwm.c             # Core WM source (rarely needs editing)
 ├── scripts/
-│   ├── run.sh            # Session startup — autostart apps here
-│   ├── generate-chadwm-theme.sh  # Create themes from wallpaper
-│   └── show-keybindings.sh       # Display all keybindings
+│   ├── run.sh                    # Session startup — autostart apps here
+│   ├── generate-chadwm-theme.sh  # Create a theme from wallpaper colors
+│   ├── generate-theme-previews.sh # Generate 1024×768 PNG previews for all themes
+│   ├── preview-theme.sh          # ANSI color preview used by the fzf theme picker
+│   └── show-keybindings.sh       # Browse all dwm + sxhkd keybindings via rofi
 ├── menu/
 │   ├── ohmychadwm-menu.sh        # Hierarchical system menu
 │   ├── ohmychadwm-menu.rasi      # Rofi theme for the menu
@@ -258,7 +325,8 @@ run "your-application"
 ├── rofi/                 # App launcher themes
 ├── picom/                # Compositor configs
 ├── alacritty/            # Terminal themes (230+)
-└── wallpapers/           # Wallpaper images
+├── previews/             # 1024×768 PNG theme preview images
+└── wallpapers/           # Wallpaper images (named <theme>.jpg to auto-restore)
 ```
 
 ---
