@@ -207,10 +207,11 @@ show_learn_menu() {
 # ---------------------------------------------------------------------------
 show_trigger_menu() {
     while true; do
-        case $(menu "Trigger" " Capture\n Toggle") in
-            *Capture*) show_capture_menu || continue; return 0 ;;
-            *Toggle*)  show_toggle_menu  || continue; return 0 ;;
-            *)         return 1 ;;
+        case $(menu "Trigger" " Capture\n Toggle\n Keybindings") in
+            *Capture*)      show_capture_menu || continue; return 0 ;;
+            *Toggle*)       show_toggle_menu  || continue; return 0 ;;
+            *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh; return 0 ;;
+            *)              return 1 ;;
         esac
     done
 }
@@ -1671,18 +1672,19 @@ _lock_screen() {
 # ---------------------------------------------------------------------------
 show_info_menu() {
     while true; do
-        local options=" System\n Btop\n Disk overview\n Disk explorer\n Temperatures\n Logs"
+        local options=" System\n Btop\n Disk overview\n Disk explorer\n Temperatures\n Logs\n Keybindings"
         upower -e 2>/dev/null | grep -qi bat && options+=" \n Battery"
 
         case $(menu "Info" "$options") in
-            *System*)  present_terminal "inxi -Fxxx"; return 0 ;;
-            *Btop*)    command -v btop &>/dev/null || install "btop" "btop"; present_terminal "btop"; return 0 ;;
+            *System*)       present_terminal "inxi -Fxxx"; return 0 ;;
+            *Btop*)         command -v btop &>/dev/null || install "btop" "btop"; present_terminal "btop"; return 0 ;;
             *"Disk overview"*) present_terminal "df -h | (read -r header; echo \"\$header\"; sort)"; return 0 ;;
             *"Disk explorer"*) command -v ncdu &>/dev/null || install "ncdu" "ncdu"; present_terminal "ncdu ${HOME}"; return 0 ;;
-            *Temp*)        present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
-            *Battery*)     present_terminal "upower -i \$(upower -e | grep -i bat | head -1)"; return 0 ;;
-            *Logs*)        show_logs_menu || continue; return 0 ;;
-            *)             return 1 ;;
+            *Temp*)         present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
+            *Battery*)      present_terminal "upower -i \$(upower -e | grep -i bat | head -1)"; return 0 ;;
+            *Logs*)         show_logs_menu || continue; return 0 ;;
+            *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh; return 0 ;;
+            *)              return 1 ;;
         esac
     done
 }
