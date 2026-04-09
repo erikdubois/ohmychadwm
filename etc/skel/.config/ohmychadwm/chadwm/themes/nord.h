@@ -20,7 +20,7 @@ static const char SchemeNormbr[]       = "#282b2c";
 
 static const char SchemeSelfg[]        = "#c7b89d";
 static const char SchemeSelbg[]        = "#d1b171";
-static const char SchemeSelbr[]        = "#d1b171";
+static const char SchemeSelbr[]        = "#88c0d0";
 
 static const char SchemeTitlefg[]      = "#c7b89d";
 static const char SchemeTitlebg[]      = "#1e2122";
