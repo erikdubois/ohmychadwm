@@ -64,6 +64,7 @@ Server = https://erikdubois.github.io/$repo/$arch
 sudo pacman -Syu
 sudo pacman -S ohmychadwm-git
 ```
+
 Logout and log into ohmychadwm with sddm or other display managers.
 
 ---
@@ -103,7 +104,7 @@ Full keybinding list: open the menu → Learn → Keybindings.
 
 Themes are `.h` files in `chadwm/themes/`. Switch via the menu (rebuilds automatically) or manually edit `config.def.h` and run `./rebuild.sh`.
 
-We have 42 themes or create one more on the fly with our theme generator.
+We have 43 themes or create one more on the fly with our theme generator.
 
 ### Preview gallery
 
@@ -166,6 +167,8 @@ We have 42 themes or create one more on the fly with our theme generator.
 | **goodnight** | **lookinto** | **spiderwoman** |
 | ![starwars](previews/starwars.png) | ![summit](previews/summit.png) | ![tiger](previews/tiger.png) |
 | **starwars** | **summit** | **tiger** |
+| ![venom](previews/venom.png) | | |
+| **venom** | | |
 
 ---
 
@@ -219,7 +222,7 @@ The `SchemeMenufg` color from the active theme is automatically synced to the ro
 
 Open with `Super + Alt + Space`.
 
-```
+```text
 ohmychadwm
 ├── Apps          — rofi app launcher
 ├── Style
@@ -300,7 +303,7 @@ run "your-application"
 
 ## Directory structure
 
-```
+```text
 ~/.config/ohmychadwm/
 ├── chadwm/               # Window manager source + build
 │   ├── config.def.h      # Main WM configuration (edit this)
