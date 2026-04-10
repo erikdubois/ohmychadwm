@@ -373,10 +373,6 @@ ask_questions() {
     echo
 
     # name
-    # names registered in config.def.h must not be overwritten
-    local -a DEFAULT_NAMES
-    mapfile -t DEFAULT_NAMES < <(grep -oP '(?<=themes/)[^"]+(?=\.h")' "$CONFIG")
-
     while true; do
         ask "Theme name (lowercase, no spaces, e.g. 'savannah'):"
         read -rp "> " THEME_NAME
@@ -384,14 +380,6 @@ ask_questions() {
         THEME_NAME="${THEME_NAME// /_}"
         if [[ -z "$THEME_NAME" ]]; then
             err "Name cannot be empty."
-            continue
-        fi
-        local is_default=0
-        for d in "${DEFAULT_NAMES[@]}"; do
-            if [[ "$THEME_NAME" == "$d" ]]; then is_default=1; break; fi
-        done
-        if [[ $is_default -eq 1 ]]; then
-            err "'$THEME_NAME' is a built-in theme and cannot be overwritten. Choose another name."
             continue
         fi
         if [[ -f "$THEMES_DIR/$THEME_NAME.h" ]]; then
