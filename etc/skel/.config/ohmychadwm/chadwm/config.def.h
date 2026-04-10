@@ -17,7 +17,7 @@
 
 // default themes
 //#include "themes/catppuccin.h"
-//#include "themes/dracula.h"
+#include "themes/dracula.h"
 //#include "themes/dracul.h"
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
@@ -56,7 +56,7 @@
 //#include "themes/buffalo.h"
 
 // custom themes
-#include "themes/monster.h"
+//#include "themes/venom.h"
 //#include "themes/spiderwoman.h"
 //#include "themes/test.h"
 //#include "themes/bright.h"

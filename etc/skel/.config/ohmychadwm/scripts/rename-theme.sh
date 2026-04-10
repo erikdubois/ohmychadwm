@@ -50,24 +50,6 @@ else
     echo -e "${Y}  (no include for '${OLD}' found in config.def.h — skipped)${NC}"
 fi
 
-# ── update DEFAULT_NAMES in generate script ──────────────────────────────────
-GENERATE="${HOME}/.config/ohmychadwm/scripts/generate-chadwm-theme.sh"
-if grep -qw "$OLD" "$GENERATE"; then
-    sed -i "s/\b${OLD}\b/${NEW}/g" "$GENERATE"
-    ok "Updated DEFAULT_NAMES in generate-chadwm-theme.sh"
-else
-    echo -e "${Y}  ('${OLD}' not found in generate script — skipped)${NC}"
-fi
-
-# ── update BUILTIN array in menu script ──────────────────────────────────────
-MENU="${HOME}/.config/ohmychadwm/menu/ohmychadwm-menu.sh"
-if grep -qw "$OLD" "$MENU"; then
-    sed -i "s/\b${OLD}\b/${NEW}/g" "$MENU"
-    ok "Updated BUILTIN in ohmychadwm-menu.sh"
-else
-    echo -e "${Y}  ('${OLD}' not found in menu script — skipped)${NC}"
-fi
-
 # ── rename wallpaper if one exists ───────────────────────────────────────────
 renamed_wp=0
 for ext in jpg jpeg png webp; do
