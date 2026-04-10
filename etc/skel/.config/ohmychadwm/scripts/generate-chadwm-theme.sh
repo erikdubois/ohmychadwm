@@ -986,9 +986,9 @@ main() {
     ask_questions
 
     # ── font availability check ───────────────────────────────────────────────
-    if ! fc-list : family | grep -qi "^${THEME_FONT}$\|, ${THEME_FONT}$\|^${THEME_FONT},\|, ${THEME_FONT},"; then
-        err "Font not installed: $THEME_FONT"
-        ask "The theme will be written but the bar will fall back to a system font."
+    if [[ -z "$(fc-list ":family=${THEME_FONT}" 2>/dev/null)" ]]; then
+        echo -e "${R}✘ Font not installed: $THEME_FONT${NC}" >&2
+        echo -e "${Y}  The theme will be written but the bar will fall back to a system font.${NC}"
         ask "Install '$THEME_FONT' first for correct rendering. Continue? [Y/n]:"
         read -rp "> " ans
         if [[ "$ans" =~ ^[Nn]$ ]]; then
