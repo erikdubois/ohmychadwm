@@ -36,15 +36,15 @@ static const char TabNormfg[]          = "#333e4c";
 static const char TabNormbg[]          = "#161E2B";
 static const char TabNormbr[]          = "#161E2B";
 
-static const char SchemeTagfg[]        = "#333e4c";
+static const char SchemeTagfg[]        = "#af8452";
 static const char SchemeTagbg[]        = "#161E2B";
 static const char SchemeTagbr[]        = "#161E2B";
 
-static const char SchemeTag1fg[]       = "#4E5664";
+static const char SchemeTag1fg[]       = "#6fb968";
 static const char SchemeTag1bg[]       = "#161E2B";
 static const char SchemeTag1br[]       = "#161E2B";
 
-static const char SchemeTag2fg[]       = "#565e6c";
+static const char SchemeTag2fg[]       = "#97a13d";
 static const char SchemeTag2bg[]       = "#161E2B";
 static const char SchemeTag2br[]       = "#161E2B";
 
@@ -52,31 +52,31 @@ static const char SchemeTag3fg[]       = "#C44C50";
 static const char SchemeTag3bg[]       = "#161E2B";
 static const char SchemeTag3br[]       = "#161E2B";
 
-static const char SchemeTag4fg[]       = "#cc5458";
+static const char SchemeTag4fg[]       = "#3fd1a5";
 static const char SchemeTag4bg[]       = "#161E2B";
 static const char SchemeTag4br[]       = "#161E2B";
 
-static const char SchemeTag5fg[]       = "#848690";
+static const char SchemeTag5fg[]       = "#8a98df";
 static const char SchemeTag5bg[]       = "#161E2B";
 static const char SchemeTag5br[]       = "#161E2B";
 
-static const char SchemeTag6fg[]       = "#ADA5AA";
+static const char SchemeTag6fg[]       = "#ad4987";
 static const char SchemeTag6bg[]       = "#161E2B";
 static const char SchemeTag6br[]       = "#161E2B";
 
-static const char SchemeTag7fg[]       = "#b5adb2";
+static const char SchemeTag7fg[]       = "#a83f3f";
 static const char SchemeTag7bg[]       = "#161E2B";
 static const char SchemeTag7br[]       = "#161E2B";
 
-static const char SchemeTag8fg[]       = "#D7D6D7";
+static const char SchemeTag8fg[]       = "#cfc1cf";
 static const char SchemeTag8bg[]       = "#161E2B";
 static const char SchemeTag8br[]       = "#161E2B";
 
-static const char SchemeTag9fg[]       = "#dfdedf";
+static const char SchemeTag9fg[]       = "#16df70";
 static const char SchemeTag9bg[]       = "#161E2B";
 static const char SchemeTag9br[]       = "#161E2B";
 
-static const char SchemeTag10fg[]      = "#F3F3F3";
+static const char SchemeTag10fg[]      = "#974c4c";
 static const char SchemeTag10bg[]      = "#161E2B";
 static const char SchemeTag10br[]      = "#161E2B";
 
