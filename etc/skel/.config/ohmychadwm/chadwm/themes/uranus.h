@@ -1,5 +1,6 @@
 /* Uranus — cool cyan, misty teal, pale blue */
 #define THEME_TOPBAR 0
+#define THEME_LAYOUT LAYOUT_DWINDLE
 #define THEME_TAGS TAGS_NERD
 #define THEME_GAPS   3
 #define THEME_AUTOHIDE 0

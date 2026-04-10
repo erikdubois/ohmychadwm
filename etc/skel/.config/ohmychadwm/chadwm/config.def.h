@@ -2,6 +2,21 @@
 
 #include <X11/XF86keysym.h>
 
+/* layout constants — reference these in THEME_LAYOUT inside any theme file */
+#define LAYOUT_DWINDLE  0   /* [\\] dwindle (default)        */
+#define LAYOUT_TILE     1   /* []= tile                      */
+#define LAYOUT_SPIRAL   2   /* [@] spiral                    */
+#define LAYOUT_DECK     3   /* H[] deck                      */
+#define LAYOUT_BSTACK   4   /* TTT bottom stack              */
+#define LAYOUT_BSTACKH  5   /* === bottom stack horizontal   */
+#define LAYOUT_GRID     6   /* HHH grid                      */
+#define LAYOUT_NROWGRID 7   /* ### nrow grid                 */
+#define LAYOUT_HORIZGRID 8  /* --- horizontal grid           */
+#define LAYOUT_GAPLESS  9   /* ::: gapless grid              */
+#define LAYOUT_CENTER   10  /* |M| centered master           */
+#define LAYOUT_CFLOAT   11  /* >M> centered floating master  */
+#define LAYOUT_FLOAT    12  /* ><> floating                  */
+
 /* tag style constants — reference these in THEME_TAGS inside any theme file */
 #define TAGS_NERD      0   /* nerd font icons (default)                        */
 #define TAGS_ARABIC    1   /* 1 2 3 4 5 6 7 8 9 10                             */
@@ -110,6 +125,9 @@
 #endif
 #ifndef THEME_TAGS
 #define THEME_TAGS TAGS_NERD
+#endif
+#ifndef THEME_LAYOUT
+#define THEME_LAYOUT LAYOUT_DWINDLE
 #endif
 
 /* stringify helper — combines THEME_FONT + THEME_FONTSIZE at compile time */
@@ -277,10 +295,36 @@ static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen win
 
 
 static const Layout layouts[] = {
-    /* symbol     arrange function */
-    { "[\\]",     dwindle },    /* first entry is default */
+    /* symbol     arrange function — first entry is the startup default */
+#if   THEME_LAYOUT == LAYOUT_TILE
     { "[]=",      tile },
-    /*{ "[M]",      monocle }, */
+#elif THEME_LAYOUT == LAYOUT_SPIRAL
+    { "[@]",      spiral },
+#elif THEME_LAYOUT == LAYOUT_DECK
+    { "H[]",      deck },
+#elif THEME_LAYOUT == LAYOUT_BSTACK
+    { "TTT",      bstack },
+#elif THEME_LAYOUT == LAYOUT_BSTACKH
+    { "===",      bstackhoriz },
+#elif THEME_LAYOUT == LAYOUT_GRID
+    { "HHH",      grid },
+#elif THEME_LAYOUT == LAYOUT_NROWGRID
+    { "###",      nrowgrid },
+#elif THEME_LAYOUT == LAYOUT_HORIZGRID
+    { "---",      horizgrid },
+#elif THEME_LAYOUT == LAYOUT_GAPLESS
+    { ":::",      gaplessgrid },
+#elif THEME_LAYOUT == LAYOUT_CENTER
+    { "|M|",      centeredmaster },
+#elif THEME_LAYOUT == LAYOUT_CFLOAT
+    { ">M>",      centeredfloatingmaster },
+#elif THEME_LAYOUT == LAYOUT_FLOAT
+    { "><>",      NULL },
+#else
+    { "[\\]",     dwindle },
+#endif
+    { "[\\]",     dwindle },
+    { "[]=",      tile },
     { "[@]",      spiral },
     { "H[]",      deck },
     { "TTT",      bstack },
@@ -291,7 +335,7 @@ static const Layout layouts[] = {
     { ":::",      gaplessgrid },
     { "|M|",      centeredmaster },
     { ">M>",      centeredfloatingmaster },
-    { "><>",      NULL },    /* no layout function means floating behavior */
+    { "><>",      NULL },
     { NULL,       NULL },
 };
 

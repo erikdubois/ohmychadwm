@@ -1,5 +1,6 @@
 /* Nord Snow Storm — bright arctic light, polar night text, frost & aurora accents */
 #define THEME_TOPBAR 1
+#define THEME_LAYOUT LAYOUT_DWINDLE
 #define THEME_TAGS TAGS_NERD
 #define THEME_GAPS   5
 #define THEME_AUTOHIDE 0

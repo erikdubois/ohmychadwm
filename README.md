@@ -217,6 +217,7 @@ Each theme `.h` file can define these values (all have sensible defaults if omit
 | `THEME_FONTSIZE` | `13` | Bar font size (pt) |
 | `THEME_ICONSIZE` | `18` | Bar icon size (pt) |
 | `THEME_TAGS` | `TAGS_NERD` | Tag label style — see options below |
+| `THEME_LAYOUT` | `LAYOUT_DWINDLE` | Default layout on startup — see options below |
 
 **Tag style options for `THEME_TAGS`:**
 
@@ -233,6 +234,24 @@ Each theme `.h` file can define these values (all have sensible defaults if omit
 | `TAGS_GEOMETRIC` | ● ■ ▲ ◆ ◇ ★ ✗ ✓ + ○ |
 | `TAGS_CHINESE` | 壹 贰 叁 肆 伍 陆 柒 捌 玖 拾 |
 | `TAGS_PURPOSE` | home chat surf media game remote code mail files misc |
+
+**Layout options for `THEME_LAYOUT`:**
+
+| Constant | Symbol | Description |
+| --- | --- | --- |
+| `LAYOUT_DWINDLE` | `[\\]` | Fibonacci dwindle (default) |
+| `LAYOUT_TILE` | `[]=` | Master + stack |
+| `LAYOUT_SPIRAL` | `[@]` | Fibonacci spiral |
+| `LAYOUT_DECK` | `H[]` | Master + tabbed stack |
+| `LAYOUT_BSTACK` | `TTT` | Bottom stack |
+| `LAYOUT_BSTACKH` | `===` | Bottom stack horizontal |
+| `LAYOUT_GRID` | `HHH` | Grid |
+| `LAYOUT_NROWGRID` | `###` | N-row grid |
+| `LAYOUT_HORIZGRID` | `---` | Horizontal grid |
+| `LAYOUT_GAPLESS` | `:::` | Gapless grid |
+| `LAYOUT_CENTER` | `\|M\|` | Centered master |
+| `LAYOUT_CFLOAT` | `>M>` | Centered floating master |
+| `LAYOUT_FLOAT` | `><>` | Floating |
 
 The `SchemeMenufg` color from the active theme is automatically synced to the rofi menu accent color (`ac:` in `ohmychadwm-menu.rasi`) when you switch themes.
 

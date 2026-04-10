@@ -1,5 +1,6 @@
 /* Venus — warm rose, copper gold, dawn peach */
 #define THEME_TOPBAR 1
+#define THEME_LAYOUT LAYOUT_DWINDLE
 #define THEME_TAGS TAGS_NERD
 #define THEME_GAPS   2
 #define THEME_AUTOHIDE 3

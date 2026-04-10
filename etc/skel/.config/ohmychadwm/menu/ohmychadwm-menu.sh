@@ -444,14 +444,31 @@ show_slstatus_menu() {
     done
 }
 
+_random_theme() {
+    local config="${OHMYCHADWM_CONFIG}/chadwm/config.def.h"
+    local -a themes
+    mapfile -t themes < <(grep -oP '(?<=themes/)[^"]+(?=\.h")' "$config")
+    local current
+    current=$(grep -oP '(?<=^#include "themes/)[^"]+(?=\.h")' "$config" | head -1)
+    # filter out current theme so we always get something different
+    local -a candidates=()
+    for t in "${themes[@]}"; do
+        [[ "$t" != "$current" ]] && candidates+=("$t")
+    done
+    local pick="${candidates[RANDOM % ${#candidates[@]}]}"
+    notify-send "ohmychadwm" "Random theme: $pick"
+    _apply_theme "$pick"
+}
+
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise") in
+        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise\n Random theme") in
             *Choose*)           show_theme_menu        || continue; return 0 ;;
             *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
             *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Customise*)        show_customise_menu    || continue; return 0 ;;
             *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
+            *"Random theme"*)   _random_theme; return 0 ;;
             *)                  return 1 ;;
         esac
     done

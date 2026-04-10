@@ -1,5 +1,6 @@
 /* Tundra — frozen slate, arctic moss, ice white */
 #define THEME_TOPBAR 1
+#define THEME_LAYOUT LAYOUT_DWINDLE
 #define THEME_TAGS TAGS_PURPOSE
 #define THEME_GAPS   1
 #define THEME_AUTOHIDE 0

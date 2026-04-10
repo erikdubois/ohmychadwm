@@ -456,6 +456,40 @@ ask_questions() {
         THEME_SMARTGAPS=0
     fi
 
+    # layout
+    echo
+    ask "Default layout? [default: dwindle]"
+    echo "  0) dwindle  — fibonacci dwindle (default)"
+    echo "  1) tile     — master + stack"
+    echo "  2) spiral   — fibonacci spiral"
+    echo "  3) deck     — master + tabbed stack"
+    echo "  4) bstack   — bottom stack"
+    echo "  5) bstackh  — bottom stack horizontal"
+    echo "  6) grid     — grid"
+    echo "  7) nrowgrid — n-row grid"
+    echo "  8) horizgrid— horizontal grid"
+    echo "  9) gapless  — gapless grid"
+    echo " 10) center   — centered master"
+    echo " 11) cfloat   — centered floating master"
+    echo " 12) float    — floating"
+    read -rp "> " ans
+    case "$ans" in
+        1|tile)      THEME_LAYOUT="LAYOUT_TILE"     ;;
+        2|spiral)    THEME_LAYOUT="LAYOUT_SPIRAL"   ;;
+        3|deck)      THEME_LAYOUT="LAYOUT_DECK"     ;;
+        4|bstack)    THEME_LAYOUT="LAYOUT_BSTACK"   ;;
+        5|bstackh)   THEME_LAYOUT="LAYOUT_BSTACKH"  ;;
+        6|grid)      THEME_LAYOUT="LAYOUT_GRID"     ;;
+        7|nrowgrid)  THEME_LAYOUT="LAYOUT_NROWGRID" ;;
+        8|horizgrid) THEME_LAYOUT="LAYOUT_HORIZGRID";;
+        9|gapless)   THEME_LAYOUT="LAYOUT_GAPLESS"  ;;
+        10|center)   THEME_LAYOUT="LAYOUT_CENTER"   ;;
+        11|cfloat)   THEME_LAYOUT="LAYOUT_CFLOAT"   ;;
+        12|float)    THEME_LAYOUT="LAYOUT_FLOAT"    ;;
+        *)           THEME_LAYOUT="LAYOUT_DWINDLE"  ;;
+    esac
+    ok "Layout: $THEME_LAYOUT"
+
     # tag style
     echo
     ask "Tag style? [default: nerd]"
@@ -722,6 +756,7 @@ write_theme() {
     cat > "$file" <<EOF
 /* ${THEME_NAME^} — generated from wallpaper */
 #define THEME_TOPBAR   $THEME_TOPBAR
+#define THEME_LAYOUT   $THEME_LAYOUT
 #define THEME_TAGS     $THEME_TAGS
 #define THEME_GAPS     $THEME_GAPS
 #define THEME_AUTOHIDE    $THEME_AUTOHIDE
