@@ -36,7 +36,6 @@
 cp etc/skel/.config/ohmychadwm/README.md .
 
 rm previews/*
-sleep 3
 cp etc/skel/.config/ohmychadwm/previews/* previews
 
 git add --all .
