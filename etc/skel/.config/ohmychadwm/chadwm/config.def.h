@@ -278,7 +278,6 @@ static const Rule rules[] = {
     { "Gimp",     NULL,       NULL,       0,            0,           0,           -1 },
     { "Firefox",  NULL,       NULL,       1 << 8,       0,           0,           -1 },
     { "mintstick", NULL,      NULL,       0,            0,           0,           -1 },
-    { "Nlogout",  NULL,       NULL,       0,            1,           1,           -1 },
 };
 
 /* layout(s) */
