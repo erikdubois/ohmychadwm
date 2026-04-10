@@ -212,7 +212,27 @@ Each theme `.h` file can define these values (all have sensible defaults if omit
 | `THEME_SMARTGAPS` | `0` | Remove gaps with single window: 1 = yes |
 | `THEME_MFACT` | `0.50` | Master area width (0.10–0.90) |
 | `THEME_NMASTER` | `1` | Number of windows in master area |
-| `THEME_FONT` | JetBrainsMono 13 | Bar font (Fontconfig string) |
+| `THEME_FONT` | `JetBrainsMono Nerd Font Mono` | Bar font family |
+| `THEME_FONTSTYLE` | `Bold` | Bar font style |
+| `THEME_FONTSIZE` | `13` | Bar font size (pt) |
+| `THEME_ICONSIZE` | `18` | Bar icon size (pt) |
+| `THEME_TAGS` | `TAGS_NERD` | Tag label style — see options below |
+
+**Tag style options for `THEME_TAGS`:**
+
+| Constant | Labels |
+| --- | --- |
+| `TAGS_NERD` | Nerd Font icons (default) |
+| `TAGS_ARABIC` | 1 2 3 4 5 6 7 8 9 10 |
+| `TAGS_ROMAN` | I II III IV V VI VII VIII IX X |
+| `TAGS_POWERLINE` | Powerline glyphs |
+| `TAGS_WEBDINGS` | Web Chat Edit Meld Vb Mail Video Image Files Music |
+| `TAGS_JAPANESE` | 一 二 三 四 五 六 七 八 九 十 |
+| `TAGS_ALPHA` | A B C D E F G H I J |
+| `TAGS_EMOJI` | 👨‍💻 🌐 🖥️ 📟 📜 👋 📺 ✉️ 💬 🎮 |
+| `TAGS_GEOMETRIC` | ● ■ ▲ ◆ ◇ ★ ✗ ✓ + ○ |
+| `TAGS_CHINESE` | 壹 贰 叁 肆 伍 陆 柒 捌 玖 拾 |
+| `TAGS_PURPOSE` | home chat surf media game remote code mail files misc |
 
 The `SchemeMenufg` color from the active theme is automatically synced to the rofi menu accent color (`ac:` in `ohmychadwm-menu.rasi`) when you switch themes.
 
