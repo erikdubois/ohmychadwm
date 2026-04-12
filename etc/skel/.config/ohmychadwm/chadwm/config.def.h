@@ -32,8 +32,8 @@
 
 // default themes
 //#include "themes/catppuccin.h"
-#include "themes/dracula.h"
-//#include "themes/dracul.h"
+//#include "themes/dracula.h"
+#include "themes/dracul.h"
 //#include "themes/everforest.h"
 //#include "themes/gruvchad.h"
 //#include "themes/nord.h"
