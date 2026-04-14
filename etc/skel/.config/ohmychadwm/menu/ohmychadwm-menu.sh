@@ -462,13 +462,14 @@ _random_theme() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise\n Random theme") in
+        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise\n Random theme\n Edit config.def.h") in
             *Choose*)           show_theme_menu        || continue; return 0 ;;
             *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
             *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Customise*)        show_customise_menu    || continue; return 0 ;;
             *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *"Random theme"*)   _random_theme; return 0 ;;
+            *"Edit config.def.h"*) edit_in_editor "${OHMYCHADWM_CONFIG}/chadwm/config.def.h"; return 0 ;;
             *)                  return 1 ;;
         esac
     done
