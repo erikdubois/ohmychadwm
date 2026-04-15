@@ -370,10 +370,9 @@ _toggle_autolock() {
 # ---------------------------------------------------------------------------
 show_style_menu() {
     while true; do
-        case $(menu "Style" " Ohmychadwm\n Alacritty\n Edit Picom.conf\n Slstatus\n Wallpaper\n Apply font globally\n Hard Reset") in
+        case $(menu "Style" " Ohmychadwm\n Alacritty\n Slstatus\n Wallpaper\n Apply font globally\n Hard Reset") in
             *Ohmychadwm*)           show_chadwm_menu        || continue; return 0 ;;
             *Alacritty*)            show_alacritty_menu     || continue; return 0 ;;
-            *"Edit Picom"*)         edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *Wallpaper*)            show_wallpaper_menu     || continue; return 0 ;;
             *Slstatus*)             show_slstatus_menu      || continue; return 0 ;;
 
@@ -462,14 +461,12 @@ _random_theme() {
 
 show_chadwm_menu() {
     while true; do
-        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Edit Menu theme\n Customise\n Random theme\n Edit config.def.h") in
+        case $(menu "chadwm" " Choose theme\n Create your own theme\n Delete theme\n Customise\n Random theme") in
             *Choose*)           show_theme_menu        || continue; return 0 ;;
             *"Delete theme"*)   show_delete_theme_menu || continue; return 0 ;;
             *"Create your own theme"*) setsid "$TERMINAL" -e bash -c "${OHMYCHADWM_CONFIG}/scripts/generate-chadwm-theme.sh; exec bash" >/dev/null 2>&1 & return 0 ;;
             *Customise*)        show_customise_menu    || continue; return 0 ;;
-            *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *"Random theme"*)   _random_theme; return 0 ;;
-            *"Edit config.def.h"*) edit_in_editor "${OHMYCHADWM_CONFIG}/chadwm/config.def.h"; return 0 ;;
             *)                  return 1 ;;
         esac
     done
@@ -1203,7 +1200,7 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Display\n Lan/Wifi\n Defaults"
+        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Edit sxhkdrc\n Edit config.def.h\n Edit Menu theme\n Display\n Lan/Wifi\n Defaults"
 
         # Show Xresources option only if the file exists
         [[ -f "${HOME}/.Xresources" ]] && options+="\n Xresources"
@@ -1213,6 +1210,9 @@ show_setup_menu() {
             *"Edit Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *"Edit Rofi"*)      edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *"Edit Alacritty"*) edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
+            *"Edit sxhkdrc"*)   edit_in_editor "${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"; return 0 ;;
+            *"Edit config.def.h"*) edit_in_editor "${OHMYCHADWM_CONFIG}/chadwm/config.def.h"; return 0 ;;
+            *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *Display*)      show_display_menu  || continue; return 0 ;;
             *"Lan/Wifi"*)   show_lanwifi_menu  || continue; return 0 ;;
             *Defaults*)     show_defaults_menu || continue; return 0 ;;
