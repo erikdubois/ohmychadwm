@@ -1210,8 +1210,8 @@ show_setup_menu() {
             *"Edit Picom"*)     edit_in_editor "${HOME}/.config/ohmychadwm/picom/picom.conf"; return 0 ;;
             *"Edit Rofi"*)      edit_in_editor "${HOME}/.config/ohmychadwm/rofi/config.rasi"; return 0 ;;
             *"Edit Alacritty"*) edit_in_editor "${HOME}/.config/alacritty/alacritty.toml"; return 0 ;;
-            *"Edit sxhkdrc"*)   edit_in_editor "${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"; return 0 ;;
-            *"Edit config.def.h"*) edit_in_editor "${OHMYCHADWM_CONFIG}/chadwm/config.def.h"; return 0 ;;
+            *"Edit Sxhkdrc"*)   edit_in_editor "${OHMYCHADWM_CONFIG}/sxhkd/sxhkdrc"; return 0 ;;
+            *"Edit Config.def.h"*) edit_in_editor "${OHMYCHADWM_CONFIG}/chadwm/config.def.h"; return 0 ;;
             *"Edit Menu theme"*) present_terminal "nano ${OHMYCHADWM_CONFIG}/menu/ohmychadwm-menu.rasi"; return 0 ;;
             *Display*)      show_display_menu  || continue; return 0 ;;
             *"Lan/Wifi"*)   show_lanwifi_menu  || continue; return 0 ;;
