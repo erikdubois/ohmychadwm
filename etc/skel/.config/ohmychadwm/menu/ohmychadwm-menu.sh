@@ -1200,7 +1200,7 @@ show_wallpaper_menu() {
 # ---------------------------------------------------------------------------
 show_setup_menu() {
     while true; do
-        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Edit sxhkdrc\n Edit config.def.h\n Edit Menu theme\n Display\n Lan/Wifi\n Defaults"
+        local options=" Edit Autostart\n Edit Alacritty\n Edit Picom\n Edit Rofi\n Edit Sxhkdrc\n Edit Config.def.h\n Edit Menu theme\n Display\n Lan/Wifi\n Defaults"
 
         # Show Xresources option only if the file exists
         [[ -f "${HOME}/.Xresources" ]] && options+="\n Xresources"
