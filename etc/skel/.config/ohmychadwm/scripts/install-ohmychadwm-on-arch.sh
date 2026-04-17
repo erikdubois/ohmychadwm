@@ -77,8 +77,8 @@ enable_chaotic_aur() {
     sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
     sudo pacman-key --lsign-key 3056513887B78AEB
     sudo pacman -U --noconfirm \
-        'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' \
-        'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+        'https://geo-mirror.chaotic.cx/chaotic-aur/x86_64/chaotic-keyring.pkg.tar.zst' \
+        'https://geo-mirror.chaotic.cx/chaotic-aur/x86_64/chaotic-mirrorlist.pkg.tar.zst'
 
     log "Appending [chaotic-aur] to /etc/pacman.conf"
     printf '\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist\n' | sudo tee -a /etc/pacman.conf >/dev/null
