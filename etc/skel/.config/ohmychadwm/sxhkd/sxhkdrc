@@ -70,10 +70,6 @@ super + k
 super + e
     code
 
-#Browser
-super + w
-    firefox
-
 #Conky-toggle
 super + c
     conky-toggle
