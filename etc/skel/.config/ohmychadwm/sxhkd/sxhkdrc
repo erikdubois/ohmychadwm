@@ -201,7 +201,7 @@ ctrl + alt + u
      pavucontrol
 
 #Rofi theme selector
-ctrl + alt + r
+alt + r
   rofi-theme-selector
 
 #Spotify
