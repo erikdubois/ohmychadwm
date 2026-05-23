@@ -79,6 +79,15 @@ run "insync start"                                    # Google Drive sync (optio
 # Configure what is shown in ~/.config/ohmychadwm/slstatus/config.def.h
 run "slstatus"
 
+# ── Claude assistant terminal ─────────────────────────────────────────────────
+# Open an Alacritty window in Kiro-HQ and drop straight into Claude Code.
+# fish -i -C claude keeps an interactive shell around, so the window survives
+# claude exiting. Guarded by pgrep so Super+Shift+R does not spawn duplicates.
+if ! pgrep -x claude >/dev/null; then
+    alacritty --working-directory "$HOME/Insync/Kiro/Kiro-HQ" \
+              -e fish -i -C claude &
+fi
+
 # ── Window manager loop ───────────────────────────────────────────────────────
 # Keeps restarting ohmychadwm as long as it exits with code 0 (Super+Shift+R).
 # Exits the session when ohmychadwm exits with a non-zero code (Super+Shift+Q).
