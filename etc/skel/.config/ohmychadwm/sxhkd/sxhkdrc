@@ -330,9 +330,9 @@ ctrl + super + Print
 #     FUNCTION KEYS
 #################################################################
 
-#xfce4-terminal dropdown
+#alacritty
 F12
-    xfce4-terminal --drop-down
+    alacritty
 
 
 #################################################################
