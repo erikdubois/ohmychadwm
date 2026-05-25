@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026.05.25
+
+### What Changed
+- De-brand (user-visible): the `Print` screenshot binding in `sxhkdrc` saved files
+  as `ArcoLinux-<date>_screenshot.jpg`. Changed the prefix to `Kiro-`. Part of the
+  ecosystem-wide arcolinux de-brand sweep.
+
+### Files Modified
+- `etc/skel/.config/ohmychadwm/sxhkd/sxhkdrc`
+
 ## 2026.05.21
 
 ### What Changed
