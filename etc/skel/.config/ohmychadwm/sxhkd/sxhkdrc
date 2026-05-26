@@ -395,9 +395,13 @@ XF86MonBrightnessDown
 # CTRL + ALT KEYS
 #################################################################
 
-#Picom Toggle
+#Opera
 ctrl + alt + o
     opera
+
+#Compositor Toggle (fastcompmgr)
+super + g
+    ~/.config/ohmychadwm/scripts/fastcompmgr-toggle.sh
 
 #Picom Toggle
 super + p
