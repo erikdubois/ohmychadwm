@@ -99,5 +99,5 @@ static const struct arg args[] = {
     //{ kernel_release,"  %s  ",   NULL                },  /* kernel version  */
 
     /* Date & time — always shown last (rightmost) */
-    { datetime,         "  %s",    "%d-%m-%y %H:%M"   },
+    { datetime,         "  %s",    "%H:%M  %d %m %y"   },
 };

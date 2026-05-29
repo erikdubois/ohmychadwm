@@ -303,9 +303,6 @@ ctrl + shift + Escape
 ctrl + alt + End
     alacritty -e btop
 
-ctrl + alt + n
-    alacritty -e btop
-
 #################################################################
 #     SCREENSHOTS
 #################################################################
