@@ -68,7 +68,7 @@ super + alt + space
 
 #show keybindings
 super + k
-    ~/.config/ohmychadwm/scripts/show-keybindings.sh
+    kiro-keybindings
 
 #Code
 super + e

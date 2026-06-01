@@ -192,7 +192,7 @@ remove_pkg() {
 # ---------------------------------------------------------------------------
 show_learn_menu() {
     case $(menu "Learn" " Keybindings\n Arch Wiki\n Chadwm source\n Bash\n Fish shell\n Man pages") in
-        *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh ;;
+        *Keybindings*)  kiro-keybindings ;;
         *"Arch Wiki"*)  setsid "$BROWSER" "https://wiki.archlinux.org" >/dev/null 2>&1 & disown ;;
         *Chadwm*)       setsid "$BROWSER" "https://github.com/erikdubois/ohmychadwm" >/dev/null 2>&1 & disown ;;
         *Bash*)         setsid "$BROWSER" "https://devhints.io/bash" >/dev/null 2>&1 & disown ;;
@@ -210,7 +210,7 @@ show_trigger_menu() {
         case $(menu "Trigger" " Capture\n Toggle\n Keybindings") in
             *Capture*)      show_capture_menu || continue; return 0 ;;
             *Toggle*)       show_toggle_menu  || continue; return 0 ;;
-            *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh; return 0 ;;
+            *Keybindings*)  kiro-keybindings; return 0 ;;
             *)              return 1 ;;
         esac
     done
@@ -1697,7 +1697,7 @@ show_info_menu() {
             *Temp*)         present_terminal "sensors 2>/dev/null || echo 'Run: sudo pacman -S lm_sensors && sudo sensors-detect'" ; return 0 ;;
             *Battery*)      present_terminal "upower -i \$(upower -e | grep -i bat | head -1)"; return 0 ;;
             *Logs*)         show_logs_menu || continue; return 0 ;;
-            *Keybindings*)  ~/.config/ohmychadwm/scripts/show-keybindings.sh; return 0 ;;
+            *Keybindings*)  kiro-keybindings; return 0 ;;
             *)              return 1 ;;
         esac
     done

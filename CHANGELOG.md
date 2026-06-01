@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026.06.01
+
+### What Changed
+- Repointed the "show keybindings" action to the new **kiro-keybindings** app (a slick PySide6/QML
+  searchable cheatsheet) instead of the local `scripts/show-keybindings.sh` rofi script. `Super+K`
+  and the Learn / Trigger / System menu "Keybindings" entries now launch `kiro-keybindings`.
+- `scripts/show-keybindings.sh` is intentionally left in place as a no-dependency fallback (not deleted).
+
+### Technical Details
+- `sxhkd/sxhkdrc`: `super + k` → `kiro-keybindings` (was `~/.config/ohmychadwm/scripts/show-keybindings.sh`).
+- `menu/ohmychadwm-menu.sh`: the three `*Keybindings*)` cases now call `kiro-keybindings`.
+- kiro-keybindings ships from `nemesis_repo`; `keybindings.txt` should be regenerated via
+  `/kiro-create-keybindings` so it lists the updated opener.
+
+### Files Modified
+- etc/skel/.config/ohmychadwm/sxhkd/sxhkdrc
+- etc/skel/.config/ohmychadwm/menu/ohmychadwm-menu.sh
+
 ## 2026.05.31
 
 ### What Changed
