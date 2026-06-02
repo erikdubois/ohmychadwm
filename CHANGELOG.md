@@ -4,19 +4,26 @@
 
 ### What Changed
 - Repointed the "show keybindings" action to the new **kiro-keybindings** app (a slick PySide6/QML
-  searchable cheatsheet) instead of the local `scripts/show-keybindings.sh` rofi script. `Super+K`
-  and the Learn / Trigger / System menu "Keybindings" entries now launch `kiro-keybindings`.
+  searchable cheatsheet) instead of the local `scripts/show-keybindings.sh` rofi script. The opener
+  is `Super + Ctrl + S` — the universal cheatsheet hotkey shared across all Kiro tiling window
+  managers ("S" = Shortcuts; AZERTY-safe). The Learn / Trigger / System menu "Keybindings" entries
+  also launch `kiro-keybindings`.
+- Removed the old `super + k → kiro-keybindings` block from `sxhkd/sxhkdrc`, so `super + k` reverts
+  to its native chadwm meaning.
 - `scripts/show-keybindings.sh` is intentionally left in place as a no-dependency fallback (not deleted).
 
 ### Technical Details
-- `sxhkd/sxhkdrc`: `super + k` → `kiro-keybindings` (was `~/.config/ohmychadwm/scripts/show-keybindings.sh`).
+- `sxhkd/sxhkdrc`: added `super + ctrl + s` → `kiro-keybindings` and removed the previous
+  `super + k` → `kiro-keybindings` binding (super+k now falls back to chadwm's native action).
 - `menu/ohmychadwm-menu.sh`: the three `*Keybindings*)` cases now call `kiro-keybindings`.
-- kiro-keybindings ships from `nemesis_repo`; `keybindings.txt` should be regenerated via
-  `/kiro-create-keybindings` so it lists the updated opener.
+- `keybindings.txt`: fully regenerated via `/kiro-keybindings-all-twms` — now lists
+  `super + ctrl + s → kiro-keybindings` under Applications & Launchers, with no `super + k` opener.
+- kiro-keybindings ships from `nemesis_repo`.
 
 ### Files Modified
 - etc/skel/.config/ohmychadwm/sxhkd/sxhkdrc
 - etc/skel/.config/ohmychadwm/menu/ohmychadwm-menu.sh
+- etc/skel/.config/ohmychadwm/keybindings.txt
 
 ## 2026.05.31
 

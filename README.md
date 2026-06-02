@@ -99,9 +99,9 @@ The rebuild script copies `config.def.h` → `config.h`, compiles, installs, and
 | `Super + Shift + R`     | Restart ohmychadwm (reload config) |
 | `Super + Alt + Space`   | Open ohmychadwm system menu        |
 | `Super + D`             | Open rofi app launcher             |
-| `Super + K`             | Open the keybindings cheatsheet    |
+| `Super + Ctrl + S`      | Open the keybindings cheatsheet    |
 
-Full keybinding list: press `Super + K` or open the menu → Learn → Keybindings — both launch the **kiro-keybindings** searchable cheatsheet.
+Full keybinding list: press `Super + Ctrl + S` or open the menu → Learn → Keybindings — both launch the **kiro-keybindings** searchable cheatsheet.
 
 ---
 
@@ -359,7 +359,7 @@ run "your-application"
 │   ├── generate-chadwm-theme.sh  # Create a theme from wallpaper colors
 │   ├── generate-theme-previews.sh # Generate 1024×768 PNG previews for all themes
 │   ├── preview-theme.sh          # ANSI color preview used by the fzf theme picker
-│   └── show-keybindings.sh       # Legacy rofi keybindings viewer — kept as a no-dependency fallback (Super+K now opens kiro-keybindings)
+│   └── show-keybindings.sh       # Legacy rofi keybindings viewer — kept as a no-dependency fallback (Super+Ctrl+S now opens kiro-keybindings)
 ├── menu/
 │   ├── ohmychadwm-menu.sh        # Hierarchical system menu
 │   ├── ohmychadwm-menu.rasi      # Rofi theme for the menu
